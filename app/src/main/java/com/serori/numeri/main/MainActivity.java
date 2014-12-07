@@ -18,11 +18,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         String s;
         Button btn = (Button) findViewById(R.id.toastbutton);
-        btn.setOnClickListener(l->{show();});
+        btn.setOnClickListener(l->{show("onClick");});
 
     }
-    private void show(){
-        Toast.makeText(this,"onCLick",Toast.LENGTH_SHORT).show();
+    private void show(String s){
+        Toast.makeText(this,s,Toast.LENGTH_SHORT).show();
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
