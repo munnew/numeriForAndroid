@@ -3,5 +3,7 @@
 
     <string name="app_name">numeri</string>
     <string name="action_settings">設定</string>
-
+    <string name="twitter_consumer_key">PcEyWY7jGYGGiOaIFg4tEg</string>
+    <string name="twitter_consumer_secret">O5UC6aoaNUxMu8X1axfvf4sjHgBjVOs4g2vlgiQ</string>
+    <string name="twitter_callback_url">serorigundam://twitter</string>
 </resources>
