@@ -7,6 +7,7 @@ import twitter4j.DirectMessage;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
+import twitter4j.TwitterStream;
 import twitter4j.User;
 import twitter4j.UserList;
 import twitter4j.UserStreamListener;
@@ -15,24 +16,39 @@ import twitter4j.UserStreamListener;
  * Streamについてのクラス.
  */
 
-public class StreamEvent implements UserStreamListener {
+public class StreamEvent implements UserStreamListener, IStreamEvent, StreamOwner {
 
-    private StreamEvent(){}
-    public static StreamEvent getStreamEventInstance(){
-        return  StreamEventInstanceHolder.instance;
+    public StreamEvent() {
     }
 
-    private List<onFavoriteListener> favoriteListeners = new ArrayList<>();
-    private List<onStatusListener> statusListeners = new ArrayList<>();
+    private TwitterStream userStream;
+    private List<OnStatusListener> onStatusListeners = new ArrayList<>();
+    private List<OnFavoriteListener> onFavoriteListeners = new ArrayList<>();
 
-    public void addOnStatusListener(onStatusListener listener){
-        statusListeners.add(listener);
+    public void setUserStream(TwitterStream stream) {
+        stream.addListener(this);
+        userStream = stream;
     }
 
-    public void addOnfavoriteListener(onFavoriteListener listener){
-        favoriteListeners.add(listener);
+    @Override
+    public void startStream() {
+        userStream.user();
     }
 
+    public void closeStream() {
+        userStream.cleanUp();
+    }
+
+
+    @Override
+    public void addOwnerOnStatusListener(OnStatusListener listener) {
+        onStatusListeners.add(listener);
+    }
+
+    @Override
+    public void addOwnerOnfavoriteListener(OnFavoriteListener listener) {
+        onFavoriteListeners.add(listener);
+    }
 
 
     //以下Streamイベント
@@ -48,16 +64,14 @@ public class StreamEvent implements UserStreamListener {
 
     @Override
     public void onFavorite(User source, User target, Status favoritedStatus) {
-
+        for (OnFavoriteListener onFavoriteListener : onFavoriteListeners) {
+            onFavoriteListener.onFavorite(source, target, favoritedStatus);
+        }
     }
 
     @Override
     public void onUnfavorite(User source, User target, Status unfavoritedStatus) {
-        if(!favoriteListeners.isEmpty()){
-            for (onFavoriteListener favoriteListener : favoriteListeners) {
-                favoriteListener.onFavorite(source,target,unfavoritedStatus);
-            }
-        }
+
     }
 
     @Override
@@ -127,10 +141,8 @@ public class StreamEvent implements UserStreamListener {
 
     @Override
     public void onStatus(Status status) {
-        if (!statusListeners.isEmpty()){
-            for (onStatusListener statusListener : statusListeners) {
-                statusListener.onStatus(status);
-            }
+        for (OnStatusListener onStatusListener : onStatusListeners) {
+            onStatusListener.onStatus(status);
         }
     }
 
@@ -159,8 +171,5 @@ public class StreamEvent implements UserStreamListener {
 
     }
 
-    //StreamEventのInstanceのホルダークラス
-    private static class StreamEventInstanceHolder{
-        private  static final StreamEvent instance = new StreamEvent();
-    }
+
 }

@@ -40,7 +40,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles 'proguard-rules.pro'
         }
     }
     aaptOptions {
@@ -61,9 +61,8 @@ dependencies {
     compile 'org.twitter4j:twitter4j-async:4.0.2'
     compile 'org.twitter4j:twitter4j-stream:4.0.2'
     compile 'com.j256.ormlite:ormlite-core:4.48'
-    compile 'com.j256.ormlite:ormlite-jdbc:4.48'
     compile 'com.j256.ormlite:ormlite-android:4.48'
-    compile 'org.xerial:sqlite-jdbc:3.8.6'
+    compile 'com.android.support:appcompat-v7:21.0.+'
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
 }

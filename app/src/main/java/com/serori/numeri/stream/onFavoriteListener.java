@@ -6,6 +6,6 @@ import twitter4j.User;
 /**
  * Created by serioriKETC on 2014/12/19.
  */
-public interface onFavoriteListener {
+public interface OnFavoriteListener {
     public  void onFavorite(User source, User target, Status favoritedStatus);
 }

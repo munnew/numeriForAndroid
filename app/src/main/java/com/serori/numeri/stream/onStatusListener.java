@@ -5,6 +5,6 @@ import twitter4j.Status;
 /**
  * Created by serioriKETC on 2014/12/19.
  */
-public interface onStatusListener {
+public interface OnStatusListener {
     public void onStatus(Status status);
 }
