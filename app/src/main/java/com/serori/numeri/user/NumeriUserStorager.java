@@ -1,12 +1,15 @@
 package com.serori.numeri.user;
 
 
+import android.util.Log;
+
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.Application.Application;
+import com.serori.numeri.application.Application;
+import com.serori.numeri.fragment.manager.FragmentStorager;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
@@ -20,9 +23,10 @@ import twitter4j.auth.AccessToken;
  */
 public class NumeriUserStorager {
 
-    private NumeriUserStorager(){}
+    private NumeriUserStorager() {
+    }
 
-    public static NumeriUserStorager getInstance(){
+    public static NumeriUserStorager getInstance() {
         return NumeriUserStoragerHolder.instance;
     }
 
@@ -48,7 +52,7 @@ public class NumeriUserStorager {
         }
     }
 
-    public  List<AccessToken> loadNumeriUserTokens() {
+    public List<AccessToken> loadNumeriUserTokens() {
         ConnectionSource connectionSource = null;
         List<AccessToken> tokens = new ArrayList<>();
         try {
@@ -57,9 +61,8 @@ public class NumeriUserStorager {
             Dao<NumeriUserTable, String> dao = helper.getDao(NumeriUserTable.class);
             TableUtils.createTableIfNotExists(connectionSource, NumeriUserTable.class);
             List<NumeriUserTable> tables = new ArrayList<>();
-            tokens = new ArrayList<>();
             tables.addAll(dao.queryForAll());
-            
+
             for (NumeriUserTable table : tables) {
                 tokens.add(new AccessToken(table.getAccessToken(), table.getAccessTokenSecret()));
             }
@@ -79,14 +82,47 @@ public class NumeriUserStorager {
         return tokens;
     }
 
-    private static class NumeriUserStoragerHolder{
+    public void deleteUser(String token) {
+        Log.v("delete","start");
+        ConnectionSource connectionSource = null;
+        try {
+            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            connectionSource = helper.getConnectionSource();
+            TableUtils.createTableIfNotExists(connectionSource, NumeriUserTable.class);
+            TableUtils.createTableIfNotExists(connectionSource, FragmentStorager.FragmentsTable.class);
+            Dao<NumeriUserTable, String> numeriUserTablesDao = helper.getDao(NumeriUserTable.class);
+            Dao<FragmentStorager.FragmentsTable, String> fragmentsTableDao = helper.getDao(FragmentStorager.FragmentsTable.class);
+            numeriUserTablesDao.deleteById(token);
+            List<FragmentStorager.FragmentsTable> fragmentsTables = new ArrayList<>();
+            fragmentsTables.addAll(fragmentsTableDao.queryForAll());
+            for (FragmentStorager.FragmentsTable fragmentsTable : fragmentsTables) {
+                if (fragmentsTable.getUserToken().equals(token)) {
+                    Log.v("delete",fragmentsTable.getFragmentName());
+                    fragmentsTableDao.delete(fragmentsTable);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            if (connectionSource != null) {
+                try {
+                    connectionSource.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static class NumeriUserStoragerHolder {
         private static final NumeriUserStorager instance = new NumeriUserStorager();
     }
 
     @DatabaseTable(tableName = "numeriUser")
     public static class NumeriUserTable {
 
-        @DatabaseField(canBeNull = false ,id = true)
+        @DatabaseField(canBeNull = false, id = true)
         private String AccessToken;
         @DatabaseField(canBeNull = false)
         private String AccessTokenSecret;

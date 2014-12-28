@@ -10,14 +10,17 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
+import com.serori.numeri.user.NumeriUser;
+import com.serori.numeri.user.NumeriUserStorager;
 
 import java.util.List;
 
 /**
  * Created by seroriKETC on 2014/12/19.
  */
-public class UserListItemAdapter extends ArrayAdapter<NumeriUserListItem>{
+public class UserListItemAdapter extends ArrayAdapter<NumeriUserListItem> {
     private LayoutInflater layoutInflater;
+
     public UserListItemAdapter(Context context, int resource, List<NumeriUserListItem> objects) {
         super(context, resource, objects);
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -26,13 +29,19 @@ public class UserListItemAdapter extends ArrayAdapter<NumeriUserListItem>{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         NumeriUserListItem item = getItem(position);
-        if(null == convertView){
-            convertView = layoutInflater.inflate(R.layout.item_user,null);
+        if (null == convertView) {
+            convertView = layoutInflater.inflate(R.layout.item_user, null);
         }
-        TextView screenName = (TextView)convertView.findViewById(R.id.screenName);
+        TextView screenName = (TextView) convertView.findViewById(R.id.screenName);
         screenName.setText(item.getScreenName());
-        Button userDeleteButton = (Button)convertView.findViewById(R.id.userDelete);
-        userDeleteButton.setOnClickListener(view -> Log.v("UserListItemAdapter", "onDelete") );
+        Button userDeleteButton = (Button) convertView.findViewById(R.id.userDelete);
+
+        userDeleteButton.setOnClickListener(view -> {
+            Log.v("UserListItemAdapter", "onDelete");
+            NumeriUserStorager.getInstance().deleteUser(getItem(position).getToken());
+            UserDeleteObserver.getInstance().onUserDelete(position);
+        });
+
         return convertView;
     }
 }

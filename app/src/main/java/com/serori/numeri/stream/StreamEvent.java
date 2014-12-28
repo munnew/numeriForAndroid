@@ -170,6 +170,4 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamOwne
     public void onException(Exception ex) {
 
     }
-
-
 }

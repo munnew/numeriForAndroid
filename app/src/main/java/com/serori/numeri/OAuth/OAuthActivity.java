@@ -6,13 +6,16 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.serori.numeri.Application.Application;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
+import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
 
@@ -31,7 +34,7 @@ import twitter4j.conf.ConfigurationContext;
 /**
  * 認証用の画面
  */
-public class OAuthActivity extends Activity {
+public class OAuthActivity extends Activity implements OnUserDeleteListener {
 
     private ListView numeriUserListView;
     private List<NumeriUserListItem> userListItems = new ArrayList<>();
@@ -47,7 +50,7 @@ public class OAuthActivity extends Activity {
             numeriUserListView.setAdapter(adapter);
             init();
         }
-
+        UserDeleteObserver.getInstance().setOnUserDeleteListener(this);
 
     }
 
@@ -104,7 +107,7 @@ public class OAuthActivity extends Activity {
 
     @Override
     public void onNewIntent(Intent intent) {
-        if (intent.getData().getQueryParameter("oauth_verifier") == null||intent == null || intent.getData() == null || !intent.getData().toString().startsWith(getString(R.string.twitter_callback_url))) {
+        if (intent.getData().getQueryParameter("oauth_verifier") == null || intent == null || intent.getData() == null || !intent.getData().toString().startsWith(getString(R.string.twitter_callback_url))) {
             toast("認証がキャンセルされました");
             return;
         }
@@ -135,6 +138,7 @@ public class OAuthActivity extends Activity {
                     userTable.setAccessTokenSecret(token.getTokenSecret());
                     NumeriUserStorager.getInstance().saveNumeriUser(userTable);
                     addItem(token);
+                    startMainActivity(true);
                 } else {
                     toast("認証失敗");
                 }
@@ -152,6 +156,7 @@ public class OAuthActivity extends Activity {
         NumeriUser numeriUser = new NumeriUser(token);
         Application.getInstance().getNumeriUsers().addNumeriUser(numeriUser);
         userListItem.setScreenName(numeriUser.getAccessToken().getScreenName());
+        userListItem.setToken(numeriUser.getAccessToken().getToken());
         adapter.add(userListItem);
         Log.v(token.getToken(), token.getTokenSecret());
         Log.v(token.getScreenName(), "" + token.getUserId());
@@ -160,7 +165,9 @@ public class OAuthActivity extends Activity {
     private void init() {
         adapter.clear();
         List<NumeriUser> numeriUsers = new ArrayList<>();
-        numeriUsers.addAll(Application.getInstance().getNumeriUsers().getNumeriUsers());
+        for (AccessToken accessToken : NumeriUserStorager.getInstance().loadNumeriUserTokens()) {
+            numeriUsers.add(new NumeriUser(accessToken));
+        }
         Log.v("numeriUsersSize", "" + numeriUsers.size());
         if (!numeriUsers.isEmpty()) {
             List<NumeriUserListItem> listItems = new ArrayList<>();
@@ -169,6 +176,7 @@ public class OAuthActivity extends Activity {
                     try {
                         NumeriUserListItem item = new NumeriUserListItem();
                         item.setScreenName(numeriUser.getTwitter().getScreenName());
+                        item.setToken(numeriUser.getAccessToken().getToken());
                         listItems.add(item);
                     } catch (TwitterException e) {
                         e.printStackTrace();
@@ -180,7 +188,27 @@ public class OAuthActivity extends Activity {
         }
     }
 
+    private void startMainActivity(boolean isFinish) {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        if (isFinish) {
+            finish();
+        }
+    }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            startMainActivity(true);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onUserDelete(int position) {
+        adapter.remove(adapter.getItem(position));
+    }
 }
 
 

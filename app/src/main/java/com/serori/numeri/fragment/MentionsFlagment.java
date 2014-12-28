@@ -1,5 +1,7 @@
 package com.serori.numeri.fragment;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -7,44 +9,52 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.Toast;
 
 import com.serori.numeri.R;
+import com.serori.numeri.application.Application;
+import com.serori.numeri.item.TimeLineItem;
+import com.serori.numeri.item.TimeLineItemAdapter;
 import com.serori.numeri.stream.OnStatusListener;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.Paging;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.UserMentionEntity;
 
-/**
- * Created by seroriKETC on 2014/12/23.
- */
-public class MentionsFlagment extends Fragment implements NumeriFragment, OnStatusListener {
-    String name;
-    NumeriUser numeriUser;
-    ListView MentionsListView;
-    TimeLineItemAdapter adapter;
-    List<TimeLineItem> timeLineItems;
+public class MentionsFlagment extends Fragment implements NumeriFragment, OnStatusListener, AttachedBottomListener {
+    private String name;
+    private NumeriUser numeriUser;
+    private NumeriListView mentionsListView;
+    private TimeLineItemAdapter adapter;
+    private List<TimeLineItem> timeLineItems;
+    private Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setRetainInstance(true);
+
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
         Log.v("Mentions", "cleate");
+        setRetainInstance(true);
+        mentionsListView = (NumeriListView) rootView.findViewById(R.id.timeLineListView);
+        mentionsListView.setNumeriUser(numeriUser);
+        mentionsListView.onTouchItemEnabled();
+        mentionsListView.setAttachedBottomListener(this);
         if (savedInstanceState == null) {
-            MentionsListView = (ListView) rootView.findViewById(R.id.timeLineListView);
+            context = rootView.getContext();
             timeLineItems = new ArrayList<>();
             adapter = new TimeLineItemAdapter(rootView.getContext(), 0, timeLineItems);
-            MentionsListView.setAdapter(adapter);
+            mentionsListView.setAdapter(adapter);
             initializeLoad();
-            numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
+        } else {
+            mentionsListView.setAdapter(adapter);
         }
 
         return rootView;
@@ -70,12 +80,15 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
         AsyncTask.execute(() -> {
             Twitter twitter = numeriUser.getTwitter();
             ResponseList<Status> timeLine = loadMentions(twitter);
-
             if (timeLine != null) {
+                List<TimeLineItem> items = new ArrayList<>();
+                for (Status status : timeLine) {
+                    items.add(new TimeLineItem(status, numeriUser));
+                }
                 getActivity().runOnUiThread(() -> {
-                    for (Status status : timeLine) {
-                        adapter.add(new TimeLineItem(status, numeriUser));
-                    }
+                    adapter.addAll(items);
+                    numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
+                    mentionsListView.onAttachedBottomCallbackEnabled(true);
                 });
             }
         });
@@ -85,6 +98,9 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
         try {
             return twitter.getMentionsTimeline();
         } catch (TwitterException e) {
+            Application.getInstance().onToast("ツイートを読み込めませんでした。ストリームを開始します", Toast.LENGTH_SHORT);
+            numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
+            mentionsListView.onAttachedBottomCallbackEnabled(true);
             e.printStackTrace();
         }
         return null;
@@ -94,8 +110,47 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
     public void onStatus(Status status) {
         for (UserMentionEntity userMentionEntity : status.getUserMentionEntities()) {
             if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
-                getActivity().runOnUiThread(() -> adapter.add(new TimeLineItem(status, numeriUser)));
+                TimeLineItem item = new TimeLineItem(status, numeriUser);
+                getActivity().runOnUiThread(() -> mentionsListView.insertItem(item));
             }
         }
+    }
+
+    private ResponseList<Status> loadPreviousMentionsTimeLine(Twitter twitter, long statusId) {
+        try {
+            Paging pages = new Paging();
+            pages.setMaxId(statusId);
+            pages.count(31);
+            ResponseList<Status> responceStatuses = twitter.getMentionsTimeline(pages);
+            responceStatuses.remove(0);
+            return responceStatuses;
+        } catch (TwitterException e) {
+            Application.getInstance().onToast("ネットワークを確認して下さい", Toast.LENGTH_SHORT);
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void AttachedBottom(TimeLineItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("ツイートを更に読み込みますか？")
+                .setNegativeButton("いいえ", (dailog, id) -> {
+                })
+                .setPositiveButton("はい", (dialog, id) -> {
+                    AsyncTask.execute(() -> {
+                        mentionsListView.onAttachedBottomCallbackEnabled(false);
+                        ResponseList<Status> previousTimeLine = loadPreviousMentionsTimeLine(numeriUser.getTwitter(), item.getStatusId());
+                        if (previousTimeLine != null) {
+                            List<TimeLineItem> items = new ArrayList<>();
+                            for (Status status : previousTimeLine) {
+                                items.add(new TimeLineItem(status, numeriUser));
+                            }
+                            getActivity().runOnUiThread(() -> adapter.addAll(items));
+                        }
+                        mentionsListView.onAttachedBottomCallbackEnabled(true);
+                    });
+                })
+                .create().show();
     }
 }

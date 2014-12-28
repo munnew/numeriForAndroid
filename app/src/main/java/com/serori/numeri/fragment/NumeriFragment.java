@@ -7,6 +7,9 @@ import com.serori.numeri.user.NumeriUser;
  */
 public interface NumeriFragment {
     String getFragmentName();
+
     void setFragmentName(String name);
+
     void setNumeriUser(NumeriUser numeriUser);
+
 }

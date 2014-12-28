@@ -5,8 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
-import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.Application.Application;
+import com.serori.numeri.application.Application;
 
 /**
  * Created by seroriKETC on 2014/12/19.
@@ -14,7 +13,6 @@ import com.serori.numeri.Application.Application;
 public class DataBaseHelper extends OrmLiteSqliteOpenHelper {
 
     private static final int DB_VERSION = 1;
-    private Class clazz;
     public DataBaseHelper(Context context) {
         super(context, Application.getInstance().getDbName(), null,DB_VERSION);
     }

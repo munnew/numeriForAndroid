@@ -7,8 +7,8 @@ import android.media.Image;
  */
 public class NumeriUserListItem {
 
-    private Image image;
     private String screenName;
+    private String token;
 
     public void setScreenName(String screenName) {
         this.screenName = screenName;
@@ -18,11 +18,11 @@ public class NumeriUserListItem {
         return screenName;
     }
 
-    public void setImage(Image image) {
-        this.image = image;
+    public String getToken() {
+        return token;
     }
 
-    public Image getImage() {
-        return image;
+    public void setToken(String token) {
+        this.token = token;
     }
 }

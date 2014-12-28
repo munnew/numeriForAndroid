@@ -6,4 +6,7 @@
     <item android:id="@+id/action_acount" android:title="アカウント"
         android:orderInCategory="100"/>
 
+    <item android:id="@+id/action_fragment_manager" android:title="フラグメント管理"
+        android:orderInCategory="100"/>
+
 </menu>

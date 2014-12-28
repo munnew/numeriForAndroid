@@ -1,8 +1,6 @@
 package com.serori.numeri.user;
 
-import android.util.Log;
-
-import com.serori.numeri.Application.Application;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
 import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;
@@ -39,7 +37,6 @@ public class NumeriUser {
         twitterStream.setOAuthConsumer(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key),
                 Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
         twitterStream.setOAuthAccessToken(token);
-        Log.v("setStream", "user");
         streamEvent.setUserStream(twitterStream);
     }
 

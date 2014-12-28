@@ -7,15 +7,14 @@ import android.support.v4.app.FragmentPagerAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by seroriKETC on 2014/12/20.
- */
+
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
-    private  List<Fragment> fragments = new ArrayList<>();
+    private List<Fragment> fragments = new ArrayList<>();
 
     public SectionsPagerAdapter(FragmentManager manager) {
         super(manager);
     }
+
     @Override
     public Fragment getItem(int position) {
         return fragments.get(position);
@@ -38,7 +37,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     public void add(Fragment fragment) {
         if (!(fragment instanceof NumeriFragment)) {
-            throw new IllegalArgumentException("追加されるフラグメントは\"NumeriFragmentParameter\"を" +
+            throw new IllegalArgumentException("追加されるフラグメントは\"NumeriFragment\"を" +
                     "継承していなければなりません");
         }
         fragments.add(fragment);
