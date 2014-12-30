@@ -1,9 +1,11 @@
 package com.serori.numeri.twitter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -21,6 +23,7 @@ import java.util.List;
 
 import twitter4j.Status;
 
+
 /**
  * Created by seroriKETC on 2014/12/21.
  */
@@ -28,11 +31,14 @@ public class TweetActivity extends Activity implements TextWatcher, OnStatusList
     private EditText tweetEditText;
     private TextView remainingTextView;
     private Button tweetButton;
+    private Button changeUserButton;
     private TextView backgroundTimeLine;
+    private TextView currentUserTextView;
     private InputMethodManager inputMethodManager;
     private static boolean isReply = false;
     private static long destinationStatusId;
     private static List<String> destinationUserNames = new ArrayList<>();
+    private NumeriUser currentNumeriUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,15 +47,21 @@ public class TweetActivity extends Activity implements TextWatcher, OnStatusList
         if (savedInstanceState == null) {
             tweetEditText = (EditText) findViewById(R.id.tweeteditText);
             remainingTextView = (TextView) findViewById(R.id.remaining);
+            changeUserButton = (Button) findViewById(R.id.changeUser);
             tweetButton = (Button) findViewById(R.id.sendTweet);
+            currentUserTextView = (TextView) findViewById(R.id.currentUser);
             backgroundTimeLine = (TextView) findViewById(R.id.backgroundTimeLine);
+            currentUserTextView.setText(Application.getInstance().getNumeriUsers().getNumeriUsers().get(0).getScreenName());
+            currentNumeriUser = Application.getInstance().getNumeriUsers().getNumeriUsers().get(0);
             inputMethodManager = (InputMethodManager) this.getSystemService(this.INPUT_METHOD_SERVICE);
             for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
                 numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
             }
+            Log.v("Tweet", "create");
             tweetEditText.setOnClickListener(v -> inputMethodManager.showSoftInput(v, InputMethodManager.SHOW_FORCED));
             tweetEditText.addTextChangedListener(this);
-            tweetButton.setOnClickListener(v -> sendTweet(Application.getInstance().getNumeriUsers().getNumeriUsers().get(0)));
+            tweetButton.setOnClickListener(v -> sendTweet(currentNumeriUser));
+            changeUserButton.setOnClickListener(v -> createChangeUserDialog());
         }
 
         if (isReply) {
@@ -122,5 +134,18 @@ public class TweetActivity extends Activity implements TextWatcher, OnStatusList
         }
         tweetEditText.setSelection(tweetEditText.getText().length());
         destinationUserNames.clear();
+    }
+
+    private void createChangeUserDialog() {
+        List<CharSequence> numeriUsersName = new ArrayList<>();
+        List<NumeriUser> numeriUsers = new ArrayList<>();
+        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+            numeriUsersName.add(numeriUser.getScreenName());
+            numeriUsers.add(numeriUser);
+        }
+        new AlertDialog.Builder(this).setItems(numeriUsersName.toArray(new CharSequence[numeriUsersName.size()]), (dialog, which) -> {
+            currentNumeriUser = numeriUsers.get(which);
+            currentUserTextView.setText(numeriUsersName.get(which));
+        }).create().show();
     }
 }

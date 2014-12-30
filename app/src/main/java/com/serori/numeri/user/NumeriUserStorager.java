@@ -58,8 +58,8 @@ public class NumeriUserStorager {
         try {
             DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
-            Dao<NumeriUserTable, String> dao = helper.getDao(NumeriUserTable.class);
             TableUtils.createTableIfNotExists(connectionSource, NumeriUserTable.class);
+            Dao<NumeriUserTable, String> dao = helper.getDao(NumeriUserTable.class);
             List<NumeriUserTable> tables = new ArrayList<>();
             tables.addAll(dao.queryForAll());
 
@@ -83,7 +83,7 @@ public class NumeriUserStorager {
     }
 
     public void deleteUser(String token) {
-        Log.v("delete","start");
+        Log.v("delete", "start");
         ConnectionSource connectionSource = null;
         try {
             DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
@@ -97,7 +97,7 @@ public class NumeriUserStorager {
             fragmentsTables.addAll(fragmentsTableDao.queryForAll());
             for (FragmentStorager.FragmentsTable fragmentsTable : fragmentsTables) {
                 if (fragmentsTable.getUserToken().equals(token)) {
-                    Log.v("delete",fragmentsTable.getFragmentName());
+                    Log.v("delete", fragmentsTable.getFragmentName());
                     fragmentsTableDao.delete(fragmentsTable);
                 }
             }

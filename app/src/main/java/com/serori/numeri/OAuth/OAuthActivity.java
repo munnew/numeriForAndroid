@@ -49,6 +49,7 @@ public class OAuthActivity extends Activity implements OnUserDeleteListener {
             adapter = new UserListItemAdapter(this, 0, userListItems);
             numeriUserListView.setAdapter(adapter);
             init();
+            Log.v("Oauth","create");
         }
         UserDeleteObserver.getInstance().setOnUserDeleteListener(this);
 
@@ -173,14 +174,10 @@ public class OAuthActivity extends Activity implements OnUserDeleteListener {
             List<NumeriUserListItem> listItems = new ArrayList<>();
             AsyncTask.execute(() -> {
                 for (NumeriUser numeriUser : numeriUsers) {
-                    try {
-                        NumeriUserListItem item = new NumeriUserListItem();
-                        item.setScreenName(numeriUser.getTwitter().getScreenName());
-                        item.setToken(numeriUser.getAccessToken().getToken());
-                        listItems.add(item);
-                    } catch (TwitterException e) {
-                        e.printStackTrace();
-                    }
+                    NumeriUserListItem item = new NumeriUserListItem();
+                    item.setScreenName(numeriUser.getScreenName());
+                    item.setToken(numeriUser.getAccessToken().getToken());
+                    listItems.add(item);
                 }
                 runOnUiThread(() -> adapter.addAll(listItems));
             });

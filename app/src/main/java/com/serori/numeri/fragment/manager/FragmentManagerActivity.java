@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +24,7 @@ import twitter4j.TwitterException;
 /**
  * Created by serioriKETC on 2014/12/27.
  */
-public class FragmentManagerActivity extends Activity {
+public class FragmentManagerActivity extends Activity implements OnFragmentDataDeleteListener {
     private ListView fragmentsListView;
     private FragmentManagerItemAdapter adapter;
     private List<FragmentManagerItem> managerItems = new ArrayList<>();
@@ -32,17 +33,21 @@ public class FragmentManagerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v("Fragment", "create");
         setContentView(R.layout.activity_fragment_manager);
         fragmentsListView = (ListView) findViewById(R.id.fragmentsList);
         adapter = new FragmentManagerItemAdapter(this, 0, managerItems);
         fragmentsListView.setAdapter(adapter);
 
+        FragmentDataDeleteObserver.getInstance().setOnFragmentDataDeleteListener(this);
         List<FragmentManagerItem> items = new ArrayList<>();
         FragmentStorager fragmentStorager = FragmentStorager.getInstance();
         List<FragmentStorager.FragmentsTable> fragmentsTable = new ArrayList<>();
         fragmentsTable.addAll(fragmentStorager.getFragmentsData());
         for (FragmentStorager.FragmentsTable table : fragmentsTable) {
-            items.add(new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName()));
+            FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
+            item.setFragmentKey(table.getFragmentKey());
+            items.add(item);
         }
         adapter.addAll(items);
 
@@ -89,12 +94,8 @@ public class FragmentManagerActivity extends Activity {
         List<String> userTokens = new ArrayList<>();
         AsyncTask.execute(() -> {
             for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                try {
-                    timeLineNames.add(numeriUser.getTwitter().getScreenName());
-                    userTokens.add(numeriUser.getAccessToken().getToken());
-                } catch (TwitterException e) {
-                    e.printStackTrace();
-                }
+                timeLineNames.add(numeriUser.getScreenName());
+                userTokens.add(numeriUser.getAccessToken().getToken());
             }
 
             runOnUiThread(() -> {
@@ -103,7 +104,9 @@ public class FragmentManagerActivity extends Activity {
                         if (which == i) {
                             FragmentStorager.FragmentsTable table = new FragmentStorager.FragmentsTable(FragmentStorager.TL, timeLineNames.get(i).toString(), userTokens.get(i));
                             FragmentStorager.getInstance().saveFragmentData(table);
-                            adapter.add(new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName()));
+                            FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
+                            item.setFragmentKey(table.getFragmentKey());
+                            adapter.add(item);
                         }
                     }
                 }).create().show();
@@ -117,12 +120,8 @@ public class FragmentManagerActivity extends Activity {
         List<String> userTokens = new ArrayList<>();
         AsyncTask.execute(() -> {
             for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                try {
-                    mentionsNames.add(numeriUser.getTwitter().getScreenName());
-                    userTokens.add(numeriUser.getAccessToken().getToken());
-                } catch (TwitterException e) {
-                    e.printStackTrace();
-                }
+                mentionsNames.add(numeriUser.getScreenName());
+                userTokens.add(numeriUser.getAccessToken().getToken());
             }
 
             runOnUiThread(() -> {
@@ -131,7 +130,9 @@ public class FragmentManagerActivity extends Activity {
                         if (which == i) {
                             FragmentStorager.FragmentsTable table = new FragmentStorager.FragmentsTable(FragmentStorager.MENTIONS, mentionsNames.get(i).toString(), userTokens.get(i));
                             FragmentStorager.getInstance().saveFragmentData(table);
-                            adapter.add(new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName()));
+                            FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
+                            item.setFragmentKey(table.getFragmentKey());
+                            adapter.add(item);
                         }
                     }
                 }).create().show();
@@ -165,4 +166,8 @@ public class FragmentManagerActivity extends Activity {
         return false;
     }
 
+    @Override
+    public void OnFragmentDataDelete(int position) {
+        adapter.remove(adapter.getItem(position));
+    }
 }

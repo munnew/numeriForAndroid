@@ -23,16 +23,18 @@ public class TimeLineItem {
     private String screenName;
     private UserMentionEntity[] mentionEntity;
     private boolean isRT = false, isMention = false, isFavorite = false;
+    private boolean isRetweeted = false;
     private String createdTime;
     List<String> destinationUserNames = new ArrayList<>();
 
-   public TimeLineItem(Status status, NumeriUser numeriUser) {
+    public TimeLineItem(Status status, NumeriUser numeriUser) {
         statusId = status.getId();
         userId = status.getUser().getId();//4 -19
         createdTime = new SimpleDateFormat(DATE_FORMAT).format(status.getCreatedAt());
         isRT = status.isRetweetedByMe();
         isFavorite = status.isFavorited();
         if (status.isRetweet()) { //RT
+            isRetweeted = true;
             iconImageUrl = status.getRetweetedStatus().getUser().getProfileImageURL();
             mainText = status.getRetweetedStatus().getText();
             name = status.getRetweetedStatus().getUser().getName();
@@ -125,5 +127,9 @@ public class TimeLineItem {
 
     public String getIconImageUrl() {
         return iconImageUrl;
+    }
+
+    public boolean isRetweeted() {
+        return isRetweeted;
     }
 }

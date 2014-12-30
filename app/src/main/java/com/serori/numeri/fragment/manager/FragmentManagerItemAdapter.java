@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
@@ -30,6 +31,11 @@ public class FragmentManagerItemAdapter extends ArrayAdapter<FragmentManagerItem
         }
         TextView fragmentName = (TextView) convertView.findViewById(R.id.fragmentName);
         fragmentName.setText(item.getFragmentName());
+        Button fragmentDeleteButton = (Button) convertView.findViewById(R.id.fragmentDlete);
+        fragmentDeleteButton.setOnClickListener(v -> {
+            FragmentStorager.getInstance().deleteFragmentData(item.getFragmentKey());
+            FragmentDataDeleteObserver.getInstance().onFragmentDeataDelete(position);
+        });
         return convertView;
     }
 }

@@ -39,6 +39,28 @@ public class FragmentStorager {
         }
     }
 
+    public void deleteFragmentData(String fragmentKey) {
+        ConnectionSource connectionSource = null;
+        try {
+            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            connectionSource = helper.getConnectionSource();
+            TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
+            Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
+            dao.deleteById(fragmentKey);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            if (connectionSource != null) {
+                try {
+                    connectionSource.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public List<FragmentsTable> getFragmentsData() {
         ConnectionSource connectionSource = null;
         List<FragmentsTable> fragmentsData = new ArrayList<>();
@@ -103,6 +125,10 @@ public class FragmentStorager {
 
         public String getFragmentName() {
             return fragmentName;
+        }
+
+        public String getFragmentKey() {
+            return fragmentKey;
         }
     }
 

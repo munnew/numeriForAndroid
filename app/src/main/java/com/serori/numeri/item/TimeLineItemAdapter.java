@@ -1,8 +1,7 @@
 package com.serori.numeri.item;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +11,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.util.cache.IconCache;
+import com.serori.numeri.color.ColorStorager;
+import com.serori.numeri.color.Colors;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
@@ -61,6 +60,19 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         } else {
             favoriteStar.setImageBitmap(null);
         }
+
+        if (timeLineItem.isRetweeted()) {
+            convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getReTweetColor()));
+            return convertView;
+        }
+
+        if (timeLineItem.isMention()) {
+            convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getMentionColor()));
+            return convertView;
+        }
+
+        convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getNomalColor()));
+
         return convertView;
     }
 

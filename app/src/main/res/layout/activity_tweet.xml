@@ -1,27 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-<LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="0dp"
-    android:background="#5f5f5f">
-    <TextView
-        android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:text="ツイート"/>
+        android:layout_margin="0dp"
+        android:background="#5f5f5f">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="ツイート" />
+
+        <TextView
+            android:id="@+id/currentUser"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="10dp"
+            android:gravity="right" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/backgroundTimeLine"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="10sp"
-        android:singleLine="true"/>
+        android:singleLine="true"
+        android:textSize="10sp" />
 
     <EditText
         android:id="@+id/tweeteditText"
@@ -38,8 +48,8 @@
         android:gravity="top"
         android:inputType="textMultiLine|textLongMessage"
         android:textColor="#000000"
-        android:textSize="15sp"
-        android:textIsSelectable="true"/>
+        android:textIsSelectable="true"
+        android:textSize="15sp" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -66,6 +76,13 @@
             android:layout_height="40dp"
             android:enabled="false"
             android:text="ツイート" />
+
+        <Button
+            android:id="@+id/changeUser"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:enabled="true"
+            android:text="ユーザー" />
     </LinearLayout>
 
 </LinearLayout>

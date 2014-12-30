@@ -15,6 +15,9 @@ import android.widget.Toast;
 
 import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
+import com.serori.numeri.color.ColorManagerActivity;
+import com.serori.numeri.color.ColorStorager;
+import com.serori.numeri.color.Colors;
 import com.serori.numeri.fragment.MentionsFlagment;
 import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.fragment.SectionsPagerAdapter;
@@ -51,7 +54,6 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
         viewPager.setOffscreenPageLimit(30);
         changeTweetActivityButton = (ImageButton) findViewById(R.id.goTweetButton);
         changeTweetActivityButton.setOnClickListener(v -> startTweetActivity(false));
-
         if (savedInstanceState == null) {
             Log.v("initLoad", "init");
             Application.getInstance().setApplicationContext(getApplicationContext());
@@ -123,6 +125,8 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
             case R.id.action_fragment_manager:
                 startFragmentManagerActivity(true);
                 break;
+            case R.id.action_color_manager:
+                startColorManager(true);
         }
 
         return super.onOptionsItemSelected(item);
@@ -153,6 +157,14 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
         }
     }
 
+    private void startColorManager(boolean isFinish) {
+        Intent intent = new Intent(this, ColorManagerActivity.class);
+        startActivity(intent);
+        if (isFinish) {
+            finish();
+        }
+    }
+
     private void startFragmentManagerActivity(boolean isFinish) {
         Intent intent = new Intent(this, FragmentManagerActivity.class);
         startActivity(intent);
@@ -162,19 +174,19 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
     }
 
     private NumeriFragment initNumeriFragment(NumeriUser numeriUser, NumeriFragment numeriFragment) {
-        String screenName = null;
+        String screenName;
 
-        try {
-            screenName = numeriUser.getTwitter().getScreenName();
-        } catch (TwitterException e) {
-            e.printStackTrace();
-        }
+        screenName = numeriUser.getScreenName();
         numeriFragment.setNumeriUser(numeriUser);
         numeriFragment.setFragmentName(screenName);
         return numeriFragment;
     }
 
     private void init() {
+
+        Colors.getInstance().setReTweetColor(ColorStorager.getInstance().loadColorForId(ColorStorager.RT_ITEM));
+        Colors.getInstance().setMentionColor(ColorStorager.getInstance().loadColorForId(ColorStorager.MENTION_ITEM));
+        Colors.getInstance().setNomalColor(ColorStorager.getInstance().loadColorForId(ColorStorager.NOMAL_ITEM));
 
         AsyncTask.execute(() -> {
             List<NumeriUser> numeriUsers = new ArrayList<>();

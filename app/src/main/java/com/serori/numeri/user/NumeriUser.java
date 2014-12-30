@@ -1,5 +1,7 @@
 package com.serori.numeri.user;
 
+import android.os.AsyncTask;
+
 import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
 import com.serori.numeri.stream.IStreamEvent;
@@ -7,6 +9,7 @@ import com.serori.numeri.stream.StreamEvent;
 import com.serori.numeri.stream.StreamOwner;
 
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
@@ -20,6 +23,8 @@ public class NumeriUser {
     private AccessToken token;
     private Twitter twitter;
     private StreamEvent streamEvent = new StreamEvent();
+    private String screenName;
+
 
     public NumeriUser(AccessToken token) {
         this.token = token;
@@ -28,11 +33,20 @@ public class NumeriUser {
 
 
     private void auth() {
+
         ConfigurationBuilder builder = new ConfigurationBuilder()
                 .setOAuthConsumerKey(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key))
                 .setOAuthConsumerSecret(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret))
                 .setOAuthAccessToken(token.getToken()).setOAuthAccessTokenSecret(token.getTokenSecret());
         twitter = new TwitterFactory(builder.build()).getInstance();
+        AsyncTask.execute(() -> {
+            try {
+                screenName = twitter.getScreenName();
+            } catch (TwitterException e) {
+                e.printStackTrace();
+                screenName = null;
+            }
+        });
         TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
         twitterStream.setOAuthConsumer(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key),
                 Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
@@ -55,5 +69,9 @@ public class NumeriUser {
 
     public IStreamEvent getStreamSwicher() {
         return streamEvent;
+    }
+
+    public String getScreenName() {
+        return screenName;
     }
 }
