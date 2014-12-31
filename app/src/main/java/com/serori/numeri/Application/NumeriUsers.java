@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by seroriKETC on 2014/12/20.
+ * アプリケーションが生きている間持つユーザーを表す
  */
 public class NumeriUsers {
     private List<NumeriUser> numeriUsers = new ArrayList<>();
