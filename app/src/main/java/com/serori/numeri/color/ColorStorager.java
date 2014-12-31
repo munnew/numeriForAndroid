@@ -1,6 +1,5 @@
 package com.serori.numeri.color;
 
-import android.graphics.Color;
 import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
@@ -12,10 +11,7 @@ import com.serori.numeri.application.Application;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
-import twitter4j.auth.AccessToken;
 
 /**
  * Created by serioriKETC on 2014/12/30.
