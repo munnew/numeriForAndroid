@@ -65,22 +65,24 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
             if (tokens.isEmpty()) {
                 startOauthActivity(true);
             } else {
-                Application.getInstance().getNumeriUsers().clear();
-                for (AccessToken token : tokens) {
-                    Application.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(token));
-                }
-                Log.v("MainActivity", "users = " + Application.getInstance().getNumeriUsers().getNumeriUsers().size());
-                for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                    numeriUser.getStreamSwicher().startStream();
-                    numeriUser.getStreamEvent().addOwnerOnfavoriteListener(this);
-                }
-            }
-            init();
+                AsyncTask.execute(() -> {
+                    Application.getInstance().getNumeriUsers().clear();
+                    for (AccessToken token : tokens) {
+                        Application.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(token));
+                    }
+                    Log.v("MainActivity", "users = " + Application.getInstance().getNumeriUsers().getNumeriUsers().size());
+                    for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+                        numeriUser.getStreamSwicher().startStream();
+                        numeriUser.getStreamEvent().addOwnerOnfavoriteListener(this);
+                    }
+                    init();
+                });
 
+            }
         } else {
-            Log.v("restoreLoad", "restore;fragmentsSize" + numeriFragments.size());
-            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-                sectionsPagerAdapter.add(fragment);
+            Log.v("restoreLoad", "restore;fragmentsSize" + Application.getInstance().getNumeriFragmentManager().getNumeriFragments().size());
+            for (NumeriFragment numeriFragment : Application.getInstance().getNumeriFragmentManager().getNumeriFragments()) {
+                sectionsPagerAdapter.add((Fragment) numeriFragment);
             }
             viewPager.setAdapter(sectionsPagerAdapter);
         }
@@ -91,24 +93,22 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (!numeriFragments.isEmpty()) {
-            for (int i = 0; i < numeriFragments.size(); i++) {
-                getSupportFragmentManager().putFragment(outState, "fragment_numeri_" + i, (Fragment) numeriFragments.get(i));
-            }
+            Log.v("save", "saved");
+            Application.getInstance().getNumeriFragmentManager().putFragments(numeriFragments);
         }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.v("Restore", "onRestoreInstanceState:fragmentsSize" + getSupportFragmentManager().getFragments().size());
+        Log.v("Restore", "onRestoreInstanceState:fragmentsSize" + Application.getInstance().getNumeriFragmentManager().getNumeriFragments().size());
         super.onRestoreInstanceState(savedInstanceState);
-        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-            numeriFragments.add((NumeriFragment) fragment);
+        if (!Application.getInstance().getNumeriFragmentManager().getNumeriFragments().isEmpty()) {
+            numeriFragments.addAll(Application.getInstance().getNumeriFragmentManager().getNumeriFragments());
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -166,6 +166,7 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
     }
 
     private void startFragmentManagerActivity(boolean isFinish) {
+        Application.getInstance().getNumeriFragmentManager().clear();
         Intent intent = new Intent(this, FragmentManagerActivity.class);
         startActivity(intent);
         if (isFinish) {

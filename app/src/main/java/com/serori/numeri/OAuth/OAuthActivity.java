@@ -50,7 +50,7 @@ public class OAuthActivity extends Activity implements OnUserDeleteListener {
             adapter = new UserListItemAdapter(this, 0, userListItems);
             numeriUserListView.setAdapter(adapter);
             init();
-            Log.v("Oauth","create");
+            Log.v("Oauth", "create");
         }
         UserDeleteObserver.getInstance().setOnUserDeleteListener(this);
 
@@ -154,26 +154,28 @@ public class OAuthActivity extends Activity implements OnUserDeleteListener {
     }
 
     private void addItem(AccessToken token) {
-        NumeriUserListItem userListItem = new NumeriUserListItem();
-        NumeriUser numeriUser = new NumeriUser(token);
-        Application.getInstance().getNumeriUsers().addNumeriUser(numeriUser);
-        userListItem.setScreenName(numeriUser.getAccessToken().getScreenName());
-        userListItem.setToken(numeriUser.getAccessToken().getToken());
-        adapter.add(userListItem);
-        Log.v(token.getToken(), token.getTokenSecret());
-        Log.v(token.getScreenName(), "" + token.getUserId());
+        AsyncTask.execute(() -> {
+            NumeriUserListItem userListItem = new NumeriUserListItem();
+            NumeriUser numeriUser = new NumeriUser(token);
+            Application.getInstance().getNumeriUsers().addNumeriUser(numeriUser);
+            userListItem.setScreenName(numeriUser.getAccessToken().getScreenName());
+            userListItem.setToken(numeriUser.getAccessToken().getToken());
+            runOnUiThread(() -> adapter.add(userListItem));
+            Log.v(token.getToken(), token.getTokenSecret());
+            Log.v(token.getScreenName(), "" + token.getUserId());
+        });
     }
 
     private void init() {
-        adapter.clear();
-        List<NumeriUser> numeriUsers = new ArrayList<>();
-        for (AccessToken accessToken : NumeriUserStorager.getInstance().loadNumeriUserTokens()) {
-            numeriUsers.add(new NumeriUser(accessToken));
-        }
-        Log.v("numeriUsersSize", "" + numeriUsers.size());
-        if (!numeriUsers.isEmpty()) {
-            List<NumeriUserListItem> listItems = new ArrayList<>();
-            AsyncTask.execute(() -> {
+        AsyncTask.execute(() -> {
+            adapter.clear();
+            List<NumeriUser> numeriUsers = new ArrayList<>();
+            for (AccessToken accessToken : NumeriUserStorager.getInstance().loadNumeriUserTokens()) {
+                numeriUsers.add(new NumeriUser(accessToken));
+            }
+            Log.v("numeriUsersSize", "" + numeriUsers.size());
+            if (!numeriUsers.isEmpty()) {
+                List<NumeriUserListItem> listItems = new ArrayList<>();
                 for (NumeriUser numeriUser : numeriUsers) {
                     NumeriUserListItem item = new NumeriUserListItem();
                     item.setScreenName(numeriUser.getScreenName());
@@ -181,9 +183,8 @@ public class OAuthActivity extends Activity implements OnUserDeleteListener {
                     listItems.add(item);
                 }
                 runOnUiThread(() -> adapter.addAll(listItems));
-            });
-
-        }
+            }
+        });
     }
 
     private void startMainActivity(boolean isFinish) {

@@ -48,12 +48,14 @@ public class Application extends android.app.Application {
         }
     }
 
-    private static class ApplicationHolder {
-        private static final Application instance = new Application();
-    }
 
     public NumeriUsers getNumeriUsers() {
         return NumeriUsers.getInstance();
+    }
+
+    public NumeriFragmentManager getNumeriFragmentManager() {
+        return NumeriFragmentManager.getInstance();
+
     }
 
     public void setOnToastListener(OnToast listener) {
@@ -74,4 +76,9 @@ public class Application extends android.app.Application {
         wm.getDefaultDisplay().getSize(size);
         return size.x;
     }
+
+    private static class ApplicationHolder {
+        private static final Application instance = new Application();
+    }
+
 }

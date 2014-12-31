@@ -2,12 +2,9 @@ package com.serori.numeri.action;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -27,10 +24,7 @@ import twitter4j.TwitterException;
 public class Actions {
 
 
-    private Context context;
-
     private Actions() {
-        context = Application.getInstance().getMainActivityContext();
     }
 
     public static Actions getInstance() {
@@ -60,28 +54,30 @@ public class Actions {
     }
 
     private void retweet(TimeLineItem item, NumeriUser numeriUser) {
-
-        new AlertDialog.Builder(context).setMessage("このツイートをRTしますか？")
-                .setNegativeButton("いいえ", (dialog, id) -> {
-                })
-                .setPositiveButton("はい", (dialog, id) -> {
-                    AsyncTask.execute(() -> {
-                        if (!item.isRT()) {
-                            try {
-                                numeriUser.getTwitter().retweetStatus(item.getStatusId());
-                                item.setRT(true);
-                                Application.getInstance().onToast(item.getScreenName()+"さんのツイートをRTしました",Toast.LENGTH_SHORT);
-                            } catch (TwitterException e) {
-                                e.printStackTrace();
+        Context context = Application.getInstance().getMainActivityContext();
+        if (!((Activity) context).isFinishing()) {
+            new AlertDialog.Builder(context).setMessage("このツイートをRTしますか？")
+                    .setNegativeButton("いいえ", (dialog, id) -> {
+                    })
+                    .setPositiveButton("はい", (dialog, id) -> {
+                        AsyncTask.execute(() -> {
+                            if (!item.isRT()) {
+                                try {
+                                    numeriUser.getTwitter().retweetStatus(item.getStatusId());
+                                    item.setRT(true);
+                                    Application.getInstance().onToast(item.getScreenName() + "さんのツイートをRTしました", Toast.LENGTH_SHORT);
+                                } catch (TwitterException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
-                    });
-                })
-                .create().show();
-
+                        });
+                    })
+                    .create().show();
+        }
     }
 
     private void favorite(TimeLineItem item, NumeriUser numeriUser, View view) {
+        Context context = Application.getInstance().getMainActivityContext();
         ImageView favoriteStar = (ImageView) view.findViewById(R.id.favoriteStar);
         if (!item.isFavorite()) {
             AsyncTask.execute(() -> {
@@ -89,7 +85,7 @@ public class Actions {
                     numeriUser.getTwitter().createFavorite(item.getStatusId());
                     item.setFavorite(true);
                     ((Activity) context).runOnUiThread(() -> favoriteStar.setImageDrawable(context.getResources().getDrawable(R.drawable.favorite_star)));
-                    Application.getInstance().onToast(item.getScreenName()+"さんのツイートをお気に入り登録しました。", Toast.LENGTH_SHORT);
+                    Application.getInstance().onToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。", Toast.LENGTH_SHORT);
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -100,7 +96,7 @@ public class Actions {
                     numeriUser.getTwitter().destroyFavorite(item.getStatusId());
                     item.setFavorite(false);
                     ((Activity) context).runOnUiThread(() -> favoriteStar.setImageBitmap(null));
-                    Application.getInstance().onToast(item.getScreenName()+"さんのツイートをお気に入りから解除しました。", Toast.LENGTH_SHORT);
+                    Application.getInstance().onToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。", Toast.LENGTH_SHORT);
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -109,6 +105,7 @@ public class Actions {
     }
 
     private void reply(TimeLineItem item) {
+        Context context = Application.getInstance().getMainActivityContext();
         item.getStatusId();
         TweetActivity.setDestination(item.getStatusId(), item.getDestinationUserNames());
         Intent intent = new Intent(context, TweetActivity.class);
