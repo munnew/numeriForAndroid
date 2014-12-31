@@ -22,13 +22,13 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    lintOptions{
+    lintOptions {
         abortOnError false
     }
 
     defaultConfig {
         applicationId "com.serori.numeri"
-        minSdkVersion 15
+        minSdkVersion 7
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -51,7 +51,7 @@ android {
     }
 }
 
-repositories{
+repositories {
     jcenter()
 }
 
@@ -72,6 +72,6 @@ retrolambda {
     jdk System.getenv("JAVA_HOME")
     oldJdk System.getenv("JAVA_HOME")
     javaVersion JavaVersion.VERSION_1_7
-   // jvmArgs '-arg1', '-arg2'
+    // jvmArgs '-arg1', '-arg2'
     incremental false
 }
