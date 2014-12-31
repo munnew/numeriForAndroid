@@ -1,7 +1,7 @@
 package com.serori.numeri.color;
 
 /**
- * Created by serioriKETC on 2014/12/30.
+ * 色を保存するクラス
  */
 public class Colors {
 
