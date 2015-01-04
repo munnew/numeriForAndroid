@@ -1,4 +1,4 @@
-package com.serori.numeri.hoge;
+package com.serori.numeri.oauth;
 
 import android.app.Activity;
 import android.content.Intent;

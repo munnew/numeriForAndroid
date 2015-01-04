@@ -21,7 +21,7 @@
         </activity>
 
         <activity
-            android:name=".hoge.OAuthActivity"
+            android:name=".oauth.OAuthActivity"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleTask">
             <intent-filter>
