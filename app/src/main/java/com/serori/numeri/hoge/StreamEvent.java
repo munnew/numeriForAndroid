@@ -1,4 +1,4 @@
-package com.serori.numeri.stream;
+package com.serori.numeri.hoge;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.serori.numeri.stream;
+package com.serori.numeri.hoge;
 
 /**
  * Created by seroriKETC on 2014/12/20.
