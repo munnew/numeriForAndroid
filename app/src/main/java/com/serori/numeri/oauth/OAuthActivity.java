@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.serori.numeri.application.Application;
+import com.serori.numeri.hoge.Application;
 import com.serori.numeri.R;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;

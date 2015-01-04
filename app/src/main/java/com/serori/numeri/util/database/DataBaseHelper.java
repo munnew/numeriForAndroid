@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.hoge.Application;
 
 /**
  * Created by seroriKETC on 2014/12/19.

@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.serori.numeri.application.Application;
+import com.serori.numeri.hoge.Application;
 import com.serori.numeri.R;
 import com.serori.numeri.stream.OnStatusListener;
 import com.serori.numeri.user.NumeriUser;

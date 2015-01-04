@@ -9,7 +9,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.serori.numeri.action.Actions;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.hoge.Application;
 import com.serori.numeri.item.TimeLineItem;
 import com.serori.numeri.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;

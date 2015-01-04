@@ -3,7 +3,7 @@ package com.serori.numeri.user;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.serori.numeri.application.Application;
+import com.serori.numeri.hoge.Application;
 import com.serori.numeri.R;
 import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;

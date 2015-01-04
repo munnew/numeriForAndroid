@@ -1,4 +1,4 @@
-package com.serori.numeri.application;
+package com.serori.numeri.hoge;
 
 import com.serori.numeri.user.NumeriUser;
 
