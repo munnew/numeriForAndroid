@@ -1,6 +1,7 @@
 package com.serori.numeri.color;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
@@ -57,6 +58,7 @@ public class ColorStorager {
             TableUtils.createTableIfNotExists(connectionSource, ColorData.class);
             Dao<ColorData, String> dao = helper.getDao(ColorData.class);
             dao.createOrUpdate(data);
+            Application.getInstance().onToast("色設定を保存しました。", Toast.LENGTH_SHORT);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

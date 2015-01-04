@@ -109,7 +109,7 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
     @Override
     public void onStatus(Status status) {
         for (UserMentionEntity userMentionEntity : status.getUserMentionEntities()) {
-            if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
+            if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId() && status.isRetweet()) {
                 TimeLineItem item = new TimeLineItem(status, numeriUser);
                 getActivity().runOnUiThread(() -> mentionsListView.insertItem(item));
             }

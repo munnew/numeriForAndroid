@@ -106,7 +106,15 @@ public class FragmentManagerActivity extends Activity implements OnFragmentDataD
                             FragmentStorager.getInstance().saveFragmentData(table);
                             FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
                             item.setFragmentKey(table.getFragmentKey());
-                            adapter.add(item);
+                            boolean addFlag = true;
+                            for (int j = 0; j < adapter.getCount(); j++) {
+                                if (item.getFragmentKey().equals(adapter.getItem(j).getFragmentKey())) {
+                                    addFlag = false;
+                                }
+                            }
+                            if (addFlag) {
+                                adapter.add(item);
+                            }
                         }
                     }
                 }).create().show();
@@ -132,7 +140,15 @@ public class FragmentManagerActivity extends Activity implements OnFragmentDataD
                             FragmentStorager.getInstance().saveFragmentData(table);
                             FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
                             item.setFragmentKey(table.getFragmentKey());
-                            adapter.add(item);
+                            boolean addFlag = true;
+                            for (int j = 0; j < adapter.getCount(); j++) {
+                                if (item.getFragmentKey().equals(adapter.getItem(j).getFragmentKey())) {
+                                    addFlag = false;
+                                }
+                            }
+                            if (addFlag) {
+                                adapter.add(item);
+                            }
                         }
                     }
                 }).create().show();

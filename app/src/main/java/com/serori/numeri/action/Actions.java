@@ -112,6 +112,10 @@ public class Actions {
         context.startActivity(intent);
     }
 
+    private void showConversation(TimeLineItem item) {
+
+    }
+
     private static class ActionsHolder {
         private static final Actions instance = new Actions();
     }
