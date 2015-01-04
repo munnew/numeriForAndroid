@@ -24,7 +24,7 @@ import com.serori.numeri.fragment.SectionsPagerAdapter;
 import com.serori.numeri.fragment.TimeLineFragment;
 import com.serori.numeri.fragment.manager.FragmentManagerActivity;
 import com.serori.numeri.fragment.manager.FragmentStorager;
-import com.serori.numeri.oauth.OAuthActivity;
+import com.serori.numeri.hoge.OAuthActivity;
 import com.serori.numeri.stream.OnFavoriteListener;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;

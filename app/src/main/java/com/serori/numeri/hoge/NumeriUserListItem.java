@@ -1,4 +1,4 @@
-package com.serori.numeri.oauth;
+package com.serori.numeri.hoge;
 
 import android.media.Image;
 

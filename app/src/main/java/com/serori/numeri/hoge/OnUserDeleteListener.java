@@ -1,4 +1,4 @@
-package com.serori.numeri.oauth;
+package com.serori.numeri.hoge;
 
 /**
  * Created by serioriKETC on 2014/12/29.

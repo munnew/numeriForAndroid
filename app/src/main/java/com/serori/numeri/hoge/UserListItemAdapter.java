@@ -1,4 +1,4 @@
-package com.serori.numeri.oauth;
+package com.serori.numeri.hoge;
 
 import android.content.Context;
 import android.util.Log;
@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
 
 import java.util.List;

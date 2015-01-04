@@ -1,5 +1,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" tools:context="com.serori.numeri.oauth.OAuthActivity">
+    xmlns:tools="http://schemas.android.com/tools" tools:context="com.serori.numeri.hoge.OAuthActivity">
     <item android:id="@+id/action_oauth" android:title="認証"
         android:orderInCategory="100"  />
 </menu>
