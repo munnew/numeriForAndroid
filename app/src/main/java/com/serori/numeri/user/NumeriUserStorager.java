@@ -8,7 +8,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.hoge.Application;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.fragment.manager.FragmentStorager;
 import com.serori.numeri.util.database.DataBaseHelper;
 

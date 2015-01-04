@@ -4,7 +4,7 @@ package com.serori.numeri.util.twitter;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.serori.numeri.hoge.Application;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.user.NumeriUser;
 
 import java.io.File;

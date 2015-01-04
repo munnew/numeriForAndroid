@@ -1,4 +1,4 @@
-package com.serori.numeri.hoge;
+package com.serori.numeri.application;
 
 import android.content.Context;
 import android.graphics.Point;

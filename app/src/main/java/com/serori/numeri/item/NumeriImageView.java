@@ -7,7 +7,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.serori.numeri.hoge.Application;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.util.cache.IconCache;
 import com.serori.numeri.util.cache.OnLoadImageCompletedListener;
 

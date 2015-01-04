@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.serori.numeri.R;
-import com.serori.numeri.hoge.Application;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.item.TimeLineItem;
 import com.serori.numeri.item.TimeLineItemAdapter;
 import com.serori.numeri.stream.OnStatusListener;
