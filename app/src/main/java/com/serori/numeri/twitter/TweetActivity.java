@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
-import com.serori.numeri.hoge.OnStatusListener;
+import com.serori.numeri.stream.OnStatusListener;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TweetBuilder;
 

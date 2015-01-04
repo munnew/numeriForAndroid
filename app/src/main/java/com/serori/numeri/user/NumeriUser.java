@@ -5,9 +5,9 @@ import android.util.Log;
 
 import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
-import com.serori.numeri.hoge.IStreamEvent;
-import com.serori.numeri.hoge.StreamEvent;
-import com.serori.numeri.hoge.StreamOwner;
+import com.serori.numeri.stream.IStreamEvent;
+import com.serori.numeri.stream.StreamEvent;
+import com.serori.numeri.stream.StreamOwner;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;

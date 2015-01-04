@@ -1,4 +1,4 @@
-package com.serori.numeri.hoge;
+package com.serori.numeri.stream;
 
 import twitter4j.Status;
 
