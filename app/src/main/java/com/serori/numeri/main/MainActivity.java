@@ -13,8 +13,8 @@ import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.color.ColorManagerActivity;
 import com.serori.numeri.color.ColorStorager;
 import com.serori.numeri.color.Colors;
@@ -34,24 +34,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import twitter4j.Status;
-import twitter4j.TwitterException;
 import twitter4j.User;
 import twitter4j.auth.AccessToken;
 
 public class MainActivity extends ActionBarActivity implements OnToast, OnFavoriteListener {
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ViewPager viewPager;
-    private ImageButton changeTweetActivityButton;
     private List<NumeriFragment> numeriFragments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setOffscreenPageLimit(30);
+        ImageButton changeTweetActivityButton;
         changeTweetActivityButton = (ImageButton) findViewById(R.id.goTweetButton);
         changeTweetActivityButton.setOnClickListener(v -> startTweetActivity(false));
         if (savedInstanceState == null) {
@@ -87,6 +85,11 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
             viewPager.setAdapter(sectionsPagerAdapter);
         }
         Log.v("MainActivity", "numeriUsers : " + Application.getInstance().getNumeriUsers().getNumeriUsers().size());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     @Override

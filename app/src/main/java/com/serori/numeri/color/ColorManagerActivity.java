@@ -1,14 +1,13 @@
 package com.serori.numeri.color;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.ListView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.item.TimeLineItem;
 import com.serori.numeri.main.MainActivity;
 
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import java.util.List;
 /**
  * Created by serioriKETC on 2014/12/30.
  */
-public class ColorManagerActivity extends Activity {
+public class ColorManagerActivity extends ActionBarActivity {
     private ListView colorListView;
     private List<ColorManagerItem> colorManagerItems = new ArrayList<>();
     private ColorListAdapter adapter;

@@ -5,26 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="0dp"
-        android:background="#5f5f5f">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="ツイート" />
-
-        <TextView
-            android:id="@+id/currentUser"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_marginRight="10dp"
-            android:gravity="right" />
-    </LinearLayout>
 
     <TextView
         android:id="@+id/backgroundTimeLine"
@@ -83,6 +63,15 @@
             android:layout_height="40dp"
             android:enabled="true"
             android:text="ユーザー" />
+
+        <TextView
+            android:id="@+id/currentUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="10dp"
+            android:textColor="#EFEFEF"
+            android:gravity="right" />
     </LinearLayout>
 
 </LinearLayout>

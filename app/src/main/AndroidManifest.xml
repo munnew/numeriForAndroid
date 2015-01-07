@@ -13,7 +13,7 @@
 
         <activity
             android:name=".main.MainActivity"
-            android:label="@string/app_name">
+            android:label="numeri">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -23,7 +23,8 @@
         <activity
             android:name=".oauth.OAuthActivity"
             android:configChanges="orientation|screenSize"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:label="ユーザー管理">
             <intent-filter>
 
                 <action android:name="android.intent.action.VIEW" />
@@ -41,7 +42,8 @@
         <activity
             android:name="com.serori.numeri.twitter.TweetActivity"
             android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:label="ツイート">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -51,6 +53,7 @@
 
         <activity
             android:name="com.serori.numeri.fragment.manager.FragmentManagerActivity"
+            android:label="フラグメント管理"
             android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -61,6 +64,7 @@
         <activity
             android:name="com.serori.numeri.color.ColorManagerActivity"
             android:configChanges="orientation|screenSize"
+            android:label="色設定"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

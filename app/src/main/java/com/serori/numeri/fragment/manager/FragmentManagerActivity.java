@@ -1,10 +1,10 @@
 package com.serori.numeri.fragment.manager;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -19,12 +19,10 @@ import com.serori.numeri.user.NumeriUser;
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter4j.TwitterException;
-
 /**
  * Created by serioriKETC on 2014/12/27.
  */
-public class FragmentManagerActivity extends Activity implements OnFragmentDataDeleteListener {
+public class FragmentManagerActivity extends ActionBarActivity implements OnFragmentDataDeleteListener {
     private ListView fragmentsListView;
     private FragmentManagerItemAdapter adapter;
     private List<FragmentManagerItem> managerItems = new ArrayList<>();

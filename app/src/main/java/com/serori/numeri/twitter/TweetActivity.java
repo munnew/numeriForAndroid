@@ -1,8 +1,8 @@
 package com.serori.numeri.twitter;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -12,8 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.stream.OnStatusListener;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TweetBuilder;
@@ -27,11 +27,10 @@ import twitter4j.Status;
 /**
  * Created by seroriKETC on 2014/12/21.
  */
-public class TweetActivity extends Activity implements TextWatcher, OnStatusListener {
+public class TweetActivity extends ActionBarActivity implements TextWatcher, OnStatusListener {
     private EditText tweetEditText;
     private TextView remainingTextView;
     private Button tweetButton;
-    private Button changeUserButton;
     private TextView backgroundTimeLine;
     private TextView currentUserTextView;
     private InputMethodManager inputMethodManager;
@@ -45,6 +44,7 @@ public class TweetActivity extends Activity implements TextWatcher, OnStatusList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tweet);
         if (savedInstanceState == null) {
+            Button changeUserButton;
             tweetEditText = (EditText) findViewById(R.id.tweeteditText);
             remainingTextView = (TextView) findViewById(R.id.remaining);
             changeUserButton = (Button) findViewById(R.id.changeUser);

@@ -1,6 +1,5 @@
 package com.serori.numeri.oauth;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -10,12 +9,11 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
@@ -35,7 +33,7 @@ import twitter4j.conf.ConfigurationContext;
 /**
  * 認証用の画面
  */
-public class OAuthActivity extends Activity implements OnUserDeleteListener {
+public class OAuthActivity extends ActionBarActivity implements OnUserDeleteListener {
 
     private ListView numeriUserListView;
     private List<NumeriUserListItem> userListItems = new ArrayList<>();
