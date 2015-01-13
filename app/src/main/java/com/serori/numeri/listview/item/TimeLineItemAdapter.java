@@ -1,4 +1,4 @@
-package com.serori.numeri.item;
+package com.serori.numeri.listview.item;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -11,7 +11,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.color.ColorStorager;
 import com.serori.numeri.color.Colors;
 
 import java.util.List;
@@ -48,6 +47,7 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         TextView viaTextView = (TextView) convertView.findViewById(R.id.timeLine_via);
         TextView createdTime = (TextView) convertView.findViewById(R.id.createdDate);
         ImageView favoriteStar = (ImageView) convertView.findViewById(R.id.favoriteStar);
+        View isMyTweetState = convertView.findViewById(R.id.isMyTweetStateView);
 
         iconImageView.startLoadImage(waitImageLoadingBar, timeLineItem.getIconImageUrl());
         screenNameTextView.setText(timeLineItem.getScreenName());
@@ -62,7 +62,7 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         }
 
         if (timeLineItem.isRetweeted()) {
-            convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getReTweetColor()));
+            convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getRetweetColor()));
             return convertView;
         }
 
@@ -70,7 +70,11 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
             convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getMentionColor()));
             return convertView;
         }
-
+        if (timeLineItem.isMyTweet()) {
+            isMyTweetState.setBackgroundColor(Color.parseColor(Colors.getInstance().getMyTweetMarkColor()));
+        }else{
+            isMyTweetState.setBackgroundColor(Color.parseColor("#00000000"));
+        }
         convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getNomalColor()));
 
         return convertView;

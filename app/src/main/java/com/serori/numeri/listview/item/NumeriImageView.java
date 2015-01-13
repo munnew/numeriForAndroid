@@ -1,4 +1,4 @@
-package com.serori.numeri.item;
+package com.serori.numeri.listview.item;
 
 import android.app.Activity;
 import android.content.Context;

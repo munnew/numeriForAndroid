@@ -1,4 +1,4 @@
-package com.serori.numeri.action;
+package com.serori.numeri.listview.action;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.serori.numeri.R;
 import com.serori.numeri.application.Application;
-import com.serori.numeri.item.TimeLineItem;
+import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
 
@@ -113,7 +113,9 @@ public class Actions {
     }
 
     private void showConversation(TimeLineItem item) {
+        if (item.getConversationId() != -1) {
 
+        }
     }
 
     private static class ActionsHolder {

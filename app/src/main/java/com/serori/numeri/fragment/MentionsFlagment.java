@@ -13,8 +13,9 @@ import android.widget.Toast;
 
 import com.serori.numeri.R;
 import com.serori.numeri.application.Application;
-import com.serori.numeri.item.TimeLineItem;
-import com.serori.numeri.item.TimeLineItemAdapter;
+import com.serori.numeri.listview.NumeriListView;
+import com.serori.numeri.listview.item.TimeLineItem;
+import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.stream.OnStatusListener;
 import com.serori.numeri.user.NumeriUser;
 

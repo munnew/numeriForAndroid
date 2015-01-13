@@ -17,20 +17,22 @@ import java.util.List;
  * Created by serioriKETC on 2014/12/30.
  */
 public class ColorManagerActivity extends ActionBarActivity {
-    private ListView colorListView;
     private List<ColorManagerItem> colorManagerItems = new ArrayList<>();
     private ColorListAdapter adapter;
-    private Button colorSaveButton;
+
     private List<String> colorIds = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ListView colorListView;
+        Button colorSaveButton;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color_manager);
 
         colorIds.add(ColorStorager.NOMAL_ITEM);
         colorIds.add(ColorStorager.RT_ITEM);
         colorIds.add(ColorStorager.MENTION_ITEM);
+        colorIds.add(ColorStorager.MYTWEET_MARK);
 
         colorSaveButton = (Button) findViewById(R.id.colorSave);
         colorListView = (ListView) findViewById(R.id.ColorList);

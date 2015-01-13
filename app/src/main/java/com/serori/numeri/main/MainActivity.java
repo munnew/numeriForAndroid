@@ -123,13 +123,13 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
             case R.id.action_settings:
                 break;
             case R.id.action_acount:
-                startOauthActivity(true);
+                startOauthActivity(false);
                 break;
             case R.id.action_fragment_manager:
-                startFragmentManagerActivity(true);
+                startFragmentManagerActivity(false);
                 break;
             case R.id.action_color_manager:
-                startColorManager(true);
+                startColorManager(false);
         }
 
         return super.onOptionsItemSelected(item);
@@ -188,9 +188,10 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
 
     private void init() {
 
-        Colors.getInstance().setReTweetColor(ColorStorager.getInstance().loadColorForId(ColorStorager.RT_ITEM));
+        Colors.getInstance().setRetweetColor(ColorStorager.getInstance().loadColorForId(ColorStorager.RT_ITEM));
         Colors.getInstance().setMentionColor(ColorStorager.getInstance().loadColorForId(ColorStorager.MENTION_ITEM));
         Colors.getInstance().setNomalColor(ColorStorager.getInstance().loadColorForId(ColorStorager.NOMAL_ITEM));
+        Colors.getInstance().setMyTweetMarkColor(ColorStorager.getInstance().loadColorForId(ColorStorager.MYTWEET_MARK));
 
         AsyncTask.execute(() -> {
             List<NumeriUser> numeriUsers = new ArrayList<>();

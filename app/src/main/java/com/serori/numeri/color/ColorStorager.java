@@ -108,7 +108,7 @@ public class ColorStorager {
     public static final String RT_ITEM = "RT_ITEM";
     public static final String MENTION_ITEM = "MENTION_ITEM";
     public static final String NOMAL_ITEM = "NOMAL_ITEM";
-
+    public static final String MYTWEET_MARK = "MYTWEET_MARK";
     @DatabaseTable(tableName = "ColorData")
     public static class ColorData {
         public ColorData() {

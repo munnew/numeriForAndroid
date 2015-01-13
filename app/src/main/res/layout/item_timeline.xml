@@ -4,6 +4,12 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
+    <View
+        android:id="@+id/isMyTweetStateView"
+        android:layout_width="2dp"
+        android:layout_height="fill_parent"
+        android:layout_margin="0dp"/>
+
     <LinearLayout
         android:id="@+id/leftLayout"
         android:layout_width="wrap_content"
@@ -12,17 +18,19 @@
 
         <ProgressBar
             android:id="@+id/waitImageLoading"
-            android:layout_width="150px"
-            android:layout_height="150px"
-            android:layout_margin="5dp"
-            android:layout_marginRight="10dp" />
-
-        <com.serori.numeri.item.NumeriImageView
-            android:id="@+id/userIcon"
-            android:layout_width="150px"
-            android:layout_height="150px"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:layout_margin="5dp"
             android:layout_marginRight="10dp"
+            android:layout_marginLeft="0dp"/>
+
+        <com.serori.numeri.listview.item.NumeriImageView
+            android:id="@+id/userIcon"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_margin="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="0dp"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -49,7 +57,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="left"
                     android:singleLine="true"
-                    android:text="hogehoge"
+                    android:text="hogehogehogehogehogeoge"
                     android:textColor="#565655" />
 
                 <TextView
@@ -58,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="left"
                     android:singleLine="true"
-                    android:text="hogehoge"
+                    android:text="hoge"
                     android:textColor="#565655" />
 
 
@@ -73,7 +81,7 @@
                 android:layout_weight="1"
                 android:gravity="right"
                 android:singleLine="true"
-                android:text="hoge"
+                android:text="01/01 00:00:00"
                 android:textColor="#565876"
                 android:textSize="8dp" />
 

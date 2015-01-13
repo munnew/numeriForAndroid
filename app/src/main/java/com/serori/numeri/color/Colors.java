@@ -7,8 +7,8 @@ public class Colors {
 
     private String nomalColor;
     private String mentionColor;
-    private String reTweetColor;
-
+    private String retweetColor;
+    private String myTweetMarkColor;
     public static Colors getInstance() {
         return ColorsHolder.instance;
     }
@@ -29,12 +29,20 @@ public class Colors {
         this.mentionColor = mentionColor;
     }
 
-    public String getReTweetColor() {
-        return reTweetColor;
+    public String getRetweetColor() {
+        return retweetColor;
     }
 
-    public void setReTweetColor(String reTweetColor) {
-        this.reTweetColor = reTweetColor;
+    public void setRetweetColor(String retweetColor) {
+        this.retweetColor = retweetColor;
+    }
+
+    public String getMyTweetMarkColor() {
+        return myTweetMarkColor;
+    }
+
+    public void setMyTweetMarkColor(String myTweetMarkColor) {
+        this.myTweetMarkColor = myTweetMarkColor;
     }
 
     private static class ColorsHolder {

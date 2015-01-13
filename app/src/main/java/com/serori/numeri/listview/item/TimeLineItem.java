@@ -1,7 +1,6 @@
-package com.serori.numeri.item;
+package com.serori.numeri.listview.item;
 
 import android.text.Html;
-import android.util.Log;
 
 import com.serori.numeri.user.NumeriUser;
 
@@ -24,24 +23,26 @@ public class TimeLineItem {
     private UserMentionEntity[] mentionEntity;
     private boolean isRT = false, isMention = false, isFavorite = false;
     private boolean isRetweeted = false;
+    private boolean isMyTweet = false;
     private String createdTime;
-    List<String> destinationUserNames = new ArrayList<>();
+    private List<String> destinationUserNames = new ArrayList<>();
+    private Long conversationId;
 
     public TimeLineItem(Status status, NumeriUser numeriUser) {
         statusId = status.getId();
-        userId = status.getUser().getId();//4 -19
+        userId = status.getUser().getId();
         createdTime = new SimpleDateFormat(DATE_FORMAT).format(status.getCreatedAt());
         isRT = status.isRetweetedByMe();
         isFavorite = status.isFavorited();
         if (status.isRetweet()) { //RT
             isRetweeted = true;
-            iconImageUrl = status.getRetweetedStatus().getUser().getProfileImageURL();
+            iconImageUrl = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
             mainText = status.getRetweetedStatus().getText();
             name = status.getRetweetedStatus().getUser().getName();
             via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName();
             screenName = status.getRetweetedStatus().getUser().getScreenName();
         } else {//!RT
-            iconImageUrl = status.getUser().getProfileImageURL();
+            iconImageUrl = status.getUser().getBiggerProfileImageURL();
             mainText = status.getText();
             name = status.getUser().getName();
             via = "via " + Html.fromHtml(status.getSource()).toString();
@@ -60,7 +61,12 @@ public class TimeLineItem {
         name = name.replaceAll("\r", "");
         name = name.replaceAll("\n", "");
         name = name.replaceAll("\t", "");
+        conversationId = status.getInReplyToStatusId();
+        if (numeriUser.getAccessToken().getUserId() == status.getUser().getId()) {
+            isMyTweet = true;
+        }
     }
+
 
     public String getName() {
         return name;
@@ -105,10 +111,6 @@ public class TimeLineItem {
         return userId;
     }
 
-    public UserMentionEntity[] getMentionEntity() {
-        return mentionEntity;
-    }
-
     public boolean isRT() {
         return isRT;
     }
@@ -131,5 +133,14 @@ public class TimeLineItem {
 
     public boolean isRetweeted() {
         return isRetweeted;
+    }
+
+    public Long getConversationId() {
+        return conversationId;
+    }
+
+
+    public boolean isMyTweet() {
+        return isMyTweet;
     }
 }

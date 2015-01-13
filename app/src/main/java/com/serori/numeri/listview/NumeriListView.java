@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment;
+package com.serori.numeri.listview;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -8,10 +8,11 @@ import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.serori.numeri.action.Actions;
+import com.serori.numeri.listview.action.Actions;
 import com.serori.numeri.application.Application;
-import com.serori.numeri.item.TimeLineItem;
-import com.serori.numeri.item.TimeLineItemAdapter;
+import com.serori.numeri.fragment.AttachedBottomListener;
+import com.serori.numeri.listview.item.TimeLineItem;
+import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
