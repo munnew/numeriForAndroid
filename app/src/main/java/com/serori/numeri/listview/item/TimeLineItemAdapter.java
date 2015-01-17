@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.color.Colors;
+import com.serori.numeri.imageview.NumeriImageView;
 
 import java.util.List;
 
@@ -61,6 +62,12 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
             favoriteStar.setImageBitmap(null);
         }
 
+        if (timeLineItem.isMyTweet()) {
+            isMyTweetState.setBackgroundColor(Color.parseColor(Colors.getInstance().getMyTweetMarkColor()));
+        } else {
+            isMyTweetState.setBackgroundColor(Color.parseColor("#00000000"));
+        }
+
         if (timeLineItem.isRetweeted()) {
             convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getRetweetColor()));
             return convertView;
@@ -70,11 +77,7 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
             convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getMentionColor()));
             return convertView;
         }
-        if (timeLineItem.isMyTweet()) {
-            isMyTweetState.setBackgroundColor(Color.parseColor(Colors.getInstance().getMyTweetMarkColor()));
-        }else{
-            isMyTweetState.setBackgroundColor(Color.parseColor("#00000000"));
-        }
+
         convertView.setBackgroundColor(Color.parseColor(Colors.getInstance().getNomalColor()));
 
         return convertView;

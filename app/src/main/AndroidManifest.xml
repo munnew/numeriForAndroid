@@ -72,6 +72,25 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.serori.numeri.twitter.ConversationActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="会話">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.serori.numeri.media.MediaActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="画像">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
     </application>
 

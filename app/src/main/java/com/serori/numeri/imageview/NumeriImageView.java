@@ -1,4 +1,4 @@
-package com.serori.numeri.listview.item;
+package com.serori.numeri.imageview;
 
 import android.app.Activity;
 import android.content.Context;
@@ -33,6 +33,7 @@ public class NumeriImageView extends ImageView implements OnLoadImageCompletedLi
     public void startLoadImage(ProgressBar progressBar, String url) {
         iconCache.setOnLoadImageCompletedListener(this);
         this.progressBar = progressBar;
+
         iconCache.loadImage(url);
     }
 
@@ -40,7 +41,9 @@ public class NumeriImageView extends ImageView implements OnLoadImageCompletedLi
     public void onLoadImageCompleted(Bitmap image) {
         ((Activity) Application.getInstance().getMainActivityContext()).runOnUiThread(() -> {
             this.setImageBitmap(image);
-            progressBar.setVisibility(GONE);
+            if (progressBar != null) {
+                progressBar.setVisibility(GONE);
+            }
             this.setVisibility(VISIBLE);
         });
     }

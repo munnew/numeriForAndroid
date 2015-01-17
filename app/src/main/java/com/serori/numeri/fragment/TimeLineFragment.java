@@ -46,12 +46,11 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
         setRetainInstance(true);
+        context = rootView.getContext();
         timeLineListView = (NumeriListView) rootView.findViewById(R.id.timeLineListView);
-        timeLineListView.setNumeriUser(numeriUser);
-        timeLineListView.onTouchItemEnabled();
+        timeLineListView.onTouchItemEnabled(numeriUser,context);
         timeLineListView.setAttachedBottomListener(this);
         if (savedInstanceState == null) {
-            context = rootView.getContext();
             timeLineItems = new ArrayList<>();
             adapter = new TimeLineItemAdapter(rootView.getContext(), 0, timeLineItems);
             timeLineListView.setAdapter(adapter);

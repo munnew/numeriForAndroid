@@ -1,6 +1,7 @@
 package com.serori.numeri.listview;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -32,7 +33,6 @@ public class NumeriListView extends ListView {
     private static final int CENTER = 1;
     private static final int RIGHT = 2;
 
-    private NumeriUser numeriUser;
     private List<TimeLineItem> storeedItems = new ArrayList<>();
 
     public NumeriListView(Context context) {
@@ -80,8 +80,9 @@ public class NumeriListView extends ListView {
         });
     }
 
+
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
+    public boolean onTouchEvent(@NonNull MotionEvent ev) {
         touchedCoordinatesX = ev.getX();
         return super.onTouchEvent(ev);
     }
@@ -99,20 +100,26 @@ public class NumeriListView extends ListView {
     }
 
 
-    public void onTouchItemEnabled() {
+    public void onTouchItemEnabled(NumeriUser numeriUser, Context context) {
+        if (numeriUser == null) {
+            throw new NullPointerException("numeriUserがセットされていません");
+        }
+        if (context == null) {
+            throw new NullPointerException("contextがセットされていません");
+        }
         setOnItemClickListener((parent, view, position, id) -> {
             TimeLineItem item = (TimeLineItem) getAdapter().getItem(position);
             Log.v("ontTouchItem", "" + getTouchedCoordinates());
 
             switch (getTouchedCoordinates()) {
                 case LEFT:
-                    Actions.getInstance().onTouchAction(Actions.FAVORITE, item, numeriUser, view);
+                    Actions.getInstance().onTouchAction(context, Actions.FAVORITE, item, numeriUser, view);
                     break;
                 case CENTER:
-                    Actions.getInstance().onTouchAction(Actions.RT, item, numeriUser, view);
+                    Actions.getInstance().onTouchAction(context, Actions.RT, item, numeriUser, view);
                     break;
                 case RIGHT:
-                    Actions.getInstance().onTouchAction(Actions.REPLY, item, numeriUser, view);
+                    Actions.getInstance().onTouchAction(context, Actions.REPLY, item, numeriUser, view);
                     break;
                 default:
                     break;
@@ -120,13 +127,14 @@ public class NumeriListView extends ListView {
             }
         });
         setOnItemLongClickListener((parent, view, position, id) -> {
-            //TimeLineItem item = (TimeLineItem) getAdapter().getItem(position);
+            TimeLineItem item = (TimeLineItem) getAdapter().getItem(position);
             switch (getTouchedCoordinates()) {
                 case LEFT:
                     break;
                 case CENTER:
                     break;
                 case RIGHT:
+                    Actions.getInstance().onTouchAction(context, Actions.MENU, item, numeriUser, view);
                     break;
                 default:
                     break;
@@ -154,7 +162,4 @@ public class NumeriListView extends ListView {
         }
     }
 
-    public void setNumeriUser(NumeriUser numeriUser) {
-        this.numeriUser = numeriUser;
-    }
 }

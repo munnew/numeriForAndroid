@@ -9,6 +9,7 @@ public class Colors {
     private String mentionColor;
     private String retweetColor;
     private String myTweetMarkColor;
+
     public static Colors getInstance() {
         return ColorsHolder.instance;
     }

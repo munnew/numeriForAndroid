@@ -1,13 +1,16 @@
 package com.serori.numeri.color;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.serori.numeri.R;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.main.MainActivity;
 
 import java.util.ArrayList;
@@ -49,6 +52,8 @@ public class ColorManagerActivity extends ActionBarActivity {
                 ColorStorager.ColorData data = new ColorStorager.ColorData(item.getColorId(), item.getColor());
                 ColorStorager.getInstance().saveColorData(data);
             }
+            Application.getInstance().destroyMainActivity();
+            Application.getInstance().onToast("色設定を保存しました。", Toast.LENGTH_SHORT);
         });
 
     }
@@ -56,7 +61,11 @@ public class ColorManagerActivity extends ActionBarActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            startMainActivity(true);
+            if (Application.getInstance().isDestroyMainActivity()) {
+                startMainActivity(true);
+            } else {
+                finish();
+            }
             return true;
         }
         return false;

@@ -8,7 +8,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.MediaEntity;
 import twitter4j.Status;
+import twitter4j.URLEntity;
 import twitter4j.UserMentionEntity;
 
 /**
@@ -26,6 +28,8 @@ public class TimeLineItem {
     private boolean isMyTweet = false;
     private String createdTime;
     private List<String> destinationUserNames = new ArrayList<>();
+    private List<String> uris = new ArrayList<>();
+    private List<String> mediaUris = new ArrayList<>();
     private Long conversationId;
 
     public TimeLineItem(Status status, NumeriUser numeriUser) {
@@ -47,6 +51,9 @@ public class TimeLineItem {
             name = status.getUser().getName();
             via = "via " + Html.fromHtml(status.getSource()).toString();
             screenName = status.getUser().getScreenName();
+            if (numeriUser.getAccessToken().getUserId() == status.getUser().getId()) {
+                isMyTweet = true;
+            }
         }
 
         mentionEntity = status.getUserMentionEntities();
@@ -62,9 +69,15 @@ public class TimeLineItem {
         name = name.replaceAll("\n", "");
         name = name.replaceAll("\t", "");
         conversationId = status.getInReplyToStatusId();
-        if (numeriUser.getAccessToken().getUserId() == status.getUser().getId()) {
-            isMyTweet = true;
+
+        for (MediaEntity mediaEntity : status.getExtendedMediaEntities()) {
+            mediaUris.add(mediaEntity.getMediaURL());
         }
+
+        for (URLEntity urlEntity : status.getURLEntities()) {
+            uris.add(urlEntity.getExpandedURL());
+        }
+
     }
 
 
@@ -139,6 +152,17 @@ public class TimeLineItem {
         return conversationId;
     }
 
+    public List<String> getUris() {
+        List<String> uris = new ArrayList<>();
+        uris.addAll(this.uris);
+        return uris;
+    }
+
+    public List<String> getMediaUris() {
+        List<String> mediaUris = new ArrayList<>();
+        mediaUris.addAll(this.mediaUris);
+        return mediaUris;
+    }
 
     public boolean isMyTweet() {
         return isMyTweet;

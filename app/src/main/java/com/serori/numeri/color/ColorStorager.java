@@ -12,6 +12,8 @@ import com.serori.numeri.application.Application;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -23,7 +25,6 @@ public class ColorStorager {
         return ColorStoragerHolder.instance;
     }
 
-
     public boolean colorsIsEmpty() {
         ConnectionSource connectionSource = null;
         boolean isEmpty = true;
@@ -33,7 +34,6 @@ public class ColorStorager {
             TableUtils.createTableIfNotExists(connectionSource, ColorData.class);
             Dao<ColorData, String> dao = helper.getDao(ColorData.class);
             isEmpty = dao.queryForAll().isEmpty();
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -58,7 +58,7 @@ public class ColorStorager {
             TableUtils.createTableIfNotExists(connectionSource, ColorData.class);
             Dao<ColorData, String> dao = helper.getDao(ColorData.class);
             dao.createOrUpdate(data);
-            Application.getInstance().onToast("色設定を保存しました。", Toast.LENGTH_SHORT);
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -105,10 +105,11 @@ public class ColorStorager {
         return color;
     }
 
-    public static final String RT_ITEM = "RT_ITEM";
-    public static final String MENTION_ITEM = "MENTION_ITEM";
-    public static final String NOMAL_ITEM = "NOMAL_ITEM";
-    public static final String MYTWEET_MARK = "MYTWEET_MARK";
+    public static final String RT_ITEM = "RT\nITEM";
+    public static final String MENTION_ITEM = "MENTION\nITEM";
+    public static final String NOMAL_ITEM = "NOMAL\nITEM";
+    public static final String MYTWEET_MARK = "MYTWEET\nMARK";
+
     @DatabaseTable(tableName = "ColorData")
     public static class ColorData {
         public ColorData() {

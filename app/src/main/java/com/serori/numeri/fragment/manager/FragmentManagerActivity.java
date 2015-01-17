@@ -174,7 +174,11 @@ public class FragmentManagerActivity extends ActionBarActivity implements OnFrag
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            startMainActivity(true);
+            if (Application.getInstance().isDestroyMainActivity()) {
+                startMainActivity(true);
+            } else {
+                finish();
+            }
             return true;
         }
         return false;

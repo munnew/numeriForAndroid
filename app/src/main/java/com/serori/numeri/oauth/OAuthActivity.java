@@ -34,8 +34,6 @@ import twitter4j.conf.ConfigurationContext;
  * 認証用の画面
  */
 public class OAuthActivity extends ActionBarActivity implements OnUserDeleteListener {
-
-    private ListView numeriUserListView;
     private List<NumeriUserListItem> userListItems = new ArrayList<>();
     private UserListItemAdapter adapter;
 
@@ -44,6 +42,7 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth);
         if (savedInstanceState == null) {
+            ListView numeriUserListView;
             numeriUserListView = (ListView) findViewById(R.id.numeriUserListView);
             adapter = new UserListItemAdapter(this, 0, userListItems);
             numeriUserListView.setAdapter(adapter);
@@ -107,7 +106,7 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
 
     @Override
     public void onNewIntent(Intent intent) {
-        if (intent.getData().getQueryParameter("oauth_verifier") == null || intent == null || intent.getData() == null || !intent.getData().toString().startsWith(getString(R.string.twitter_callback_url))) {
+        if (intent.getData().getQueryParameter("oauth_verifier") == null  || intent.getData() == null || !intent.getData().toString().startsWith(getString(R.string.twitter_callback_url))) {
             toast("認証がキャンセルされました");
             return;
         }
@@ -138,6 +137,9 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
                     userTable.setAccessTokenSecret(token.getTokenSecret());
                     NumeriUserStorager.getInstance().saveNumeriUser(userTable);
                     addItem(token);
+                    if (!Application.getInstance().isDestroyMainActivity()) {
+                        Application.getInstance().destroyMainActivity();
+                    }
                     startMainActivity(true);
                 } else {
                     toast("認証失敗");
@@ -196,7 +198,11 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            startMainActivity(true);
+            if (Application.getInstance().isDestroyMainActivity()) {
+                startMainActivity(true);
+            } else {
+                finish();
+            }
             return true;
         }
         return false;
@@ -204,6 +210,7 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
 
     @Override
     public void onUserDelete(int position) {
+        Application.getInstance().destroyMainActivity();
         adapter.remove(adapter.getItem(position));
     }
 }

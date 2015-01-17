@@ -44,14 +44,13 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
         Log.v("Mentions", "cleate");
         setRetainInstance(true);
+        context = rootView.getContext();
         mentionsListView = (NumeriListView) rootView.findViewById(R.id.timeLineListView);
-        mentionsListView.setNumeriUser(numeriUser);
-        mentionsListView.onTouchItemEnabled();
+        mentionsListView.onTouchItemEnabled(numeriUser, context);
         mentionsListView.setAttachedBottomListener(this);
         if (savedInstanceState == null) {
-            context = rootView.getContext();
             timeLineItems = new ArrayList<>();
-            adapter = new TimeLineItemAdapter(rootView.getContext(), 0, timeLineItems);
+            adapter = new TimeLineItemAdapter(context, 0, timeLineItems);
             mentionsListView.setAdapter(adapter);
             initializeLoad();
         } else {

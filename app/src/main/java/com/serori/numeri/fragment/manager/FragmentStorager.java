@@ -25,6 +25,7 @@ public class FragmentStorager {
             TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
             Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
             dao.createOrUpdate(table);
+            Application.getInstance().destroyMainActivity();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -47,6 +48,7 @@ public class FragmentStorager {
             TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
             Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
             dao.deleteById(fragmentKey);
+            Application.getInstance().destroyMainActivity();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

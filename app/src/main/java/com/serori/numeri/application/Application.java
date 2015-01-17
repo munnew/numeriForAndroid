@@ -1,5 +1,6 @@
 package com.serori.numeri.application;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.view.WindowManager;
@@ -48,6 +49,17 @@ public class Application extends android.app.Application {
         }
     }
 
+    public void destroyMainActivity() {
+        if (mainActivityContext != null) {
+            if (!isDestroyMainActivity()) {
+                ((Activity) mainActivityContext).finish();
+            }
+        }
+    }
+
+    public boolean isDestroyMainActivity() {
+        return ((Activity) mainActivityContext).isFinishing();
+    }
 
     public NumeriUsers getNumeriUsers() {
         return NumeriUsers.getInstance();

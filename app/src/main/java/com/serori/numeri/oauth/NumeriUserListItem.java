@@ -1,6 +1,5 @@
 package com.serori.numeri.oauth;
 
-import android.media.Image;
 
 /**
  * Created by seroriKETC on 2014/12/19.

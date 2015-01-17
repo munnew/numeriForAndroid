@@ -3,6 +3,7 @@ package com.serori.numeri.main;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -88,11 +89,6 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (!numeriFragments.isEmpty()) {
@@ -102,7 +98,7 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         Log.v("Restore", "onRestoreInstanceState:fragmentsSize" + Application.getInstance().getNumeriFragmentManager().getNumeriFragments().size());
         super.onRestoreInstanceState(savedInstanceState);
         if (!Application.getInstance().getNumeriFragmentManager().getNumeriFragments().isEmpty()) {
