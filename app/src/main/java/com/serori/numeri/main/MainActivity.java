@@ -18,7 +18,8 @@ import com.serori.numeri.R;
 import com.serori.numeri.application.Application;
 import com.serori.numeri.color.ColorManagerActivity;
 import com.serori.numeri.color.ColorStorager;
-import com.serori.numeri.color.Colors;
+import com.serori.numeri.config.ConfigActivity;
+import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.fragment.MentionsFlagment;
 import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.fragment.SectionsPagerAdapter;
@@ -45,6 +46,13 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Application.getInstance().setApplicationContext(getApplicationContext());
+        Application.getInstance().setMainActivityContext(this);
+        Application.getInstance().setOnToastListener(this);
+        ConfigurationStorager.getInstance().loadConfigurations();
+        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -55,10 +63,6 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
         changeTweetActivityButton.setOnClickListener(v -> startTweetActivity(false));
         if (savedInstanceState == null) {
             Log.v("initLoad", "init");
-            Application.getInstance().setApplicationContext(getApplicationContext());
-            Application.getInstance().setMainActivityContext(this);
-            Application.getInstance().setOnToastListener(this);
-
             List<AccessToken> tokens = new ArrayList<>();
             tokens.addAll(NumeriUserStorager.getInstance().loadNumeriUserTokens());
             if (tokens.isEmpty()) {
@@ -117,6 +121,7 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
+                startConfigActivity(false);
                 break;
             case R.id.action_acount:
                 startOauthActivity(false);
@@ -165,8 +170,15 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
     }
 
     private void startFragmentManagerActivity(boolean isFinish) {
-        Application.getInstance().getNumeriFragmentManager().clear();
         Intent intent = new Intent(this, FragmentManagerActivity.class);
+        startActivity(intent);
+        if (isFinish) {
+            finish();
+        }
+    }
+
+    private void startConfigActivity(boolean isFinish) {
+        Intent intent = new Intent(this, ConfigActivity.class);
         startActivity(intent);
         if (isFinish) {
             finish();
@@ -184,10 +196,7 @@ public class MainActivity extends ActionBarActivity implements OnToast, OnFavori
 
     private void init() {
 
-        Colors.getInstance().setRetweetColor(ColorStorager.getInstance().loadColorForId(ColorStorager.RT_ITEM));
-        Colors.getInstance().setMentionColor(ColorStorager.getInstance().loadColorForId(ColorStorager.MENTION_ITEM));
-        Colors.getInstance().setNomalColor(ColorStorager.getInstance().loadColorForId(ColorStorager.NOMAL_ITEM));
-        Colors.getInstance().setMyTweetMarkColor(ColorStorager.getInstance().loadColorForId(ColorStorager.MYTWEET_MARK));
+        ColorStorager.getInstance().loadColor();
 
         AsyncTask.execute(() -> {
             List<NumeriUser> numeriUsers = new ArrayList<>();

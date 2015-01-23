@@ -8,12 +8,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 
 import com.serori.numeri.R;
+import com.serori.numeri.config.ConfigurationStorager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by serioriKETC on 2015/01/15.
+ * MesdiaActivity
  */
 public class MediaActivity extends ActionBarActivity {
     private static List<String> mediaUris = new ArrayList<>();
@@ -21,10 +22,14 @@ public class MediaActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media);
         MediaPagerAdapter mediaPagerAdapter = new MediaPagerAdapter(getSupportFragmentManager());
         ViewPager pager = (ViewPager) findViewById(R.id.mediaPager);
+        pager.setOffscreenPageLimit(10);
         if (savedInstanceState == null) {
             for (int i = 0; i < mediaUris.size(); i++) {
                 MediaFragment mediaFragment = new MediaFragment();

@@ -88,7 +88,7 @@ public class NumeriListView extends ListView {
     }
 
     private int getTouchedCoordinates() {
-        float windowX = Application.getInstance().getWindowX();
+        float windowX = Application.getInstance().getWindowSize().x;
         if (windowX / 3 > touchedCoordinatesX)
             return LEFT;
         if (windowX / 3 * 2 > touchedCoordinatesX)

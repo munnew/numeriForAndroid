@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.serori.numeri.R;
 import com.serori.numeri.application.Application;
+import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
@@ -39,6 +40,9 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth);
         if (savedInstanceState == null) {
@@ -106,7 +110,7 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
 
     @Override
     public void onNewIntent(Intent intent) {
-        if (intent.getData().getQueryParameter("oauth_verifier") == null  || intent.getData() == null || !intent.getData().toString().startsWith(getString(R.string.twitter_callback_url))) {
+        if (intent.getData().getQueryParameter("oauth_verifier") == null || intent.getData() == null || !intent.getData().toString().startsWith(getString(R.string.twitter_callback_url))) {
             toast("認証がキャンセルされました");
             return;
         }

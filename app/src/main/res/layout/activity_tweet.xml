@@ -27,9 +27,14 @@
         android:ems="26"
         android:gravity="top"
         android:inputType="textMultiLine|textLongMessage"
-        android:textColor="#000000"
         android:textIsSelectable="true"
         android:textSize="15sp" />
+
+    <LinearLayout
+        android:id="@+id/appendedImages"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -47,7 +52,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="140"
-            android:textColor="#ABABAB"
             android:textSize="20sp" />
 
         <Button
@@ -56,6 +60,13 @@
             android:layout_height="40dp"
             android:enabled="false"
             android:text="ツイート" />
+
+        <Button
+            android:id="@+id/addImageButtoon"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:enabled="true"
+            android:text="画像" />
 
         <Button
             android:id="@+id/changeUser"
@@ -73,5 +84,6 @@
             android:textColor="#EFEFEF"
             android:gravity="right" />
     </LinearLayout>
+
 
 </LinearLayout>

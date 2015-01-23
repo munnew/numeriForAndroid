@@ -1,25 +1,27 @@
 package com.serori.numeri.color;
 
 /**
- * Created by serioriKETC on 2014/12/30.
+ * ColorManagerItem
  */
 public class ColorManagerItem {
-    private String colorId;
-    private String color;
+    private String colorValue;
+    private Color color;
 
-    public ColorManagerItem(String colorId) {
-        this.colorId = colorId;
-    }
-
-    public String getColorId() {
-        return colorId;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
+    public ColorManagerItem(Color color) {
+        this.colorValue = color.getColor();
         this.color = color;
+    }
+
+
+    public void setColorValue(String color) {
+        this.colorValue = color;
+    }
+
+    public String getColorValue() {
+        return this.colorValue;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }

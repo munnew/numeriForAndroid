@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 
 import com.serori.numeri.R;
+import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.listview.NumeriListView;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
@@ -21,6 +22,7 @@ import twitter4j.TwitterException;
  * 会話を表示するためのActivity
  */
 public class ConversationActivity extends ActionBarActivity {
+
     private NumeriListView conversationListView;
     private List<TimeLineItem> timeLineItems = new ArrayList<>();
     private TimeLineItemAdapter adapter;
@@ -29,6 +31,9 @@ public class ConversationActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_conversation);
         adapter = new TimeLineItemAdapter(this, 0, timeLineItems);

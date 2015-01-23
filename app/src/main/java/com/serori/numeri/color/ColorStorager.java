@@ -1,7 +1,6 @@
 package com.serori.numeri.color;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
@@ -12,12 +11,10 @@ import com.serori.numeri.application.Application;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
- * Created by serioriKETC on 2014/12/30.
+ * 色をローカルに保存したり読み込んだりするためのクラス
  */
 public class ColorStorager {
 
@@ -25,40 +22,18 @@ public class ColorStorager {
         return ColorStoragerHolder.instance;
     }
 
-    public boolean colorsIsEmpty() {
+
+    public void saveColorData() {
         ConnectionSource connectionSource = null;
-        boolean isEmpty = true;
         try {
             DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, ColorData.class);
             Dao<ColorData, String> dao = helper.getDao(ColorData.class);
-            isEmpty = dao.queryForAll().isEmpty();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        } finally {
-            if (connectionSource != null) {
-                try {
-                    connectionSource.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            for (Color color : Colors.values()) {
+                ColorData data = new ColorData(color);
+                dao.createOrUpdate(data);
             }
-        }
-        return isEmpty;
-    }
-
-
-    public void saveColorData(ColorData data) {
-        ConnectionSource connectionSource = null;
-        try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
-            connectionSource = helper.getConnectionSource();
-            TableUtils.createTableIfNotExists(connectionSource, ColorData.class);
-            Dao<ColorData, String> dao = helper.getDao(ColorData.class);
-            dao.createOrUpdate(data);
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -73,23 +48,27 @@ public class ColorStorager {
         }
     }
 
-    public String loadColorForId(String colorId) {
+    /**
+     * 色設定をColorsにローカルから読み込む。<br>
+     * 任意のタイミングで呼び出し。
+     */
+    public void loadColor() {
         ConnectionSource connectionSource = null;
-        String color;
         try {
             DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, ColorData.class);
             Dao<ColorData, String> dao = helper.getDao(ColorData.class);
-            ColorData colorData = dao.queryForId(colorId);
-            if (colorData == null) {
-                Log.v("ColorStrager", "return:defaultColor");
-                color = "#FFFFFF";
-            } else {
-                Log.v("ColorStrager", "return:storageColor");
-                color = colorData.getColor();
+            for (Colors color : Colors.values()) {
+                ColorData colorData = dao.queryForId(color.getColorId());
+                if (colorData == null) {
+                    Log.v("ColorStrager", "return:defaultColor");
+                    color.setColor("#FFFFFF");
+                } else {
+                    Log.v("ColorStrager", "return:storageColor");
+                    color.setColor(colorData.getColor());
+                }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -102,13 +81,8 @@ public class ColorStorager {
                 }
             }
         }
-        return color;
     }
 
-    public static final String RT_ITEM = "RT\nITEM";
-    public static final String MENTION_ITEM = "MENTION\nITEM";
-    public static final String NOMAL_ITEM = "NOMAL\nITEM";
-    public static final String MYTWEET_MARK = "MYTWEET\nMARK";
 
     @DatabaseTable(tableName = "ColorData")
     public static class ColorData {
@@ -116,19 +90,15 @@ public class ColorStorager {
 
         }
 
-        public ColorData(String colorId, String color) {
-            this.colorId = colorId;
-            this.color = color;
+        public ColorData(Color color) {
+            this.colorId = color.getColorId();
+            this.color = color.getColor();
         }
 
         @DatabaseField(canBeNull = false, id = true)
         private String colorId;
         @DatabaseField(canBeNull = false)
         private String color;
-
-        public String getColorId() {
-            return colorId;
-        }
 
         public String getColor() {
             return color;
@@ -137,5 +107,40 @@ public class ColorStorager {
 
     private static class ColorStoragerHolder {
         private static final ColorStorager instance = new ColorStorager();
+    }
+
+    /**
+     * 色を保存する列挙型
+     */
+    public static enum Colors implements Color {
+
+        NORMAL_ITEM("NORMAL\nITEM"),
+        RT_ITEM("RT\nITEM"),
+        MENTION_ITEM("MENTION\nITEM"),
+        MYTWEET_MARK("MYTWEET\nMARK"),
+        CHARACTER("CHARACTER");
+
+        private String color;
+        private String colorId;
+
+        private Colors(String id) {
+            colorId = id;
+        }
+
+        @Override
+        public void setColor(String s) {
+            this.color = s;
+        }
+
+        @Override
+        public String getColor() {
+            return color;
+        }
+
+        @Override
+        public String getColorId() {
+            return colorId;
+        }
+
     }
 }

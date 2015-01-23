@@ -1,33 +1,43 @@
 package com.serori.numeri.twitter;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.serori.numeri.R;
 import com.serori.numeri.application.Application;
-import com.serori.numeri.stream.OnStatusListener;
+import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TweetBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter4j.Status;
-
 
 /**
- * Created by seroriKETC on 2014/12/21.
+ * TweetActivity
  */
-public class TweetActivity extends ActionBarActivity implements TextWatcher, OnStatusListener {
+public class TweetActivity extends ActionBarActivity implements TextWatcher {
     private EditText tweetEditText;
     private TextView remainingTextView;
     private Button tweetButton;
@@ -37,31 +47,48 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher, OnS
     private static boolean isReply = false;
     private static long destinationStatusId;
     private static List<String> destinationUserNames = new ArrayList<>();
-    private NumeriUser currentNumeriUser;
+    private static NumeriUser currentNumeriUser = null;
+    private List<File> appendedImages = new ArrayList<>();
+    private LinearLayout appendedImageViews;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tweet);
         if (savedInstanceState == null) {
-            Button changeUserButton;
+            Button changeUserButton = (Button) findViewById(R.id.changeUser);
             tweetEditText = (EditText) findViewById(R.id.tweeteditText);
             remainingTextView = (TextView) findViewById(R.id.remaining);
-            changeUserButton = (Button) findViewById(R.id.changeUser);
             tweetButton = (Button) findViewById(R.id.sendTweet);
+            Button addImageButton = (Button) findViewById(R.id.addImageButtoon);
             currentUserTextView = (TextView) findViewById(R.id.currentUser);
             backgroundTimeLine = (TextView) findViewById(R.id.backgroundTimeLine);
-            currentUserTextView.setText(Application.getInstance().getNumeriUsers().getNumeriUsers().get(0).getScreenName());
-            currentNumeriUser = Application.getInstance().getNumeriUsers().getNumeriUsers().get(0);
-            inputMethodManager = (InputMethodManager) this.getSystemService(this.INPUT_METHOD_SERVICE);
+            appendedImageViews = (LinearLayout) findViewById(R.id.appendedImages);
+            currentNumeriUser = currentNumeriUser == null ? Application.getInstance().getNumeriUsers().getNumeriUsers().get(0) : currentNumeriUser;
+            String currentTweetUserName = currentNumeriUser == null ? Application.getInstance().getNumeriUsers().getNumeriUsers().get(0).getScreenName() : currentNumeriUser.getScreenName();
+
+            currentUserTextView.setText(currentTweetUserName);
+            inputMethodManager = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
+
             for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
+                numeriUser.getStreamEvent().addOwnerOnStatusListener(status -> {
+                    String owner = status.getUser().getScreenName();
+                    String text = status.getText();
+                    runOnUiThread(() -> backgroundTimeLine.setText(owner + " : " + text));
+                });
             }
-            Log.v("Tweet", "create");
+
             tweetEditText.setOnClickListener(v -> inputMethodManager.showSoftInput(v, InputMethodManager.SHOW_FORCED));
             tweetEditText.addTextChangedListener(this);
             tweetButton.setOnClickListener(v -> sendTweet(currentNumeriUser));
             changeUserButton.setOnClickListener(v -> createChangeUserDialog());
+            addImageButton.setOnClickListener(v -> {
+                appendedImage();
+                inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
+            });
         }
 
         if (isReply) {
@@ -72,12 +99,19 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher, OnS
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            isReply = false;
-            finish();
-            return true;
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                isReply = false;
+                currentNumeriUser = null;
+                finish();
+                return true;
+            case KeyEvent.KEYCODE_MOVE_HOME:
+                inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
+                moveTaskToBack(true);
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     @Override
@@ -102,22 +136,111 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher, OnS
     }
 
     private void sendTweet(NumeriUser numeriUser) {
+        TweetBuilder tweetBuilder = numeriUser.getTweetBuilder();
+        tweetBuilder.setText(tweetEditText.getText().toString());
+
         if (isReply) {
-            new TweetBuilder().setNumeriUser(numeriUser).setReplyDestinationId(destinationStatusId).setText(tweetEditText.getText().toString()).tweet();
+            tweetBuilder.setReplyDestinationId(destinationStatusId);
             isReply = false;
-        } else {
-            new TweetBuilder().setNumeriUser(numeriUser).setText(tweetEditText.getText().toString()).tweet();
         }
+
+        if (!appendedImages.isEmpty()) {
+            tweetBuilder.addImages(appendedImages);
+        }
+
+        tweetBuilder.tweet();
         tweetEditText.setText("");
         inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
+        currentNumeriUser = null;
         finish();
     }
 
+    private static final int GALLERY = 1;
+    private static final int CAMERA = 2;
+
+    private void appendedImage() {
+        if (appendedImages.size() < 4) {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(intent, GALLERY);
+        } else {
+            Application.getInstance().onToast("4つ以上は添付できません", Toast.LENGTH_SHORT);
+        }
+    }
+
+
     @Override
-    public void onStatus(Status status) {
-        String owner = status.getUser().getScreenName();
-        String text = status.getText();
-        runOnUiThread(() -> backgroundTimeLine.setText(owner + " : " + text));
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            String path = null;
+            switch (requestCode) {
+                case GALLERY:
+                    try {
+                        InputStream inputStream = getContentResolver().openInputStream(data.getData());
+                        Cursor cursor = getContentResolver().query(data.getData(), null, null, null, null);
+                        cursor.moveToPosition(0);
+                        Log.v(toString(), cursor.getString(1));
+                        path = cursor.getString(1);
+                        File file = new File(path);
+                        cursor.close();
+                        inputStream.close();
+                        appendedImages.add(file);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    break;
+                case CAMERA:
+
+                    break;
+                default:
+                    break;
+            }
+            if (path != null) {
+                Bitmap bitmap = BitmapFactory.decodeFile(path);
+                ImageView appendedImage = new ImageView(this);
+                Matrix matrix = new Matrix();
+                float y = Application.getInstance().getWindowSize().y / 9;
+                float magnification;
+                Log.v(toString(), "Height:" + bitmap.getHeight() + "width" + bitmap.getWidth());
+                if (bitmap.getHeight() > bitmap.getWidth()) {
+                    magnification = y / bitmap.getHeight();
+                } else {
+                    magnification = y / bitmap.getWidth();
+                }
+                float width = bitmap.getWidth() * magnification;
+                float height = bitmap.getHeight() * magnification;
+                bitmap = Bitmap.createScaledBitmap(bitmap, (int) width, (int) height, false);
+                Log.v(toString(), "magnification:" + magnification);
+                matrix.postTranslate(0, 0);
+                appendedImage.setImageMatrix(matrix);
+                appendedImage.setScaleType(ImageView.ScaleType.MATRIX);
+                appendedImage.setImageBitmap(bitmap);
+                appendedImageViews.addView(appendedImage);
+                appendedImage.setOnClickListener(this::removeAppendedImage);
+            }
+        }
+    }
+
+    /**
+     * 投稿予定の画像をリストから除外する
+     *
+     * @param image 消したい画像が表示されているView
+     */
+    private void removeAppendedImage(View image) {
+        new AlertDialog.Builder(this).setMessage("選択した画像を投稿予定から除外しますか？")
+                .setPositiveButton("はい", (dialog, id) -> {
+                    for (int i = 0; i < appendedImageViews.getChildCount(); i++) {
+                        if (appendedImageViews.getChildAt(i) == image) {
+                            appendedImageViews.removeViewAt(i);
+                            appendedImages.remove(i);
+                        }
+                    }
+                })
+                .setNegativeButton("いいえ", (dialog, id) -> {
+                })
+                .create().show();
     }
 
     public static void setDestination(long statusId, List<String> destinationNames) {
@@ -128,6 +251,10 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher, OnS
         }
     }
 
+    public static void setTweetNunmeriUser(NumeriUser numeriUser) {
+        currentNumeriUser = numeriUser;
+    }
+
     private void setUserNames() {
         for (String destinationUserName : destinationUserNames) {
             tweetEditText.setText(tweetEditText.getText() + "@" + destinationUserName + " ");
@@ -135,6 +262,7 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher, OnS
         tweetEditText.setSelection(tweetEditText.getText().length());
         destinationUserNames.clear();
     }
+
 
     private void createChangeUserDialog() {
         List<CharSequence> numeriUsersName = new ArrayList<>();
@@ -148,4 +276,5 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher, OnS
             currentUserTextView.setText(numeriUsersName.get(which));
         }).create().show();
     }
+
 }

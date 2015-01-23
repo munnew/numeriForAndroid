@@ -12,11 +12,12 @@ import com.serori.numeri.util.cache.IconCache;
 import com.serori.numeri.util.cache.OnLoadImageCompletedListener;
 
 /**
- * Created by serioriKETC on 2014/12/26.
+ * ImageView
  */
 public class NumeriImageView extends ImageView implements OnLoadImageCompletedListener {
     private IconCache iconCache = new IconCache();
     private ProgressBar progressBar;
+    private OnLoadCompletedListener onLoadCompletedListener;
 
     public NumeriImageView(Context context) {
         super(context);
@@ -30,12 +31,17 @@ public class NumeriImageView extends ImageView implements OnLoadImageCompletedLi
         super(context, attrs, defStyleAttr);
     }
 
+    public void setOnLoadCompletedListener(OnLoadCompletedListener listener) {
+        onLoadCompletedListener = listener;
+    }
+
     public void startLoadImage(ProgressBar progressBar, String url) {
         iconCache.setOnLoadImageCompletedListener(this);
         this.progressBar = progressBar;
 
         iconCache.loadImage(url);
     }
+
 
     @Override
     public void onLoadImageCompleted(Bitmap image) {
@@ -45,6 +51,9 @@ public class NumeriImageView extends ImageView implements OnLoadImageCompletedLi
                 progressBar.setVisibility(GONE);
             }
             this.setVisibility(VISIBLE);
+            if (onLoadCompletedListener != null) {
+                onLoadCompletedListener.onLoadCompleted(image);
+            }
         });
     }
 }

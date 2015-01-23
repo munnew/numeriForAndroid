@@ -82,11 +82,11 @@ public class Application extends android.app.Application {
         return DB_NAME;
     }
 
-    public int getWindowX() {
+    public Point getWindowSize() {
         WindowManager wm = (WindowManager) mainActivityContext.getSystemService(WINDOW_SERVICE);
         Point size = new Point();
         wm.getDefaultDisplay().getSize(size);
-        return size.x;
+        return size;
     }
 
     private static class ApplicationHolder {

@@ -1,6 +1,5 @@
 package com.serori.numeri.user;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.serori.numeri.application.Application;
@@ -8,6 +7,7 @@ import com.serori.numeri.R;
 import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;
 import com.serori.numeri.stream.StreamOwner;
+import com.serori.numeri.util.twitter.TweetBuilder;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -69,6 +69,10 @@ public class NumeriUser {
 
     public IStreamEvent getStreamSwicher() {
         return streamEvent;
+    }
+
+    public TweetBuilder getTweetBuilder() {
+        return new TweetBuilder(this);
     }
 
     public String getScreenName() {

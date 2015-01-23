@@ -55,6 +55,7 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
             initializeLoad();
         } else {
             mentionsListView.setAdapter(adapter);
+            mentionsListView.onAttachedBottomCallbackEnabled(true);
         }
 
         return rootView;

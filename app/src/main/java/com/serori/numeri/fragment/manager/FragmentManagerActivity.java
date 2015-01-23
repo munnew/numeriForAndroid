@@ -13,6 +13,7 @@ import android.widget.ListView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.application.Application;
+import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;
 
@@ -30,6 +31,9 @@ public class FragmentManagerActivity extends ActionBarActivity implements OnFrag
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
+        }
         super.onCreate(savedInstanceState);
         Log.v("Fragment", "create");
         setContentView(R.layout.activity_fragment_manager);

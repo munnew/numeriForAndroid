@@ -48,7 +48,7 @@ public class Actions {
     public void onTouchAction(Context context, int action, TimeLineItem item, NumeriUser numeriUser, View view) {
         switch (action) {
             case REPLY:
-                reply(context, item);
+                reply(context, numeriUser, item);
                 break;
             case FAVORITE:
                 favorite(context, item, numeriUser, view);
@@ -117,9 +117,10 @@ public class Actions {
         }
     }
 
-    private void reply(Context context, TimeLineItem item) {
+    private void reply(Context context, NumeriUser user, TimeLineItem item) {
         item.getStatusId();
         TweetActivity.setDestination(item.getStatusId(), item.getDestinationUserNames());
+        TweetActivity.setTweetNunmeriUser(user);
         Intent intent = new Intent(context, TweetActivity.class);
         context.startActivity(intent);
     }
@@ -145,7 +146,7 @@ public class Actions {
 
         if (item.getConversationId() != -1) menuItems.add(new MenuItem(SHOW_CONVERSATION, "会話を表示"));
 
-        if (!item.getMediaUris().isEmpty()) menuItems.add(new MenuItem(SHOW_MEDIA,"画像を表示"));
+        if (!item.getMediaUris().isEmpty()) menuItems.add(new MenuItem(SHOW_MEDIA, "画像を表示"));
 
         if (!item.getUris().isEmpty()) {
             for (String s : item.getUris()) {
@@ -161,7 +162,7 @@ public class Actions {
                 .setItems(menuItemText.toArray(new CharSequence[menuItemText.size()]), (dialog, which) -> {
                     switch (menuItems.get(which).getAction()) {
                         case REPLY:
-                            reply(context, item);
+                            reply(context, numeriUser, item);
                             break;
                         case FAVORITE:
                             favorite(context, item, numeriUser, view);

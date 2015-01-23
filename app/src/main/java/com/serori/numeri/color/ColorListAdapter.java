@@ -34,7 +34,7 @@ public class ColorListAdapter extends ArrayAdapter<ColorManagerItem> {
         }
 
         TextView colorId = (TextView) convertView.findViewById(R.id.colorId);
-        colorId.setText(item.getColorId());
+        colorId.setText(item.getColor().getColorId());
         SeekBar redSeekBar = (SeekBar) convertView.findViewById(R.id.redSeekBar);
         SeekBar greenSeekBar = (SeekBar) convertView.findViewById(R.id.greenSeekBar);
         SeekBar blueSeekBar = (SeekBar) convertView.findViewById(R.id.blueSeekBar);
@@ -46,7 +46,7 @@ public class ColorListAdapter extends ArrayAdapter<ColorManagerItem> {
         greenSeekBar.setMax(255);
         blueSeekBar.setMax(255);
 
-        List<Integer> rgbValue = purseToDecRgbVakue(item.getColor());
+        List<Integer> rgbValue = purseToDecRgbValue(item.getColor().getColor());
         redSeekBar.setProgress(rgbValue.get(0));
         greenSeekBar.setProgress(rgbValue.get(1));
         blueSeekBar.setProgress(rgbValue.get(2));
@@ -56,7 +56,7 @@ public class ColorListAdapter extends ArrayAdapter<ColorManagerItem> {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 colorView.setBackgroundColor(Color.argb(255, progress, greenSeekBar.getProgress(), blueSeekBar.getProgress()));
-                item.setColor(purseToHexRgbValue(progress, greenSeekBar.getProgress(), blueSeekBar.getProgress()));
+                item.setColorValue(purseToHexRgbValue(progress, greenSeekBar.getProgress(), blueSeekBar.getProgress()));
             }
 
             @Override
@@ -73,7 +73,7 @@ public class ColorListAdapter extends ArrayAdapter<ColorManagerItem> {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 colorView.setBackgroundColor(Color.argb(255, redSeekBar.getProgress(), progress, blueSeekBar.getProgress()));
-                item.setColor(purseToHexRgbValue(redSeekBar.getProgress(), progress, blueSeekBar.getProgress()));
+                item.setColorValue(purseToHexRgbValue(redSeekBar.getProgress(), progress, blueSeekBar.getProgress()));
             }
 
             @Override
@@ -91,7 +91,7 @@ public class ColorListAdapter extends ArrayAdapter<ColorManagerItem> {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 colorView.setBackgroundColor(Color.argb(255, redSeekBar.getProgress(), greenSeekBar.getProgress(), progress));
-                item.setColor(purseToHexRgbValue(redSeekBar.getProgress(), greenSeekBar.getProgress(), progress));
+                item.setColorValue(purseToHexRgbValue(redSeekBar.getProgress(), greenSeekBar.getProgress(), progress));
             }
 
             @Override
@@ -128,7 +128,7 @@ public class ColorListAdapter extends ArrayAdapter<ColorManagerItem> {
         return hexRgbValue;
     }
 
-    private List<Integer> purseToDecRgbVakue(String hexRgbValue) {
+    private List<Integer> purseToDecRgbValue(String hexRgbValue) {
         List<Integer> rgbValue = new ArrayList<>();
         rgbValue.add(Integer.parseInt(hexRgbValue.substring(1, 3), 16));
         rgbValue.add(Integer.parseInt(hexRgbValue.substring(3, 5), 16));

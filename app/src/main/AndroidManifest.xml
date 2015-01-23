@@ -4,6 +4,7 @@
     package="com.serori.numeri">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -44,11 +45,15 @@
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize"
             android:label="ツイート">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
 
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="android.intent.action.VIEW" />
+                <data android:mimeType="image/*" />
             </intent-filter>
+
         </activity>
 
         <activity
@@ -86,6 +91,16 @@
             android:name="com.serori.numeri.media.MediaActivity"
             android:configChanges="orientation|screenSize"
             android:label="画像">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.serori.numeri.config.ConfigActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="設定">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

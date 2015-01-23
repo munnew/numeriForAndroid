@@ -8,7 +8,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.serori.numeri.application.Application;
 
 /**
- * Created by seroriKETC on 2014/12/19.
+ * DataBaseHelper
  */
 public class DataBaseHelper extends OrmLiteSqliteOpenHelper {
 

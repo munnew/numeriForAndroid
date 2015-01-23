@@ -61,8 +61,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="left"
-                        android:singleLine="true"
-                        android:textColor="#565655" />
+                        android:singleLine="true" />
 
 
                     <TextView
@@ -74,7 +73,6 @@
                         android:layout_weight="1"
                         android:gravity="right"
                         android:singleLine="true"
-                        android:textColor="#565876"
                         android:textSize="8dp" />
 
 
@@ -87,8 +85,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="left"
                     android:singleLine="true"
-                    android:text="hoge"
-                    android:textColor="#565655" />
+                    android:text="hoge" />
 
 
             </LinearLayout>
@@ -106,8 +103,7 @@
             <TextView
                 android:id="@+id/timeLine_maintext"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#555555" />
+                android:layout_height="wrap_content"/>
 
 
             <TextView
@@ -115,7 +111,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
-                android:textColor="#565876"
                 android:textSize="7dp" />
 
         </LinearLayout>

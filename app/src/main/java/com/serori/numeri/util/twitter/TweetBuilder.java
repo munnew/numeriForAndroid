@@ -19,21 +19,20 @@ import twitter4j.UploadedMedia;
 public class TweetBuilder {
     private NumeriUser numeriUser;
     private List<File> images = new ArrayList<>();
-    private boolean isReply = false;
     private long statusId = -1;
     private String text;
 
-    public TweetBuilder setNumeriUser(NumeriUser numeriUser) {
+    public TweetBuilder(NumeriUser numeriUser) {
         this.numeriUser = numeriUser;
-        return this;
     }
+
 
     public TweetBuilder setText(String text) {
         this.text = text;
         return this;
     }
 
-    public TweetBuilder setImages(List<File> images) {
+    public TweetBuilder addImages(List<File> images) {
         this.images.addAll(images);
         return this;
     }
@@ -53,20 +52,21 @@ public class TweetBuilder {
 
         if (statusId != -1)
             statusUpdate.setInReplyToStatusId(statusId);
-
-        if (!images.isEmpty()) {
-            long[] medias = new long[images.size()];
-            for (int i = 0; i < images.size(); i++) {
-                try {
-                    UploadedMedia uploadedMedia = numeriUser.getTwitter().uploadMedia(images.get(i));
-                    medias[i] = uploadedMedia.getMediaId();
-                } catch (TwitterException e) {
-                    e.printStackTrace();
+        AsyncTask.execute(() -> {
+            if (!images.isEmpty()) {
+                Application.getInstance().onToast("画像をアップロードします", Toast.LENGTH_SHORT);
+                long[] medias = new long[images.size()];
+                for (int i = 0; i < images.size(); i++) {
+                    try {
+                        UploadedMedia uploadedMedia = numeriUser.getTwitter().uploadMedia(images.get(i));
+                        medias[i] = uploadedMedia.getMediaId();
+                    } catch (TwitterException e) {
+                        e.printStackTrace();
+                    }
                 }
+                statusUpdate.setMediaIds(medias);
             }
-            statusUpdate.setMediaIds(medias);
-        }
-        AsyncTask.execute(()->{
+
             try {
                 twitter.updateStatus(statusUpdate);
                 Application.getInstance().onToast("ツイートに成功しました", Toast.LENGTH_SHORT);
