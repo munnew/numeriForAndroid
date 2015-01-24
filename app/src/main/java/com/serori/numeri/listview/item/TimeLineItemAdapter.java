@@ -18,10 +18,21 @@ import java.util.List;
 
 public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
     private LayoutInflater layoutInflater;
+    private Context context;
+    private int resource;
+    private List<TimeLineItem> objects;
+    private View currentVeiw;
 
     public TimeLineItemAdapter(Context context, int resource, List<TimeLineItem> objects) {
         super(context, resource, objects);
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.context = context;
+        this.resource = resource;
+        this.objects = objects;
+    }
+
+    public TimeLineItemAdapter clone() {
+        return new TimeLineItemAdapter(context, resource, objects);
     }
 
     @Override
@@ -83,4 +94,11 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         return convertView;
     }
 
+    public View getCurrentVeiw() {
+        return currentVeiw;
+    }
+
+    public void setCurrentVeiw(View currentVeiw) {
+        this.currentVeiw = currentVeiw;
+    }
 }

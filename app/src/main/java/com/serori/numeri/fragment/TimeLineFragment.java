@@ -48,7 +48,6 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
         setRetainInstance(true);
         context = rootView.getContext();
         timeLineListView = (NumeriListView) rootView.findViewById(R.id.timeLineListView);
-        timeLineListView.onTouchItemEnabled(numeriUser,context);
         timeLineListView.setAttachedBottomListener(this);
         if (savedInstanceState == null) {
             timeLineItems = new ArrayList<>();
@@ -60,6 +59,7 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
             timeLineListView.onAttachedBottomCallbackEnabled(true);
             Log.v("restoredinfo:", fragmentName + numeriUser.getAccessToken().getUserId());
         }
+        timeLineListView.onTouchItemEnabled(numeriUser, context);
         return rootView;
     }
 

@@ -46,7 +46,6 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
         setRetainInstance(true);
         context = rootView.getContext();
         mentionsListView = (NumeriListView) rootView.findViewById(R.id.timeLineListView);
-        mentionsListView.onTouchItemEnabled(numeriUser, context);
         mentionsListView.setAttachedBottomListener(this);
         if (savedInstanceState == null) {
             timeLineItems = new ArrayList<>();
@@ -57,7 +56,7 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
             mentionsListView.setAdapter(adapter);
             mentionsListView.onAttachedBottomCallbackEnabled(true);
         }
-
+        mentionsListView.onTouchItemEnabled(numeriUser, context);
         return rootView;
     }
 

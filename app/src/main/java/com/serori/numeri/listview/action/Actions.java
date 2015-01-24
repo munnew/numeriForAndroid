@@ -13,11 +13,11 @@ import android.widget.Toast;
 import com.serori.numeri.R;
 import com.serori.numeri.application.Application;
 import com.serori.numeri.listview.item.TimeLineItem;
+import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.media.MediaActivity;
 import com.serori.numeri.twitter.ConversationActivity;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +29,14 @@ import twitter4j.TwitterException;
  */
 public class Actions {
 
+    private Context context;
+    private NumeriUser numeriUser;
+    private TimeLineItemAdapter adapter;
 
-    private Actions() {
-    }
-
-    public static Actions getInstance() {
-        return ActionsHolder.instance;
+    public Actions(Context context, NumeriUser numeriUser, TimeLineItemAdapter adapter) {
+        this.context = context;
+        this.numeriUser = numeriUser;
+        this.adapter = adapter;
     }
 
     public static final int REPLY = 0;
@@ -45,22 +47,22 @@ public class Actions {
     public static final int OPEN_URI = 6;
     public static final int SHOW_MEDIA = 7;
 
-    public void onTouchAction(Context context, int action, TimeLineItem item, NumeriUser numeriUser, View view) {
+    public void onTouchAction(int action, int position) {
         switch (action) {
             case REPLY:
-                reply(context, numeriUser, item);
+                reply(position);
                 break;
             case FAVORITE:
-                favorite(context, item, numeriUser, view);
+                favorite(position);
                 break;
             case RT:
-                retweet(context, item, numeriUser);
+                retweet(position);
                 break;
             case SHOW_CONVERSATION:
-                showConversation(context, item, numeriUser);
+                showConversation(position);
                 break;
             case MENU:
-                showMenu(context, item, numeriUser, view);
+                showMenu(position);
                 break;
             default:
                 break;
@@ -68,8 +70,9 @@ public class Actions {
 
     }
 
-    private void retweet(Context context, TimeLineItem item, NumeriUser numeriUser) {
+    private void retweet(int position) {
         if (!((Activity) context).isFinishing()) {
+            TimeLineItem item = adapter.getItem(position);
             new AlertDialog.Builder(context).setMessage("このツイートをRTしますか？")
                     .setNegativeButton("いいえ", (dialog, id) -> {
                     })
@@ -90,7 +93,9 @@ public class Actions {
         }
     }
 
-    private void favorite(Context context, TimeLineItem item, NumeriUser numeriUser, View view) {
+    private void favorite(int position) {
+        TimeLineItem item = adapter.getItem(position);
+        View view = adapter.getView(position, adapter.getCurrentVeiw(), null);
         ImageView favoriteStar = (ImageView) view.findViewById(R.id.favoriteStar);
         if (!item.isFavorite()) {
             AsyncTask.execute(() -> {
@@ -117,15 +122,17 @@ public class Actions {
         }
     }
 
-    private void reply(Context context, NumeriUser user, TimeLineItem item) {
+    private void reply(int position) {
+        TimeLineItem item = adapter.getItem(position);
         item.getStatusId();
         TweetActivity.setDestination(item.getStatusId(), item.getDestinationUserNames());
-        TweetActivity.setTweetNunmeriUser(user);
+        TweetActivity.setTweetNunmeriUser(numeriUser);
         Intent intent = new Intent(context, TweetActivity.class);
         context.startActivity(intent);
     }
 
-    private void showConversation(Context context, TimeLineItem item, NumeriUser numeriUser) {
+    private void showConversation(int position) {
+        TimeLineItem item = adapter.getItem(position);
         if (item.getConversationId() != -1) {
             ConversationActivity.setNumeriUser(numeriUser);
             ConversationActivity.setConversationStatusId(item.getStatusId());
@@ -135,7 +142,8 @@ public class Actions {
     }
 
 
-    private void showMenu(Context context, TimeLineItem item, NumeriUser numeriUser, View view) {
+    private void showMenu(int position) {
+        TimeLineItem item = adapter.getItem(position);
         List<MenuItem> menuItems = new ArrayList<>();
         menuItems.add(new MenuItem(REPLY, "リプライ"));
 
@@ -162,22 +170,22 @@ public class Actions {
                 .setItems(menuItemText.toArray(new CharSequence[menuItemText.size()]), (dialog, which) -> {
                     switch (menuItems.get(which).getAction()) {
                         case REPLY:
-                            reply(context, numeriUser, item);
+                            reply(position);
                             break;
                         case FAVORITE:
-                            favorite(context, item, numeriUser, view);
+                            favorite(position);
                             break;
                         case RT:
-                            retweet(context, item, numeriUser);
+                            retweet(position);
                             break;
                         case SHOW_CONVERSATION:
-                            showConversation(context, item, numeriUser);
+                            showConversation(position);
                             break;
                         case OPEN_URI:
-                            opneUri(context, menuItems.get(which).text.toString());
+                            opneUri(menuItems.get(which).text.toString());
                             break;
                         case SHOW_MEDIA:
-                            showMedia(context, item.getMediaUris());
+                            showMedia(item.getMediaUris());
                             break;
                         default:
                             break;
@@ -185,12 +193,12 @@ public class Actions {
                 }).create().show();
     }
 
-    private void opneUri(Context context, String uri) {
+    private void opneUri(String uri) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
         context.startActivity(intent);
     }
 
-    private void showMedia(Context context, List<String> uris) {
+    private void showMedia(List<String> uris) {
         MediaActivity.setMediaUris(uris);
         Intent intent = new Intent(context, MediaActivity.class);
         context.startActivity(intent);
@@ -214,7 +222,5 @@ public class Actions {
         }
     }
 
-    private static class ActionsHolder {
-        private static final Actions instance = new Actions();
-    }
+
 }

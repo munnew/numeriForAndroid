@@ -1,6 +1,7 @@
 package com.serori.numeri.config;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,7 +17,7 @@ import com.serori.numeri.main.MainActivity;
  * config
  */
 public class ConfigActivity extends ActionBarActivity {
-    private Button chooseThemaButton;
+    private Dialog currentShowDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,16 +32,16 @@ public class ConfigActivity extends ActionBarActivity {
     }
 
     private void init() {
-        chooseThemaButton = (Button) findViewById(R.id.chooseThemeButton);
+        Button chooseThemeButton = (Button) findViewById(R.id.chooseThemeButton);
 
-        chooseThemaButton.setOnClickListener(v -> chooseThema());
+        chooseThemeButton.setOnClickListener(v -> chooseThema());
     }
 
     private void chooseThema() {
         CharSequence[] themes = {"ライトテーマ", "ダークテーマ"};
         boolean theme = ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled();
         int checkedItem = theme ? 1 : 0;
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
+        currentShowDialog = new AlertDialog.Builder(this)
                 .setSingleChoiceItems(themes, checkedItem, (dialog, witch) -> {
                     switch (witch) {
                         case 0:
@@ -55,10 +56,28 @@ public class ConfigActivity extends ActionBarActivity {
                     ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.DARK_THEME);
                     Application.getInstance().destroyMainActivity();
                     ((AlertDialog) dialog).hide();
+                    currentShowDialog.dismiss();
+                    currentShowDialog = null;
+                    dialog.dismiss();
                 })
                 .create();
-        alertDialog.show();
+        currentShowDialog.show();
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (currentShowDialog != null && currentShowDialog.isShowing()) {
+            currentShowDialog.hide();
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (currentShowDialog != null) {
+            currentShowDialog.show();
+        }
     }
 
     @Override
