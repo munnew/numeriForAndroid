@@ -16,16 +16,14 @@ import twitter4j.UserStreamListener;
  * Streamについてのクラス.
  */
 
-public class StreamEvent implements UserStreamListener, IStreamEvent, StreamOwner {
-
-    public StreamEvent() {
-    }
+public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwitcher {
 
     private TwitterStream userStream;
     private List<OnStatusListener> onStatusListeners = new ArrayList<>();
     private List<OnFavoriteListener> onFavoriteListeners = new ArrayList<>();
 
-    public void setUserStream(TwitterStream stream) {
+
+    public StreamEvent(TwitterStream stream) {
         stream.addListener(this);
         userStream = stream;
     }
@@ -41,13 +39,15 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamOwne
 
 
     @Override
-    public void addOwnerOnStatusListener(OnStatusListener listener) {
+    public IStreamEvent addOwnerOnStatusListener(OnStatusListener listener) {
         onStatusListeners.add(listener);
+        return this;
     }
 
     @Override
-    public void addOwnerOnfavoriteListener(OnFavoriteListener listener) {
+    public IStreamEvent addOwnerOnfavoriteListener(OnFavoriteListener listener) {
         onFavoriteListeners.add(listener);
+        return this;
     }
 
 

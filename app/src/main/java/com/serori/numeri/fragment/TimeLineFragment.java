@@ -1,7 +1,6 @@
 package com.serori.numeri.fragment;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,14 +8,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.serori.numeri.R;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.listview.NumeriListView;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.stream.OnStatusListener;
+import com.serori.numeri.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
@@ -39,14 +38,12 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
     private List<TimeLineItem> timeLineItems;
     private TimeLineItemAdapter adapter;
     private NumeriUser numeriUser;
-    private Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
         setRetainInstance(true);
-        context = rootView.getContext();
         timeLineListView = (NumeriListView) rootView.findViewById(R.id.timeLineListView);
         timeLineListView.setAttachedBottomListener(this);
         if (savedInstanceState == null) {
@@ -59,7 +56,8 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
             timeLineListView.onAttachedBottomCallbackEnabled(true);
             Log.v("restoredinfo:", fragmentName + numeriUser.getAccessToken().getUserId());
         }
-        timeLineListView.onTouchItemEnabled(numeriUser, context);
+
+        timeLineListView.onTouchItemEnabled(numeriUser, getActivity());
         return rootView;
     }
 
@@ -105,7 +103,7 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
         try {
             return twitter.getHomeTimeline();
         } catch (TwitterException e) {
-            Application.getInstance().onToast("ツイートを読み込めませんでした。ストリームを開始します", Toast.LENGTH_SHORT);
+            ToastSender.getInstance().sendToast("ツイートを読み込めませんでした。ストリームを開始します");
             numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
             timeLineListView.onAttachedBottomCallbackEnabled(true);
             e.printStackTrace();
@@ -122,7 +120,7 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
             responceStatuses.remove(0);
             return responceStatuses;
         } catch (TwitterException e) {
-            Application.getInstance().onToast("ネットワークを確認して下さい", Toast.LENGTH_SHORT);
+            ToastSender.getInstance().sendToast("ネットワークを確認して下さい");
             e.printStackTrace();
         }
         return null;
@@ -131,8 +129,8 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
     @Override
     public void AttachedBottom(TimeLineItem item) {
         Log.v("TL", "onAttach");
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("ツイートを更に読み込みますか？")
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                .setMessage("ツイートを更に読み込みますか？")
                 .setNegativeButton("いいえ", (dialog, id) -> {
                 })
                 .setPositiveButton("はい", (daialog, id) -> {
@@ -149,6 +147,7 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
                         timeLineListView.onAttachedBottomCallbackEnabled(true);
                     });
                 })
-                .create().show();
+                .create();
+        ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
     }
 }

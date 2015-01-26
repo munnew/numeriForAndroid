@@ -1,7 +1,6 @@
 package com.serori.numeri.media;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10,11 +9,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.serori.numeri.R;
-import com.serori.numeri.application.Application;
 import com.serori.numeri.imageview.NumeriImageView;
+import com.serori.numeri.toast.ToastSender;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,7 +54,7 @@ public class MediaFragment extends Fragment {
                                     image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                                     outputStream.flush();
                                     outputStream.close();
-                                    Application.getInstance().onToast(fileName + "を保存しました", Toast.LENGTH_SHORT);
+                                    ToastSender.getInstance().sendToast(fileName + "を保存しました");
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();

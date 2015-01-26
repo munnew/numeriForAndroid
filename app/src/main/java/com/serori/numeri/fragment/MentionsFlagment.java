@@ -9,14 +9,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.serori.numeri.R;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.listview.NumeriListView;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.stream.OnStatusListener;
+import com.serori.numeri.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
             mentionsListView.setAdapter(adapter);
             mentionsListView.onAttachedBottomCallbackEnabled(true);
         }
-        mentionsListView.onTouchItemEnabled(numeriUser, context);
+        mentionsListView.onTouchItemEnabled(numeriUser, getActivity());
         return rootView;
     }
 
@@ -98,7 +98,7 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
         try {
             return twitter.getMentionsTimeline();
         } catch (TwitterException e) {
-            Application.getInstance().onToast("ツイートを読み込めませんでした。ストリームを開始します", Toast.LENGTH_SHORT);
+            ToastSender.getInstance().sendToast("ツイートを読み込めませんでした。ストリームを開始します");
             numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
             mentionsListView.onAttachedBottomCallbackEnabled(true);
             e.printStackTrace();
@@ -125,7 +125,7 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
             responceStatuses.remove(0);
             return responceStatuses;
         } catch (TwitterException e) {
-            Application.getInstance().onToast("ネットワークを確認して下さい", Toast.LENGTH_SHORT);
+            ToastSender.getInstance().sendToast("ネットワークを確認して下さい");
             e.printStackTrace();
         }
         return null;
@@ -133,8 +133,8 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
 
     @Override
     public void AttachedBottom(TimeLineItem item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("ツイートを更に読み込みますか？")
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                .setMessage("ツイートを更に読み込みますか？")
                 .setNegativeButton("いいえ", (dailog, id) -> {
                 })
                 .setPositiveButton("はい", (dialog, id) -> {
@@ -151,6 +151,7 @@ public class MentionsFlagment extends Fragment implements NumeriFragment, OnStat
                         mentionsListView.onAttachedBottomCallbackEnabled(true);
                     });
                 })
-                .create().show();
+                .create();
+        ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
     }
 }

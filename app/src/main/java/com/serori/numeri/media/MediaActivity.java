@@ -4,11 +4,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 
 import com.serori.numeri.R;
-import com.serori.numeri.config.ConfigurationStorager;
+import com.serori.numeri.activity.NumeriActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,15 +15,12 @@ import java.util.List;
 /**
  * MesdiaActivity
  */
-public class MediaActivity extends ActionBarActivity {
+public class MediaActivity extends NumeriActivity {
     private static List<String> mediaUris = new ArrayList<>();
     private static List<MediaFragment> mediaFragments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
-            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media);
         MediaPagerAdapter mediaPagerAdapter = new MediaPagerAdapter(getSupportFragmentManager());
@@ -48,7 +44,7 @@ public class MediaActivity extends ActionBarActivity {
 
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         for (int i = 0; i < mediaFragments.size(); i++) {
             if (mediaFragments.get(i).isAdded()) {

@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
-import com.serori.numeri.application.Application;
 
 /**
  * DataBaseHelper
@@ -13,9 +12,12 @@ import com.serori.numeri.application.Application;
 public class DataBaseHelper extends OrmLiteSqliteOpenHelper {
 
     private static final int DB_VERSION = 1;
+    private static final String DB_NAME = "numeri.db";
+
     public DataBaseHelper(Context context) {
-        super(context, Application.getInstance().getDbName(), null,DB_VERSION);
+        super(context, DB_NAME, null, DB_VERSION);
     }
+
     @Override
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
 

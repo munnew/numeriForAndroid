@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -19,11 +18,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.serori.numeri.R;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.application.Application;
 import com.serori.numeri.config.ConfigurationStorager;
+import com.serori.numeri.main.MainActivity;
+import com.serori.numeri.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TweetBuilder;
 
@@ -37,7 +38,7 @@ import java.util.List;
 /**
  * TweetActivity
  */
-public class TweetActivity extends ActionBarActivity implements TextWatcher {
+public class TweetActivity extends NumeriActivity implements TextWatcher {
     private EditText tweetEditText;
     private TextView remainingTextView;
     private Button tweetButton;
@@ -53,9 +54,6 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
-            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tweet);
         if (savedInstanceState == null) {
@@ -73,6 +71,9 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher {
             currentUserTextView.setText(currentTweetUserName);
             inputMethodManager = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
 
+            if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+
+            }
             for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
                 numeriUser.getStreamEvent().addOwnerOnStatusListener(status -> {
                     String owner = status.getUser().getScreenName();
@@ -136,22 +137,32 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher {
     }
 
     private void sendTweet(NumeriUser numeriUser) {
-        TweetBuilder tweetBuilder = numeriUser.getTweetBuilder();
-        tweetBuilder.setText(tweetEditText.getText().toString());
+        if (tweetEditText.getText().toString().equals("/add menu_button")) {
+            ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON.setEnabled(true);
+            ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON);
+            ((MainActivity) Application.getInstance().getMainActivityContext()).addMenuButton();
+        } else if (tweetEditText.getText().toString().equals("/remove menu_button")) {
+            ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON.setEnabled(false);
+            ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON);
+            ((MainActivity) Application.getInstance().getMainActivityContext()).removeMenuButton();
+        } else {
+            TweetBuilder tweetBuilder = numeriUser.getTweetBuilder();
+            tweetBuilder.setText(tweetEditText.getText().toString());
 
-        if (isReply) {
-            tweetBuilder.setReplyDestinationId(destinationStatusId);
-            isReply = false;
+            if (isReply) {
+                tweetBuilder.setReplyDestinationId(destinationStatusId);
+                isReply = false;
+            }
+
+            if (!appendedImages.isEmpty()) {
+                tweetBuilder.addImages(appendedImages);
+            }
+
+            tweetBuilder.tweet();
+            tweetEditText.setText("");
+            currentNumeriUser = null;
         }
-
-        if (!appendedImages.isEmpty()) {
-            tweetBuilder.addImages(appendedImages);
-        }
-
-        tweetBuilder.tweet();
-        tweetEditText.setText("");
         inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
-        currentNumeriUser = null;
         finish();
     }
 
@@ -165,7 +176,7 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher {
             intent.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(intent, GALLERY);
         } else {
-            Application.getInstance().onToast("4つ以上は添付できません", Toast.LENGTH_SHORT);
+            ToastSender.getInstance().sendToast("4つ以上は添付できません");
         }
     }
 
@@ -276,5 +287,4 @@ public class TweetActivity extends ActionBarActivity implements TextWatcher {
             currentUserTextView.setText(numeriUsersName.get(which));
         }).create().show();
     }
-
 }

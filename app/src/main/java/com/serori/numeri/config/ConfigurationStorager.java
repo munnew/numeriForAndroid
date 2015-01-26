@@ -105,7 +105,8 @@ public class ConfigurationStorager {
      * Created by serioriKETC on 2015/01/22.
      */
     public static enum EitherConfigurations implements EitherConfiguration {
-        DARK_THEME("DARK_THEME");
+        DARK_THEME("DARK_THEME"),
+        ADD_MENUBUTTON("ADD_MENUBUTTON");
 
 
         private String id;

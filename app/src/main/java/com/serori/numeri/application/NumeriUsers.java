@@ -30,7 +30,7 @@ public class NumeriUsers {
 
     public void clear() {
         for (NumeriUser numeriUser : numeriUsers) {
-            numeriUser.getStreamSwicher().closeStream();
+            numeriUser.getStreamSwitcher().closeStream();
         }
         numeriUsers.clear();
     }

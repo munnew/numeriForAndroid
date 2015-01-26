@@ -2,11 +2,11 @@ package com.serori.numeri.user;
 
 import android.util.Log;
 
-import com.serori.numeri.application.Application;
 import com.serori.numeri.R;
+import com.serori.numeri.application.Application;
 import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;
-import com.serori.numeri.stream.StreamOwner;
+import com.serori.numeri.stream.StreamSwitcher;
 import com.serori.numeri.util.twitter.TweetBuilder;
 
 import twitter4j.Twitter;
@@ -23,7 +23,7 @@ import twitter4j.conf.ConfigurationBuilder;
 public class NumeriUser {
     private AccessToken token;
     private Twitter twitter;
-    private StreamEvent streamEvent = new StreamEvent();
+    private StreamEvent streamEvent;
     private String screenName = "user";
 
 
@@ -51,7 +51,7 @@ public class NumeriUser {
         twitterStream.setOAuthConsumer(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key),
                 Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
         twitterStream.setOAuthAccessToken(token);
-        streamEvent.setUserStream(twitterStream);
+        streamEvent = new StreamEvent(twitterStream);
     }
 
     public Twitter getTwitter() {
@@ -63,11 +63,11 @@ public class NumeriUser {
     }
 
 
-    public StreamOwner getStreamEvent() {
+    public IStreamEvent getStreamEvent() {
         return streamEvent;
     }
 
-    public IStreamEvent getStreamSwicher() {
+    public StreamSwitcher getStreamSwitcher() {
         return streamEvent;
     }
 

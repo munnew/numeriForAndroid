@@ -2,28 +2,24 @@ package com.serori.numeri.config;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.widget.Button;
 
 import com.serori.numeri.R;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.application.Application;
 import com.serori.numeri.main.MainActivity;
 
 /**
  * config
  */
-public class ConfigActivity extends ActionBarActivity {
+public class ConfigActivity extends NumeriActivity {
     private Dialog currentShowDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
-            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
         if (savedInstanceState == null) {
@@ -84,7 +80,7 @@ public class ConfigActivity extends ActionBarActivity {
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (Application.getInstance().isDestroyMainActivity()) {
-                startMainActivity(true);
+                startActivity(MainActivity.class, true);
             } else {
                 finish();
             }
@@ -93,12 +89,5 @@ public class ConfigActivity extends ActionBarActivity {
         return false;
     }
 
-    private void startMainActivity(boolean isFinish) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        if (isFinish) {
-            finish();
-        }
-    }
 
 }

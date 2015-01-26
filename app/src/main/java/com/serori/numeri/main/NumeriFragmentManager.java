@@ -1,4 +1,4 @@
-package com.serori.numeri.application;
+package com.serori.numeri.main;
 
 import com.serori.numeri.fragment.NumeriFragment;
 

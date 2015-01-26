@@ -4,18 +4,18 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.serori.numeri.R;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.application.Application;
-import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.main.MainActivity;
+import com.serori.numeri.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
 
@@ -34,15 +34,12 @@ import twitter4j.conf.ConfigurationContext;
 /**
  * 認証用の画面
  */
-public class OAuthActivity extends ActionBarActivity implements OnUserDeleteListener {
+public class OAuthActivity extends NumeriActivity implements OnUserDeleteListener {
     private List<NumeriUserListItem> userListItems = new ArrayList<>();
     private UserListItemAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
-            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth);
         if (savedInstanceState == null) {
@@ -54,7 +51,8 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
             Log.v("Oauth", "create");
         }
         UserDeleteObserver.getInstance().setOnUserDeleteListener(this);
-
+        Button addUserButton = (Button) findViewById(R.id.addUser);
+        addUserButton.setOnClickListener(v -> oauthStart());
     }
 
     @Override
@@ -101,7 +99,7 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(intent);
                 } else {
-                    toast("失敗しました");
+                    ToastSender.getInstance().sendToast("失敗しました");
                 }
             }
         };
@@ -111,7 +109,7 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
     @Override
     public void onNewIntent(Intent intent) {
         if (intent.getData().getQueryParameter("oauth_verifier") == null || intent.getData() == null || !intent.getData().toString().startsWith(getString(R.string.twitter_callback_url))) {
-            toast("認証がキャンセルされました");
+            ToastSender.getInstance().sendToast("認証がキャンセルされました");
             return;
         }
 
@@ -135,7 +133,7 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
             @Override
             protected void onPostExecute(AccessToken token) {
                 if (resultToken != null) {
-                    toast(token.getScreenName() + "認証");
+                    ToastSender.getInstance().sendToast(token.getScreenName() + "認証");
                     NumeriUserStorager.NumeriUserTable userTable = new NumeriUserStorager.NumeriUserTable();
                     userTable.setAccessToken(token.getToken());
                     userTable.setAccessTokenSecret(token.getTokenSecret());
@@ -144,18 +142,15 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
                     if (!Application.getInstance().isDestroyMainActivity()) {
                         Application.getInstance().destroyMainActivity();
                     }
-                    startMainActivity(true);
+                    startActivity(MainActivity.class, true);
                 } else {
-                    toast("認証失敗");
+                    ToastSender.getInstance().sendToast("認証失敗");
                 }
             }
         };
         task.execute(oauthVerifier);
     }
 
-    private void toast(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
-    }
 
     private void addItem(AccessToken token) {
         AsyncTask.execute(() -> {
@@ -191,19 +186,11 @@ public class OAuthActivity extends ActionBarActivity implements OnUserDeleteList
         });
     }
 
-    private void startMainActivity(boolean isFinish) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        if (isFinish) {
-            finish();
-        }
-    }
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (Application.getInstance().isDestroyMainActivity()) {
-                startMainActivity(true);
+                startActivity(MainActivity.class, true);
             } else {
                 finish();
             }

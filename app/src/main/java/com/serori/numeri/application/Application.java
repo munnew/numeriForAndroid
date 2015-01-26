@@ -6,7 +6,6 @@ import android.graphics.Point;
 import android.view.WindowManager;
 
 import com.serori.numeri.main.MainActivity;
-import com.serori.numeri.main.OnToast;
 
 /**
  * Application
@@ -21,8 +20,7 @@ public class Application extends android.app.Application {
 
     private Context applicationContext;
     private Context mainActivityContext;
-    private OnToast onToastListener;
-    private static final String DB_NAME = "numeri.db";
+
 
     public Context getApplicationContext() {
         return applicationContext;
@@ -57,29 +55,16 @@ public class Application extends android.app.Application {
         }
     }
 
+    public void runOnUiThread(Runnable runnable) {
+        ((Activity) mainActivityContext).runOnUiThread(runnable);
+    }
+
     public boolean isDestroyMainActivity() {
         return ((Activity) mainActivityContext).isFinishing();
     }
 
     public NumeriUsers getNumeriUsers() {
         return NumeriUsers.getInstance();
-    }
-
-    public NumeriFragmentManager getNumeriFragmentManager() {
-        return NumeriFragmentManager.getInstance();
-
-    }
-
-    public void setOnToastListener(OnToast listener) {
-        onToastListener = listener;
-    }
-
-    public void onToast(String text, int length) {
-        onToastListener.onToast(text, length);
-    }
-
-    public String getDbName() {
-        return DB_NAME;
     }
 
     public Point getWindowSize() {

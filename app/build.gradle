@@ -4,7 +4,7 @@ buildscript {
     }
     dependencies {
 
-        classpath 'me.tatarka:gradle-retrolambda:2.3.1'
+        classpath 'me.tatarka:gradle-retrolambda:+'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -74,4 +74,8 @@ retrolambda {
     javaVersion JavaVersion.VERSION_1_7
     // jvmArgs '-arg1', '-arg2'
     incremental false
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }

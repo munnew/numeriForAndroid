@@ -34,6 +34,32 @@
         android:paddingRight="0dp"
         android:paddingTop="0dp">
 
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="37dp"
+            android:layout_weight="1"
+            android:gravity="left|bottom"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/menuButton"
+                android:layout_width="40dp"
+                android:layout_height="37dp"
+                android:gravity="center|bottom"
+                android:visibility="visible"
+                android:background="#00FFFFFF">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:clickable="true"
+                    android:scaleType="fitCenter"
+                    android:background="#00FFFFFF"
+                    android:src="@drawable/button_menu" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/goTweetButton"
@@ -41,8 +67,9 @@
             android:layout_height="37dp"
             android:layout_gravity="right"
             android:clickable="true"
-            android:contentDescription="pen"
             android:background="#00FFFFFF"
+            android:layout_weight="0"
+            android:scaleType="centerCrop"
             android:src="@drawable/gotweet" />
     </LinearLayout>
 

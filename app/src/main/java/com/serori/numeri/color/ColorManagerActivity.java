@@ -1,17 +1,16 @@
 package com.serori.numeri.color;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.serori.numeri.R;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.application.Application;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.main.MainActivity;
+import com.serori.numeri.toast.ToastSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.List;
 /**
  * ColorManagerActivity
  */
-public class ColorManagerActivity extends ActionBarActivity {
+public class ColorManagerActivity extends NumeriActivity {
     private List<ColorManagerItem> colorManagerItems = new ArrayList<>();
     private ColorListAdapter adapter;
 
@@ -48,7 +47,7 @@ public class ColorManagerActivity extends ActionBarActivity {
                 ColorStorager.getInstance().saveColorData();
             }
             Application.getInstance().destroyMainActivity();
-            Application.getInstance().onToast("色設定を保存しました。", Toast.LENGTH_SHORT);
+            ToastSender.getInstance().sendToast("色設定を保存しました。");
         });
 
     }
@@ -57,7 +56,7 @@ public class ColorManagerActivity extends ActionBarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (Application.getInstance().isDestroyMainActivity()) {
-                startMainActivity(true);
+                startActivity(MainActivity.class, true);
             } else {
                 finish();
             }
@@ -66,11 +65,5 @@ public class ColorManagerActivity extends ActionBarActivity {
         return false;
     }
 
-    private void startMainActivity(boolean isFinish) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        if (isFinish) {
-            finish();
-        }
-    }
+
 }

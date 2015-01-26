@@ -8,13 +8,13 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.serori.numeri.R;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.media.MediaActivity;
+import com.serori.numeri.toast.ToastSender;
 import com.serori.numeri.twitter.ConversationActivity;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
@@ -73,7 +73,7 @@ public class Actions {
     private void retweet(int position) {
         if (!((Activity) context).isFinishing()) {
             TimeLineItem item = adapter.getItem(position);
-            new AlertDialog.Builder(context).setMessage("このツイートをRTしますか？")
+            AlertDialog alertDialog = new AlertDialog.Builder(context).setMessage("このツイートをRTしますか？")
                     .setNegativeButton("いいえ", (dialog, id) -> {
                     })
                     .setPositiveButton("はい", (dialog, id) -> {
@@ -82,14 +82,15 @@ public class Actions {
                                 try {
                                     numeriUser.getTwitter().retweetStatus(item.getStatusId());
                                     item.setRT(true);
-                                    Application.getInstance().onToast(item.getScreenName() + "さんのツイートをRTしました", Toast.LENGTH_SHORT);
+                                    ToastSender.getInstance().sendToast(item.getScreenName() + "さんのツイートをRTしました");
                                 } catch (TwitterException e) {
                                     e.printStackTrace();
                                 }
                             }
                         });
                     })
-                    .create().show();
+                    .create();
+            ((NumeriActivity) context).setCurrentShowDialog(alertDialog);
         }
     }
 
@@ -103,7 +104,7 @@ public class Actions {
                     numeriUser.getTwitter().createFavorite(item.getStatusId());
                     item.setFavorite(true);
                     ((Activity) context).runOnUiThread(() -> favoriteStar.setImageDrawable(context.getResources().getDrawable(R.drawable.favorite_star)));
-                    Application.getInstance().onToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。", Toast.LENGTH_SHORT);
+                    ToastSender.getInstance().sendToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -114,7 +115,7 @@ public class Actions {
                     numeriUser.getTwitter().destroyFavorite(item.getStatusId());
                     item.setFavorite(false);
                     ((Activity) context).runOnUiThread(() -> favoriteStar.setImageBitmap(null));
-                    Application.getInstance().onToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。", Toast.LENGTH_SHORT);
+                    ToastSender.getInstance().sendToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -165,7 +166,7 @@ public class Actions {
         for (MenuItem menuItem : menuItems) {
             menuItemText.add(menuItem.getText());
         }
-        new AlertDialog.Builder(context)
+        AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setTitle(item.getScreenName() + "\n" + item.getName())
                 .setItems(menuItemText.toArray(new CharSequence[menuItemText.size()]), (dialog, which) -> {
                     switch (menuItems.get(which).getAction()) {
@@ -190,7 +191,8 @@ public class Actions {
                         default:
                             break;
                     }
-                }).create().show();
+                }).create();
+        ((NumeriActivity) context).setCurrentShowDialog(alertDialog);
     }
 
     private void opneUri(String uri) {

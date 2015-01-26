@@ -1,19 +1,18 @@
 package com.serori.numeri.fragment.manager;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.serori.numeri.R;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.application.Application;
-import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;
 
@@ -23,7 +22,7 @@ import java.util.List;
 /**
  * Created by serioriKETC on 2014/12/27.
  */
-public class FragmentManagerActivity extends ActionBarActivity implements OnFragmentDataDeleteListener {
+public class FragmentManagerActivity extends NumeriActivity implements OnFragmentDataDeleteListener {
     private ListView fragmentsListView;
     private FragmentManagerItemAdapter adapter;
     private List<FragmentManagerItem> managerItems = new ArrayList<>();
@@ -31,16 +30,13 @@ public class FragmentManagerActivity extends ActionBarActivity implements OnFrag
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
-            setTheme(R.style.Base_ThemeOverlay_AppCompat_Dark_ActionBar);
-        }
         super.onCreate(savedInstanceState);
         Log.v("Fragment", "create");
         setContentView(R.layout.activity_fragment_manager);
         fragmentsListView = (ListView) findViewById(R.id.fragmentsList);
         adapter = new FragmentManagerItemAdapter(this, 0, managerItems);
         fragmentsListView.setAdapter(adapter);
-
+        Button addFragmentButton = (Button) findViewById(R.id.addFragment);
         FragmentDataDeleteObserver.getInstance().setOnFragmentDataDeleteListener(this);
         List<FragmentManagerItem> items = new ArrayList<>();
         FragmentStorager fragmentStorager = FragmentStorager.getInstance();
@@ -52,7 +48,7 @@ public class FragmentManagerActivity extends ActionBarActivity implements OnFrag
             items.add(item);
         }
         adapter.addAll(items);
-
+        addFragmentButton.setOnClickListener(v -> showAddFragmentDialog());
     }
 
     @Override
@@ -66,29 +62,34 @@ public class FragmentManagerActivity extends ActionBarActivity implements OnFrag
         int id = item.getItemId();
         switch (id) {
             case R.id.action_addfragment:
-                new AlertDialog.Builder(this)
-                        .setItems(fragmentAttribute, (dialog, which) -> {
-                            switch (which) {
-                                case 0:
-                                    createTimeLineFragmentsListDialog();
-                                    break;
-                                case 1:
-                                    createMentionsFragmentsListDialog();
-                                    break;
-                                case 2:
-                                    createListFragmentsListDialog();
-                                    break;
-                                case 3:
-                                    createDMFragmentsListDialog();
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }).create().show();
+
                 return true;
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showAddFragmentDialog() {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setItems(fragmentAttribute, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            createTimeLineFragmentsListDialog();
+                            break;
+                        case 1:
+                            createMentionsFragmentsListDialog();
+                            break;
+                        case 2:
+                            createListFragmentsListDialog();
+                            break;
+                        case 3:
+                            createDMFragmentsListDialog();
+                            break;
+                        default:
+                            break;
+                    }
+                }).create();
+        setCurrentShowDialog(alertDialog);
     }
 
     private void createTimeLineFragmentsListDialog() {
@@ -167,19 +168,11 @@ public class FragmentManagerActivity extends ActionBarActivity implements OnFrag
 
     }
 
-    private void startMainActivity(boolean isFinish) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        if (isFinish) {
-            finish();
-        }
-    }
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (Application.getInstance().isDestroyMainActivity()) {
-                startMainActivity(true);
+                startActivity(MainActivity.class, true);
             } else {
                 finish();
             }
