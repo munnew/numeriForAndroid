@@ -3,11 +3,12 @@ package com.serori.numeri.user;
 import android.util.Log;
 
 import com.serori.numeri.R;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;
 import com.serori.numeri.stream.StreamSwitcher;
 import com.serori.numeri.util.twitter.TweetBuilder;
+import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -43,7 +44,7 @@ public class NumeriUser {
         try {
             screenName = twitter.getScreenName();
         } catch (TwitterException e) {
-            e.printStackTrace();
+            TwitterExceptionDisplay.show(e);
             screenName = null;
         }
         Log.v("user", "getScreenName");

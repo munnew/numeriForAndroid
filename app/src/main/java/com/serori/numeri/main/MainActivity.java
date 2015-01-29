@@ -3,7 +3,6 @@ package com.serori.numeri.main;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -15,20 +14,18 @@ import android.widget.LinearLayout;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.application.Application;
 import com.serori.numeri.color.ColorManagerActivity;
 import com.serori.numeri.color.ColorStorager;
 import com.serori.numeri.config.ConfigActivity;
 import com.serori.numeri.config.ConfigurationStorager;
-import com.serori.numeri.fragment.MentionsFlagment;
 import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.fragment.SectionsPagerAdapter;
-import com.serori.numeri.fragment.TimeLineFragment;
 import com.serori.numeri.fragment.manager.FragmentManagerActivity;
 import com.serori.numeri.fragment.manager.FragmentStorager;
+import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.oauth.OAuthActivity;
 import com.serori.numeri.stream.OnFavoriteListener;
-import com.serori.numeri.toast.ToastSender;
+import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
@@ -51,6 +48,7 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
         Application.getInstance().setApplicationContext(getApplicationContext());
         Application.getInstance().setMainActivityContext(this);
         ConfigurationStorager.getInstance().loadConfigurations();
+        ActionStorager.getInstance().initializeActions();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON.isEnabled()) {
@@ -81,12 +79,12 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
                     }
                     init();
                 });
-
             }
+
         } else {
             Log.v("restoreLoad", "restore;fragmentsSize" + NumeriFragmentManager.getInstance().getNumeriFragments().size());
             for (NumeriFragment numeriFragment : NumeriFragmentManager.getInstance().getNumeriFragments()) {
-                sectionsPagerAdapter.add((Fragment) numeriFragment);
+                sectionsPagerAdapter.add(numeriFragment);
             }
             viewPager.setAdapter(sectionsPagerAdapter);
         }
@@ -146,44 +144,14 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
         return false;
     }
 
-
-    private NumeriFragment initNumeriFragment(NumeriUser numeriUser, NumeriFragment numeriFragment) {
-        String screenName;
-
-        screenName = numeriUser.getScreenName();
-        numeriFragment.setNumeriUser(numeriUser);
-        numeriFragment.setFragmentName(screenName);
-        return numeriFragment;
-    }
-
     private void init() {
-
         ColorStorager.getInstance().loadColor();
-
-        AsyncTask.execute(() -> {
-            List<NumeriUser> numeriUsers = new ArrayList<>();
-            numeriUsers.addAll(Application.getInstance().getNumeriUsers().getNumeriUsers());
-            for (FragmentStorager.FragmentsTable table : FragmentStorager.getInstance().getFragmentsData()) {
-                if (table.getFragmentType().equals(FragmentStorager.TL)) {
-                    for (NumeriUser numeriUser : numeriUsers) {
-                        if (numeriUser.getAccessToken().getToken().equals(table.getUserToken())) {
-                            numeriFragments.add(initNumeriFragment(numeriUser, new TimeLineFragment()));
-                        }
-                    }
-                } else if (table.getFragmentType().equals(FragmentStorager.MENTIONS)) {
-                    for (NumeriUser numeriUser : numeriUsers) {
-                        if (numeriUser.getAccessToken().getToken().equals(table.getUserToken())) {
-                            numeriFragments.add(initNumeriFragment(numeriUser, new MentionsFlagment()));
-                        }
-                    }
-                }
+        numeriFragments.addAll(FragmentStorager.getInstance().getFragments());
+        runOnUiThread(() -> {
+            for (NumeriFragment numeriFragment : numeriFragments) {
+                sectionsPagerAdapter.add(numeriFragment);
             }
-            runOnUiThread(() -> {
-                for (NumeriFragment numeriFragment : numeriFragments) {
-                    sectionsPagerAdapter.add((Fragment) numeriFragment);
-                }
-                viewPager.setAdapter(sectionsPagerAdapter);
-            });
+            viewPager.setAdapter(sectionsPagerAdapter);
         });
     }
 
@@ -191,7 +159,7 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
     public void onFavorite(User source, User target, Status favoritedStatus) {
         for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
             if (target.getId() == numeriUser.getAccessToken().getUserId()) {
-               ToastSender.getInstance().sendToast(source.getScreenName() + "さんに" + target.getScreenName() + "のツイートがお気に入り登録されました");
+                ToastSender.sendToast(source.getScreenName() + "さんに" + target.getScreenName() + "のツイートがお気に入り登録されました");
             }
         }
     }

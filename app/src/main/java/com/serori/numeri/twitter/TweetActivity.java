@@ -21,10 +21,10 @@ import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.main.MainActivity;
-import com.serori.numeri.toast.ToastSender;
+import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TweetBuilder;
 
@@ -176,7 +176,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             intent.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(intent, GALLERY);
         } else {
-            ToastSender.getInstance().sendToast("4つ以上は添付できません");
+            ToastSender.sendToast("4つ以上は添付できません");
         }
     }
 

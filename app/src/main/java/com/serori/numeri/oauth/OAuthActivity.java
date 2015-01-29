@@ -13,9 +13,9 @@ import android.widget.ListView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.main.MainActivity;
-import com.serori.numeri.toast.ToastSender;
+import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
 
@@ -99,7 +99,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(intent);
                 } else {
-                    ToastSender.getInstance().sendToast("失敗しました");
+                    ToastSender.sendToast("失敗しました");
                 }
             }
         };
@@ -109,7 +109,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
     @Override
     public void onNewIntent(Intent intent) {
         if (intent.getData().getQueryParameter("oauth_verifier") == null || intent.getData() == null || !intent.getData().toString().startsWith(getString(R.string.twitter_callback_url))) {
-            ToastSender.getInstance().sendToast("認証がキャンセルされました");
+            ToastSender.sendToast("認証がキャンセルされました");
             return;
         }
 
@@ -133,7 +133,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
             @Override
             protected void onPostExecute(AccessToken token) {
                 if (resultToken != null) {
-                    ToastSender.getInstance().sendToast(token.getScreenName() + "認証");
+                    ToastSender.sendToast(token.getScreenName() + "認証");
                     NumeriUserStorager.NumeriUserTable userTable = new NumeriUserStorager.NumeriUserTable();
                     userTable.setAccessToken(token.getToken());
                     userTable.setAccessTokenSecret(token.getTokenSecret());
@@ -144,7 +144,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
                     }
                     startActivity(MainActivity.class, true);
                 } else {
-                    ToastSender.getInstance().sendToast("認証失敗");
+                    ToastSender.sendToast("認証失敗");
                 }
             }
         };
@@ -156,7 +156,6 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
         AsyncTask.execute(() -> {
             NumeriUserListItem userListItem = new NumeriUserListItem();
             NumeriUser numeriUser = new NumeriUser(token);
-            Application.getInstance().getNumeriUsers().addNumeriUser(numeriUser);
             userListItem.setScreenName(numeriUser.getAccessToken().getScreenName());
             userListItem.setToken(numeriUser.getAccessToken().getToken());
             runOnUiThread(() -> adapter.add(userListItem));

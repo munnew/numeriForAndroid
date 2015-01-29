@@ -17,8 +17,96 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:background="#00000000"
-                android:text="layout" />
+                android:text="動作" />
+
+            <Button
+                android:id="@+id/openActionMenuButton"
+                android:text="アクション"
+                android:background="#00000000"
+                android:gravity="left|center_vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="60dp"
+                android:layout_margin="0dp"
+                android:textSize="50px" />
+
+            <LinearLayout
+                android:id="@+id/actionMenu"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/rightTapConfButton"
+                    android:text="右押し"
+                    android:background="#00000000"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:gravity="left|center_vertical"
+                    android:layout_margin="0dp"
+                    android:textSize="50px" />
+
+                <Button
+                    android:id="@+id/centerTapConfButton"
+                    android:text="中押し"
+                    android:background="#00000000"
+                    android:layout_width="fill_parent"
+                    android:gravity="left|center_vertical"
+                    android:layout_height="50dp"
+                    android:layout_margin="0dp"
+                    android:textSize="50px" />
+
+                <Button
+                    android:id="@+id/leftTapConfButton"
+                    android:text="左押し"
+                    android:background="#00000000"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:gravity="left|center_vertical"
+                    android:layout_margin="0dp"
+                    android:textSize="50px" />
+
+                <Button
+                    android:id="@+id/rightLongTapConfButton"
+                    android:text="右長押し"
+                    android:background="#00000000"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:layout_margin="0dp"
+                    android:gravity="left|center_vertical"
+                    android:textSize="50px" />
+
+                <Button
+                    android:id="@+id/centerLongTapConfButton"
+                    android:text="中長押し"
+                    android:background="#00000000"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:gravity="left|center_vertical"
+                    android:layout_margin="0dp"
+                    android:textSize="50px" />
+
+                <Button
+                    android:id="@+id/leftLongTapConfButton"
+                    android:text="左長押し"
+                    android:gravity="left|center_vertical"
+                    android:background="#00000000"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:layout_margin="0dp"
+                    android:textSize="50px" />
+
+
+            </LinearLayout>
+
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                android:text="レイアウト" />
 
             <Button
                 android:id="@+id/chooseThemeButton"
@@ -31,6 +119,19 @@
                 android:longClickable="false"
                 android:layout_margin="0dp"
                 android:lines="@integer/abc_max_action_buttons" />
+
+            <Button
+                android:id="@+id/chooseCharSizeButton"
+                android:text="文字の大きさ"
+                android:layout_width="fill_parent"
+                android:layout_height="60dp"
+                android:textSize="50px"
+                android:gravity="left|center_vertical"
+                android:background="#00000000"
+                android:longClickable="false"
+                android:layout_margin="0dp"
+                android:lines="@integer/abc_max_action_buttons" />
+
 
         </LinearLayout>
 

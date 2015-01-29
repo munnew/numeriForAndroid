@@ -10,6 +10,7 @@ import com.serori.numeri.listview.NumeriListView;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
+import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,17 +38,22 @@ public class ConversationActivity extends NumeriActivity {
         if (numeriUser == null) {
             throw new NullPointerException("numeriUserがセットされていません");
         }
+        NumeriUser user = numeriUser;
         conversationListView.setAdapter(adapter);
         AsyncTask.execute(() -> {
-            while (nextStatusId != -1) try {
-                Status status = numeriUser.getTwitter().showStatus(nextStatusId);
-                runOnUiThread(() -> adapter.add(new TimeLineItem(status, numeriUser)));
-                nextStatusId = status.getInReplyToStatusId();
-            } catch (TwitterException e) {
-                e.printStackTrace();
+            while (nextStatusId != -1) {
+                try {
+                    Status status = user.getTwitter().showStatus(nextStatusId);
+                    runOnUiThread(() -> adapter.add(new TimeLineItem(status, user)));
+                    nextStatusId = status.getInReplyToStatusId();
+                } catch (TwitterException e) {
+                    TwitterExceptionDisplay.show(e);
+                    e.printStackTrace();
+                    break;
+                }
             }
+            conversationListView.onTouchItemEnabled(user, this);
         });
-        conversationListView.onTouchItemEnabled(numeriUser, this);
     }
 
     /**

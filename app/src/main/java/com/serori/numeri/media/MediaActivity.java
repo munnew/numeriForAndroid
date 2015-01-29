@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * MesdiaActivity
+ * MediaActivity
  */
 public class MediaActivity extends NumeriActivity {
     private static List<String> mediaUris = new ArrayList<>();

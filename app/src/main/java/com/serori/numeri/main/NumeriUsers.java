@@ -1,4 +1,4 @@
-package com.serori.numeri.application;
+package com.serori.numeri.main;
 
 import com.serori.numeri.user.NumeriUser;
 
@@ -14,11 +14,11 @@ public class NumeriUsers {
     private NumeriUsers() {
     }
 
-    protected static NumeriUsers getInstance() {
+    static NumeriUsers getInstance() {
         return NumeriUsersHolder.instance;
     }
 
-    public void addNumeriUser(NumeriUser numeriUser) {
+    void addNumeriUser(NumeriUser numeriUser) {
         numeriUsers.add(numeriUser);
     }
 
@@ -28,7 +28,7 @@ public class NumeriUsers {
         return users;
     }
 
-    public void clear() {
+    void clear() {
         for (NumeriUser numeriUser : numeriUsers) {
             numeriUser.getStreamSwitcher().closeStream();
         }

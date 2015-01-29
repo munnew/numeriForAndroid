@@ -49,7 +49,7 @@ public class NumeriActivity extends ActionBarActivity {
      * @param dialog
      */
     public void setCurrentShowDialog(AlertDialog dialog) {
-        dialog.show();
+        runOnUiThread(dialog::show);
         currentShowDialog = dialog;
     }
 

@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 
 import com.serori.numeri.R;
 import com.serori.numeri.imageview.NumeriImageView;
-import com.serori.numeri.toast.ToastSender;
+import com.serori.numeri.util.toast.ToastSender;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,7 +54,7 @@ public class MediaFragment extends Fragment {
                                     image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                                     outputStream.flush();
                                     outputStream.close();
-                                    ToastSender.getInstance().sendToast(fileName + "を保存しました");
+                                    ToastSender.sendToast(fileName + "を保存しました");
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();

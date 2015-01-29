@@ -1,11 +1,9 @@
-package com.serori.numeri.application;
+package com.serori.numeri.main;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.view.WindowManager;
-
-import com.serori.numeri.main.MainActivity;
 
 /**
  * Application

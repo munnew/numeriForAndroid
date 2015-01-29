@@ -1,22 +1,11 @@
 package com.serori.numeri.fragment;
 
-import android.app.AlertDialog;
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.listview.NumeriListView;
+import com.serori.numeri.fragment.manager.FragmentStorager;
 import com.serori.numeri.listview.item.TimeLineItem;
-import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.stream.OnStatusListener;
-import com.serori.numeri.toast.ToastSender;
-import com.serori.numeri.user.NumeriUser;
+import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,72 +17,34 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
 
-public class TimeLineFragment extends Fragment implements NumeriFragment, OnStatusListener, AttachedBottomListener {
+public class TimeLineFragment extends NumeriFragment implements OnStatusListener {
 
     public TimeLineFragment() {
     }
 
-    private String fragmentName;
-    private NumeriListView timeLineListView;
-    private List<TimeLineItem> timeLineItems;
-    private TimeLineItemAdapter adapter;
-    private NumeriUser numeriUser;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
-        setRetainInstance(true);
-        timeLineListView = (NumeriListView) rootView.findViewById(R.id.timeLineListView);
-        timeLineListView.setAttachedBottomListener(this);
-        if (savedInstanceState == null) {
-            timeLineItems = new ArrayList<>();
-            adapter = new TimeLineItemAdapter(rootView.getContext(), 0, timeLineItems);
-            timeLineListView.setAdapter(adapter);
-            initializeLoad();
-        } else {
-            timeLineListView.setAdapter(adapter);
-            timeLineListView.onAttachedBottomCallbackEnabled(true);
-            Log.v("restoredinfo:", fragmentName + numeriUser.getAccessToken().getUserId());
-        }
-
-        timeLineListView.onTouchItemEnabled(numeriUser, getActivity());
-        return rootView;
-    }
-
-    @Override
-    public String getFragmentName() {
-        return fragmentName;
-    }
-
     @Override
     public void setFragmentName(String name) {
-        fragmentName = name + " : TimeLine";
+        super.name = name + " : " + FragmentStorager.FragmentType.TL.getId();
     }
 
     @Override
     public void onStatus(Status status) {
-        getActivity().runOnUiThread(() -> timeLineListView.insertItem(new TimeLineItem(status, numeriUser)));
+        getMainActivity().runOnUiThread(() -> getTimelineListView().insertItem(new TimeLineItem(status, getNumeriUser())));
     }
 
     @Override
-    public void setNumeriUser(NumeriUser numeriUser) {
-        this.numeriUser = numeriUser;
-    }
-
-    private void initializeLoad() {
+    protected void initializeLoad() {
         AsyncTask.execute(() -> {
-            Twitter twitter = numeriUser.getTwitter();
+            Twitter twitter = getNumeriUser().getTwitter();
             ResponseList<Status> timeLine = loadTimeLine(twitter);
             if (timeLine != null) {
                 List<TimeLineItem> items = new ArrayList<>();
                 for (Status status : timeLine) {
-                    items.add(new TimeLineItem(status, numeriUser));
+                    items.add(new TimeLineItem(status, getNumeriUser()));
                 }
-                getActivity().runOnUiThread(() -> {
-                    adapter.addAll(items);
-                    numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
-                    timeLineListView.onAttachedBottomCallbackEnabled(true);
+                getMainActivity().runOnUiThread(() -> {
+                    getAdapter().addAll(items);
+                    getNumeriUser().getStreamEvent().addOwnerOnStatusListener(this);
                 });
             }
         });
@@ -103,9 +54,8 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
         try {
             return twitter.getHomeTimeline();
         } catch (TwitterException e) {
-            ToastSender.getInstance().sendToast("ツイートを読み込めませんでした。ストリームを開始します");
-            numeriUser.getStreamEvent().addOwnerOnStatusListener(this);
-            timeLineListView.onAttachedBottomCallbackEnabled(true);
+            ToastSender.sendToast("ツイートを読み込めませんでした。ストリームを開始します");
+            getNumeriUser().getStreamEvent().addOwnerOnStatusListener(this);
             e.printStackTrace();
         }
         return null;
@@ -116,38 +66,33 @@ public class TimeLineFragment extends Fragment implements NumeriFragment, OnStat
             Paging pages = new Paging();
             pages.setMaxId(statusId);
             pages.count(31);
-            ResponseList<Status> responceStatuses = twitter.getHomeTimeline(pages);
-            responceStatuses.remove(0);
-            return responceStatuses;
+            ResponseList<Status> responseStatuses = twitter.getHomeTimeline(pages);
+            responseStatuses.remove(0);
+            return responseStatuses;
         } catch (TwitterException e) {
-            ToastSender.getInstance().sendToast("ネットワークを確認して下さい");
             e.printStackTrace();
+            if (e.exceededRateLimitation()) {
+                ToastSender.sendToast("exceededRateLimitation");
+            } else {
+                ToastSender.sendToast("ネットワークを確認して下さい");
+            }
         }
         return null;
     }
 
     @Override
-    public void AttachedBottom(TimeLineItem item) {
-        Log.v("TL", "onAttach");
-        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                .setMessage("ツイートを更に読み込みますか？")
-                .setNegativeButton("いいえ", (dialog, id) -> {
-                })
-                .setPositiveButton("はい", (daialog, id) -> {
-                    AsyncTask.execute(() -> {
-                        timeLineListView.onAttachedBottomCallbackEnabled(false);
-                        ResponseList<Status> previousTimeLine = loadPreviousTimeLine(numeriUser.getTwitter(), item.getStatusId());
-                        if (previousTimeLine != null) {
-                            List<TimeLineItem> items = new ArrayList<>();
-                            for (Status status : previousTimeLine) {
-                                items.add(new TimeLineItem(status, numeriUser));
-                            }
-                            getActivity().runOnUiThread(() -> adapter.addAll(items));
-                        }
-                        timeLineListView.onAttachedBottomCallbackEnabled(true);
-                    });
-                })
-                .create();
-        ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
+    protected void onAttachedBottom(TimeLineItem item) {
+        AsyncTask.execute(() -> {
+            getTimelineListView().onAttachedBottomCallbackEnabled(false);
+            ResponseList<Status> previousTimeLine = loadPreviousTimeLine(getNumeriUser().getTwitter(), item.getStatusId());
+            if (previousTimeLine != null) {
+                List<TimeLineItem> items = new ArrayList<>();
+                for (Status status : previousTimeLine) {
+                    items.add(new TimeLineItem(status, getNumeriUser()));
+                }
+                getMainActivity().runOnUiThread(() -> getAdapter().addAll(items));
+            }
+            getTimelineListView().onAttachedBottomCallbackEnabled(true);
+        });
     }
 }

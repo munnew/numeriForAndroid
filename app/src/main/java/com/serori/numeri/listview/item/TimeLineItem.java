@@ -22,7 +22,6 @@ public class TimeLineItem {
     private long statusId, userId;
     private static final String DATE_FORMAT = "MM/dd HH:mm:ss";
     private String screenName;
-    private UserMentionEntity[] mentionEntity;
     private boolean isRT = false, isMention = false, isFavorite = false;
     private boolean isRetweeted = false;
     private boolean isMyTweet = false;
@@ -56,7 +55,7 @@ public class TimeLineItem {
             }
         }
 
-        mentionEntity = status.getUserMentionEntities();
+        UserMentionEntity[] mentionEntity = status.getUserMentionEntities();
         destinationUserNames.add(screenName);
         for (UserMentionEntity userMentionEntity : mentionEntity) {//?Mention
             if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {

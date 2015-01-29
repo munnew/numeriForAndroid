@@ -9,8 +9,9 @@ import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.serori.numeri.listview.action.Actions;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.listview.action.ActionStorager;
+import com.serori.numeri.listview.action.TwitterActions;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.fragment.AttachedBottomListener;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
@@ -27,13 +28,13 @@ public class NumeriListView extends ListView {
     private float touchedCoordinatesX;
     private AttachedBottomListener attachedBottomListener;
     private boolean onAttachedBottom = false;
-    private boolean OnAttachedBottomCallbackEnabled = false;
+    private boolean OnAttachedBottomCallbackEnabled = true;
 
     private static final int LEFT = 0;
     private static final int CENTER = 1;
     private static final int RIGHT = 2;
 
-    private Actions actions;
+    private TwitterActions twitterAction;
 
     private List<TimeLineItem> storeedItems = new ArrayList<>();
 
@@ -77,7 +78,7 @@ public class NumeriListView extends ListView {
                 }
                 if (attachedBottomListener != null && OnAttachedBottomCallbackEnabled && !onAttachedBottom &&
                         firstVisibleItemPosition + visibleItemCount == totalItemCount && visibleItemCount < totalItemCount) {
-                    attachedBottomListener.AttachedBottom((TimeLineItem) getAdapter().getItem(totalItemCount - 1));
+                    attachedBottomListener.attachedBottom((TimeLineItem) getAdapter().getItem(totalItemCount - 1));
                     onAttachedBottom = true;
                 } else if (firstVisibleItemPosition + visibleItemCount <= totalItemCount - 1) {
                     onAttachedBottom = false;
@@ -116,19 +117,21 @@ public class NumeriListView extends ListView {
         if (getAdapter() == null) {
             throw new NullPointerException("adapterがセットされていません");
         }
-        actions = new Actions(context, numeriUser, (TimeLineItemAdapter) getAdapter());
+
+        twitterAction = new TwitterActions(context, numeriUser, (TimeLineItemAdapter) getAdapter());
+
         setOnItemClickListener((parent, view, position, id) -> {
             Log.v("ontTouchItem", "" + getTouchedCoordinates());
             ((TimeLineItemAdapter) getAdapter()).setCurrentVeiw(view);
             switch (getTouchedCoordinates()) {
                 case LEFT:
-                    actions.onTouchAction(Actions.FAVORITE, position);
+                    twitterAction.onTouchAction(ActionStorager.RespectTapPositionActions.LEFT, position);
                     break;
                 case CENTER:
-                    actions.onTouchAction(Actions.RT, position);
+                    twitterAction.onTouchAction(ActionStorager.RespectTapPositionActions.CENTER, position);
                     break;
                 case RIGHT:
-                    actions.onTouchAction(Actions.REPLY, position);
+                    twitterAction.onTouchAction(ActionStorager.RespectTapPositionActions.RIGHT, position);
                     break;
                 default:
                     break;
@@ -138,11 +141,13 @@ public class NumeriListView extends ListView {
         setOnItemLongClickListener((parent, view, position, id) -> {
             switch (getTouchedCoordinates()) {
                 case LEFT:
+                    twitterAction.onTouchAction(ActionStorager.RespectTapPositionActions.LONG_LEFT, position);
                     break;
                 case CENTER:
+                    twitterAction.onTouchAction(ActionStorager.RespectTapPositionActions.LONG_CENTER, position);
                     break;
                 case RIGHT:
-                    actions.onTouchAction(Actions.MENU, position);
+                    twitterAction.onTouchAction(ActionStorager.RespectTapPositionActions.LONG_RIGHT, position);
                     break;
                 default:
                     break;

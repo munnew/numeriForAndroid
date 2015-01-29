@@ -7,7 +7,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
@@ -63,7 +63,11 @@ public class ColorStorager {
                 ColorData colorData = dao.queryForId(color.getColorId());
                 if (colorData == null) {
                     Log.v("ColorStrager", "return:defaultColor");
-                    color.setColor("#FFFFFF");
+                    if (color == Colors.CHARACTER) {
+                        color.setColor("#000000");
+                    } else {
+                        color.setColor("#FFFFFF");
+                    }
                 } else {
                     Log.v("ColorStrager", "return:storageColor");
                     color.setColor(colorData.getColor());

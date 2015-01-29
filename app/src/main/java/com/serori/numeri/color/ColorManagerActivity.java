@@ -7,10 +7,10 @@ import android.widget.ListView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.main.MainActivity;
-import com.serori.numeri.toast.ToastSender;
+import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +46,7 @@ public class ColorManagerActivity extends NumeriActivity {
                 item.getColor().setColor(item.getColorValue());
                 ColorStorager.getInstance().saveColorData();
             }
-            Application.getInstance().destroyMainActivity();
-            ToastSender.getInstance().sendToast("色設定を保存しました。");
+            ToastSender.sendToast("色設定を保存しました。");
         });
 
     }
@@ -55,11 +54,7 @@ public class ColorManagerActivity extends NumeriActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (Application.getInstance().isDestroyMainActivity()) {
-                startActivity(MainActivity.class, true);
-            } else {
-                finish();
-            }
+            finish();
             return true;
         }
         return false;

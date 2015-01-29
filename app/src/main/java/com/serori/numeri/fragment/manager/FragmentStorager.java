@@ -5,7 +5,12 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.fragment.ListFragment;
+import com.serori.numeri.main.Application;
+import com.serori.numeri.fragment.MentionsFlagment;
+import com.serori.numeri.fragment.NumeriFragment;
+import com.serori.numeri.fragment.TimeLineFragment;
+import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
@@ -87,8 +92,67 @@ public class FragmentStorager {
         return fragmentsData;
     }
 
-    public static final String MENTIONS = "Mentions";
-    public static final String TL = "TimeLine";
+    public List<NumeriFragment> getFragments() {
+        ConnectionSource connectionSource = null;
+        List<NumeriFragment> fragments = new ArrayList<>();
+        try {
+            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            connectionSource = helper.getConnectionSource();
+            TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
+            Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
+
+            List<NumeriUser> numeriUsers = new ArrayList<>();
+            numeriUsers.addAll(Application.getInstance().getNumeriUsers().getNumeriUsers());
+
+            for (FragmentsTable table : dao.queryForAll()) {
+                if (table.getFragmentType().equals(FragmentType.TL.getId())) {
+                    for (NumeriUser numeriUser : numeriUsers) {
+                        if (numeriUser.getAccessToken().getToken().equals(table.getUserToken())) {
+                            fragments.add(initNumeriFragment(numeriUser, new TimeLineFragment()));
+                        }
+                    }
+                } else if (table.getFragmentType().equals(FragmentType.MENTIONS.getId())) {
+                    for (NumeriUser numeriUser : numeriUsers) {
+                        if (numeriUser.getAccessToken().getToken().equals(table.getUserToken())) {
+                            fragments.add(initNumeriFragment(numeriUser, new MentionsFlagment()));
+                        }
+                    }
+                } else if (table.getFragmentType().equals(FragmentType.LIST.getId())) {
+                    for (NumeriUser numeriUser : numeriUsers) {
+                        if (numeriUser.getAccessToken().getToken().equals(table.getUserToken())) {
+                            ListFragment listFragment = new ListFragment();
+                            listFragment.setFragmentName(table.getFragmentName());
+                            listFragment.setNumeriUser(numeriUser);
+                            listFragment.setListId(table.getListId());
+                            fragments.add(listFragment);
+                        }
+                    }
+                }
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            if (connectionSource != null) {
+                try {
+                    connectionSource.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return fragments;
+    }
+
+    private NumeriFragment initNumeriFragment(NumeriUser numeriUser, NumeriFragment numeriFragment) {
+        String screenName;
+        screenName = numeriUser.getScreenName();
+        numeriFragment.setNumeriUser(numeriUser);
+        numeriFragment.setFragmentName(screenName);
+        return numeriFragment;
+    }
 
 
     @DatabaseTable(tableName = "fragments")
@@ -105,17 +169,27 @@ public class FragmentStorager {
         @DatabaseField(canBeNull = false, id = true)
         private String fragmentKey;
 
+        @DatabaseField(canBeNull = true)
+        private long listId;
+
         public FragmentsTable() {
 
         }
 
-        public FragmentsTable(String fragmentType, String fragmentName, String userToken) {
-            this.fragmentType = fragmentType;
+        public FragmentsTable(FragmentType type, String fragmentName, String userToken) {
+            this.fragmentType = type.getId();
             this.fragmentName = fragmentName;
             this.userToken = userToken;
             this.fragmentKey = fragmentType + fragmentName + userToken;
         }
 
+        public FragmentsTable(FragmentType type, String fragmentName, String userToken, long listId) {
+            this.fragmentType = type.getId();
+            this.fragmentName = fragmentName;
+            this.userToken = userToken;
+            this.fragmentKey = fragmentType + fragmentName + userToken;
+            this.listId = listId;
+        }
 
         public String getFragmentType() {
             return fragmentType;
@@ -132,6 +206,10 @@ public class FragmentStorager {
         public String getFragmentKey() {
             return fragmentKey;
         }
+
+        public long getListId() {
+            return listId;
+        }
     }
 
     public static FragmentStorager getInstance() {
@@ -140,5 +218,22 @@ public class FragmentStorager {
 
     private static class FragmentStoragerHolder {
         private static final FragmentStorager instance = new FragmentStorager();
+    }
+
+    public static enum FragmentType {
+        TL("TimeLine"),
+        MENTIONS("Mentions"),
+        LIST("リスト");
+
+
+        private String id;
+
+        FragmentType(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
     }
 }

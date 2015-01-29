@@ -14,7 +14,7 @@ import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.media.MediaActivity;
-import com.serori.numeri.toast.ToastSender;
+import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.twitter.ConversationActivity;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
@@ -27,28 +27,22 @@ import twitter4j.TwitterException;
 /**
  * Numeri
  */
-public class Actions {
+public class TwitterActions {
 
     private Context context;
     private NumeriUser numeriUser;
     private TimeLineItemAdapter adapter;
 
-    public Actions(Context context, NumeriUser numeriUser, TimeLineItemAdapter adapter) {
+    public TwitterActions(Context context, NumeriUser numeriUser, TimeLineItemAdapter adapter) {
         this.context = context;
         this.numeriUser = numeriUser;
         this.adapter = adapter;
     }
 
-    public static final int REPLY = 0;
-    public static final int FAVORITE = 1;
-    public static final int RT = 2;
-    public static final int SHOW_CONVERSATION = 4;
-    public static final int MENU = 5;
-    public static final int OPEN_URI = 6;
-    public static final int SHOW_MEDIA = 7;
 
-    public void onTouchAction(int action, int position) {
-        switch (action) {
+    public void onTouchAction(ActionStorager.RespectTapPositionActions respectTapPositionAction, int position) {
+
+        switch (respectTapPositionAction.getTwitterAction()) {
             case REPLY:
                 reply(position);
                 break;
@@ -64,6 +58,8 @@ public class Actions {
             case MENU:
                 showMenu(position);
                 break;
+            case SHOW_MEDIA:
+                showMedia(adapter.getItem(position).getMediaUris());
             default:
                 break;
         }
@@ -82,7 +78,7 @@ public class Actions {
                                 try {
                                     numeriUser.getTwitter().retweetStatus(item.getStatusId());
                                     item.setRT(true);
-                                    ToastSender.getInstance().sendToast(item.getScreenName() + "さんのツイートをRTしました");
+                                    ToastSender.sendToast(item.getScreenName() + "さんのツイートをRTしました");
                                 } catch (TwitterException e) {
                                     e.printStackTrace();
                                 }
@@ -104,7 +100,7 @@ public class Actions {
                     numeriUser.getTwitter().createFavorite(item.getStatusId());
                     item.setFavorite(true);
                     ((Activity) context).runOnUiThread(() -> favoriteStar.setImageDrawable(context.getResources().getDrawable(R.drawable.favorite_star)));
-                    ToastSender.getInstance().sendToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。");
+                    ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -115,7 +111,7 @@ public class Actions {
                     numeriUser.getTwitter().destroyFavorite(item.getStatusId());
                     item.setFavorite(false);
                     ((Activity) context).runOnUiThread(() -> favoriteStar.setImageBitmap(null));
-                    ToastSender.getInstance().sendToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。");
+                    ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -146,25 +142,30 @@ public class Actions {
     private void showMenu(int position) {
         TimeLineItem item = adapter.getItem(position);
         List<MenuItem> menuItems = new ArrayList<>();
-        menuItems.add(new MenuItem(REPLY, "リプライ"));
+        menuItems.add(new MenuItem(Actions.REPLY));
 
-        if (item.isFavorite()) menuItems.add(new MenuItem(FAVORITE, "お気に入り解除"));
-        else menuItems.add(new MenuItem(FAVORITE, "お気に入り"));
+        if (item.isFavorite()) menuItems.add(new MenuItem(Actions.FAVORITE));
+        else menuItems.add(new MenuItem(Actions.FAVORITE));
 
-        menuItems.add(new MenuItem(RT, "リツイート"));
+        menuItems.add(new MenuItem(Actions.RT));
 
-        if (item.getConversationId() != -1) menuItems.add(new MenuItem(SHOW_CONVERSATION, "会話を表示"));
+        if (item.getConversationId() != -1) menuItems.add(new MenuItem(Actions.SHOW_CONVERSATION));
 
-        if (!item.getMediaUris().isEmpty()) menuItems.add(new MenuItem(SHOW_MEDIA, "画像を表示"));
+        if (!item.getMediaUris().isEmpty()) menuItems.add(new MenuItem(Actions.SHOW_MEDIA));
 
         if (!item.getUris().isEmpty()) {
             for (String s : item.getUris()) {
-                menuItems.add(new MenuItem(OPEN_URI, s));
+                menuItems.add(new MenuItem(Actions.OPEN_URI, s));
             }
         }
         List<CharSequence> menuItemText = new ArrayList<>();
         for (MenuItem menuItem : menuItems) {
-            menuItemText.add(menuItem.getText());
+            if (menuItem.getUrl() == null) {
+                menuItemText.add(menuItem.getAction().getName());
+            } else {
+                menuItemText.add(menuItem.getUrl());
+            }
+
         }
         AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setTitle(item.getScreenName() + "\n" + item.getName())
@@ -183,7 +184,7 @@ public class Actions {
                             showConversation(position);
                             break;
                         case OPEN_URI:
-                            opneUri(menuItems.get(which).text.toString());
+                            openUri(menuItems.get(which).getUrl());
                             break;
                         case SHOW_MEDIA:
                             showMedia(item.getMediaUris());
@@ -195,7 +196,7 @@ public class Actions {
         ((NumeriActivity) context).setCurrentShowDialog(alertDialog);
     }
 
-    private void opneUri(String uri) {
+    private void openUri(String uri) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
         context.startActivity(intent);
     }
@@ -207,22 +208,57 @@ public class Actions {
     }
 
     private static class MenuItem {
-        private int action;
-        private CharSequence text;
+        private Actions action;
+        private String url = null;
 
-        MenuItem(int action, CharSequence text) {
+        MenuItem(Actions action) {
             this.action = action;
-            this.text = text;
         }
 
-        public int getAction() {
+        MenuItem(Actions action, String url) {
+            this.action = action;
+            this.url = url;
+        }
+
+        public Actions getAction() {
             return action;
         }
 
-        public CharSequence getText() {
-            return text;
+        public String getUrl() {
+            return url;
         }
+
     }
 
 
+    /**
+     * アクションのidと名前を保持する列挙型
+     */
+    public static enum Actions {
+        REPLY("リプライ", 0),
+        RT("リツイート", 1),
+        FAVORITE("お気に入り", 2),
+        MENU("メニュー", 3),
+        QT("引用リツイート", 4),
+        OPEN_USER_PROFILE("ユーザー情報", 5),
+        SHOW_CONVERSATION("会話を表示", 6),
+        SHOW_MEDIA("画像を表示", 7),
+        OPEN_URI("", 8);
+
+        private final int id;
+        private String name = null;
+
+        private Actions(String name, int id) {
+            this.name = name;
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
 }

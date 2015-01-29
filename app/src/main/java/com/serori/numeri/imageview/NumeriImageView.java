@@ -5,18 +5,17 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 
-import com.serori.numeri.application.Application;
-import com.serori.numeri.util.cache.IconCache;
-import com.serori.numeri.util.cache.OnLoadImageCompletedListener;
+import com.serori.numeri.main.Application;
+import com.serori.numeri.imageview.cache.IconCache;
+import com.serori.numeri.imageview.cache.OnLoadImageCompletedListener;
 
 /**
  * ImageView
  */
 public class NumeriImageView extends ImageView implements OnLoadImageCompletedListener {
-    private IconCache iconCache = new IconCache();
-    private ProgressBar progressBar;
+    private TextView progressText = null;
     private OnLoadCompletedListener onLoadCompletedListener;
 
     public NumeriImageView(Context context) {
@@ -35,10 +34,10 @@ public class NumeriImageView extends ImageView implements OnLoadImageCompletedLi
         onLoadCompletedListener = listener;
     }
 
-    public void startLoadImage(ProgressBar progressBar, String url) {
+    public void startLoadImage(TextView progressText, String url) {
+        IconCache iconCache = new IconCache();
         iconCache.setOnLoadImageCompletedListener(this);
-        this.progressBar = progressBar;
-
+        this.progressText = progressText;
         iconCache.loadImage(url);
     }
 
@@ -47,8 +46,8 @@ public class NumeriImageView extends ImageView implements OnLoadImageCompletedLi
     public void onLoadImageCompleted(Bitmap image) {
         ((Activity) Application.getInstance().getMainActivityContext()).runOnUiThread(() -> {
             this.setImageBitmap(image);
-            if (progressBar != null) {
-                progressBar.setVisibility(GONE);
+            if (progressText != null) {
+                progressText.setVisibility(GONE);
             }
             this.setVisibility(VISIBLE);
             if (onLoadCompletedListener != null) {

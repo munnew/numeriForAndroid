@@ -12,28 +12,31 @@ import android.widget.ListView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.application.Application;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.PagableResponseList;
+import twitter4j.ResponseList;
+import twitter4j.TwitterException;
+import twitter4j.UserList;
+
 /**
  * Created by serioriKETC on 2014/12/27.
  */
 public class FragmentManagerActivity extends NumeriActivity implements OnFragmentDataDeleteListener {
-    private ListView fragmentsListView;
     private FragmentManagerItemAdapter adapter;
     private List<FragmentManagerItem> managerItems = new ArrayList<>();
-    private CharSequence[] fragmentAttribute = {"TimeLine", "Mentions", "リスト", "DM"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.v("Fragment", "create");
         setContentView(R.layout.activity_fragment_manager);
-        fragmentsListView = (ListView) findViewById(R.id.fragmentsList);
+        ListView fragmentsListView = (ListView) findViewById(R.id.fragmentsList);
         adapter = new FragmentManagerItemAdapter(this, 0, managerItems);
         fragmentsListView.setAdapter(adapter);
         Button addFragmentButton = (Button) findViewById(R.id.addFragment);
@@ -70,23 +73,23 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
     }
 
     private void showAddFragmentDialog() {
+        List<CharSequence> fragmentAttribute = new ArrayList<>();
+        for (FragmentStorager.FragmentType fragmentType : FragmentStorager.FragmentType.values()) {
+            fragmentAttribute.add(fragmentType.getId());
+        }
         AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setItems(fragmentAttribute, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                            createTimeLineFragmentsListDialog();
-                            break;
-                        case 1:
-                            createMentionsFragmentsListDialog();
-                            break;
-                        case 2:
-                            createListFragmentsListDialog();
-                            break;
-                        case 3:
-                            createDMFragmentsListDialog();
-                            break;
-                        default:
-                            break;
+                .setItems(fragmentAttribute.toArray(new CharSequence[fragmentAttribute.size()]), (dialog, which) -> {
+
+                    if (fragmentAttribute.get(which).equals(FragmentStorager.FragmentType.TL.getId())) {
+                        createTimeLineFragmentsListDialog();
+                    }
+
+                    if (fragmentAttribute.get(which).equals(FragmentStorager.FragmentType.MENTIONS.getId())) {
+                        createMentionsFragmentsListDialog();
+                    }
+
+                    if (fragmentAttribute.get(which).equals(FragmentStorager.FragmentType.LIST.getId())) {
+                        createListFragmentsListDialog();
                     }
                 }).create();
         setCurrentShowDialog(alertDialog);
@@ -95,73 +98,109 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
     private void createTimeLineFragmentsListDialog() {
         List<CharSequence> timeLineNames = new ArrayList<>();
         List<String> userTokens = new ArrayList<>();
-        AsyncTask.execute(() -> {
-            for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                timeLineNames.add(numeriUser.getScreenName());
-                userTokens.add(numeriUser.getAccessToken().getToken());
-            }
+        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+            timeLineNames.add(numeriUser.getScreenName());
+            userTokens.add(numeriUser.getAccessToken().getToken());
+        }
 
-            runOnUiThread(() -> {
-                new AlertDialog.Builder(this).setItems(timeLineNames.toArray(new CharSequence[timeLineNames.size()]), (dialog, which) -> {
-                    for (int i = 0; i < timeLineNames.size(); i++) {
-                        if (which == i) {
-                            FragmentStorager.FragmentsTable table = new FragmentStorager.FragmentsTable(FragmentStorager.TL, timeLineNames.get(i).toString(), userTokens.get(i));
-                            FragmentStorager.getInstance().saveFragmentData(table);
-                            FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
-                            item.setFragmentKey(table.getFragmentKey());
-                            boolean addFlag = true;
-                            for (int j = 0; j < adapter.getCount(); j++) {
-                                if (item.getFragmentKey().equals(adapter.getItem(j).getFragmentKey())) {
-                                    addFlag = false;
-                                }
-                            }
-                            if (addFlag) {
-                                adapter.add(item);
-                            }
+        AlertDialog alertDialog = new AlertDialog.Builder(this).setItems(timeLineNames.toArray(new CharSequence[timeLineNames.size()]), (dialog, which) -> {
+            for (int i = 0; i < timeLineNames.size(); i++) {
+                if (which == i) {
+                    FragmentStorager.FragmentsTable table = new FragmentStorager.FragmentsTable(FragmentStorager.FragmentType.TL, timeLineNames.get(i).toString(), userTokens.get(i));
+                    FragmentStorager.getInstance().saveFragmentData(table);
+                    FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
+                    item.setFragmentKey(table.getFragmentKey());
+                    boolean addFlag = true;
+                    for (int j = 0; j < adapter.getCount(); j++) {
+                        if (item.getFragmentKey().equals(adapter.getItem(j).getFragmentKey())) {
+                            addFlag = false;
                         }
                     }
-                }).create().show();
-            });
-        });
+                    if (addFlag) {
+                        adapter.add(item);
+                    }
+                }
+            }
+        }).create();
+        setCurrentShowDialog(alertDialog);
 
     }
 
     private void createMentionsFragmentsListDialog() {
         List<CharSequence> mentionsNames = new ArrayList<>();
         List<String> userTokens = new ArrayList<>();
-        AsyncTask.execute(() -> {
-            for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                mentionsNames.add(numeriUser.getScreenName());
-                userTokens.add(numeriUser.getAccessToken().getToken());
-            }
+        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+            mentionsNames.add(numeriUser.getScreenName());
+            userTokens.add(numeriUser.getAccessToken().getToken());
+        }
 
-            runOnUiThread(() -> {
-                new AlertDialog.Builder(this).setItems(mentionsNames.toArray(new CharSequence[mentionsNames.size()]), (dialog, which) -> {
-                    for (int i = 0; i < mentionsNames.size(); i++) {
-                        if (which == i) {
-                            FragmentStorager.FragmentsTable table = new FragmentStorager.FragmentsTable(FragmentStorager.MENTIONS, mentionsNames.get(i).toString(), userTokens.get(i));
-                            FragmentStorager.getInstance().saveFragmentData(table);
-                            FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
-                            item.setFragmentKey(table.getFragmentKey());
-                            boolean addFlag = true;
-                            for (int j = 0; j < adapter.getCount(); j++) {
-                                if (item.getFragmentKey().equals(adapter.getItem(j).getFragmentKey())) {
-                                    addFlag = false;
-                                }
-                            }
-                            if (addFlag) {
-                                adapter.add(item);
-                            }
+        AlertDialog alertDialog = new AlertDialog.Builder(this).setItems(mentionsNames.toArray(new CharSequence[mentionsNames.size()]), (dialog, which) -> {
+            for (int i = 0; i < mentionsNames.size(); i++) {
+                if (which == i) {
+                    FragmentStorager.FragmentsTable table = new FragmentStorager.FragmentsTable(FragmentStorager.FragmentType.MENTIONS, mentionsNames.get(i).toString(), userTokens.get(i));
+                    FragmentStorager.getInstance().saveFragmentData(table);
+                    FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
+                    item.setFragmentKey(table.getFragmentKey());
+                    boolean addFlag = true;
+                    for (int j = 0; j < adapter.getCount(); j++) {
+                        if (item.getFragmentKey().equals(adapter.getItem(j).getFragmentKey())) {
+                            addFlag = false;
                         }
                     }
-                }).create().show();
-            });
-        });
+                    if (addFlag) {
+                        adapter.add(item);
+                    }
+                }
+            }
+        }).create();
+        setCurrentShowDialog(alertDialog);
 
     }
 
     private void createListFragmentsListDialog() {
+        List<CharSequence> userNames = new ArrayList<>();
+        List<NumeriUser> users = new ArrayList<>();
+        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+            userNames.add(numeriUser.getScreenName());
+            users.add(numeriUser);
+        }
+        AlertDialog alertDialog = new AlertDialog.Builder(this).setItems(userNames.toArray(new CharSequence[userNames.size()]), (dialog, which) -> {
+            AsyncTask.execute(() -> {
+                try {
 
+                    ResponseList<UserList> lists = users.get(which).getTwitter().getUserLists(users.get(which).getScreenName());
+                    List<CharSequence> listNames = new ArrayList<>();
+                    for (UserList list : lists) {
+                        listNames.add(list.getName());
+                    }
+                    runOnUiThread(() -> {
+                        AlertDialog alertDialog1 = new AlertDialog.Builder(this)
+                                .setItems(listNames.toArray(new CharSequence[listNames.size()]), (dialog1, which1) -> {
+                                    FragmentStorager.FragmentsTable table = new FragmentStorager.FragmentsTable(FragmentStorager.FragmentType.LIST, lists.get(which1).getName(), users.get(which).getAccessToken().getToken(), lists.get(which1).getId());
+                                    FragmentStorager.getInstance().saveFragmentData(table);
+                                    FragmentManagerItem item = new FragmentManagerItem(table.getFragmentType() + " : " + table.getFragmentName());
+                                    item.setFragmentKey(table.getFragmentKey());
+                                    boolean addFlag = true;
+                                    for (int j = 0; j < adapter.getCount(); j++) {
+                                        if (item.getFragmentKey().equals(adapter.getItem(j).getFragmentKey())) {
+                                            addFlag = false;
+                                        }
+                                    }
+                                    if (addFlag) {
+                                        adapter.add(item);
+                                    }
+                                    lists.get(which1).getId();
+                                }).create();
+                        setCurrentShowDialog(alertDialog1);
+                    });
+
+                } catch (TwitterException e) {
+                    e.printStackTrace();
+                }
+
+            });
+        }).create();
+        setCurrentShowDialog(alertDialog);
     }
 
     private void createDMFragmentsListDialog() {

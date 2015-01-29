@@ -1,4 +1,4 @@
-package com.serori.numeri.util.cache;
+package com.serori.numeri.imageview.cache;
 
 import android.graphics.Bitmap;
 

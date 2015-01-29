@@ -3,7 +3,7 @@ package com.serori.numeri.util.twitter;
 
 import android.os.AsyncTask;
 
-import com.serori.numeri.toast.ToastSender;
+import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
 
 import java.io.File;
@@ -53,7 +53,7 @@ public class TweetBuilder {
             statusUpdate.setInReplyToStatusId(statusId);
         AsyncTask.execute(() -> {
             if (!images.isEmpty()) {
-                ToastSender.getInstance().sendToast("画像をアップロードします");
+                ToastSender.sendToast("画像をアップロードします");
                 long[] medias = new long[images.size()];
                 for (int i = 0; i < images.size(); i++) {
                     try {
@@ -68,13 +68,11 @@ public class TweetBuilder {
 
             try {
                 twitter.updateStatus(statusUpdate);
-                ToastSender.getInstance().sendToast("ツイートに成功しました");
+                ToastSender.sendToast("ツイートに成功しました");
             } catch (TwitterException e) {
-                ToastSender.getInstance().sendToast("ツイートに失敗しました");
+                ToastSender.sendToast("ツイートに失敗しました");
                 e.printStackTrace();
             }
         });
     }
-
-
 }

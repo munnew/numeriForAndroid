@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.color.ColorStorager;
+import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.imageview.NumeriImageView;
 
 import java.util.List;
@@ -41,22 +42,29 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.item_timeline, null);
         }
-        ProgressBar waitImageLoadingBar = (ProgressBar) convertView.findViewById(R.id.waitImageLoading);
+        float textSize = ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE.getNumericValue() + 8;
+        TextView waitImageLoadingBar = (TextView) convertView.findViewById(R.id.waitImageLoading);
         NumeriImageView iconImageView = (NumeriImageView) convertView.findViewById(R.id.userIcon);
+
         TextView screenNameTextView = (TextView) convertView.findViewById(R.id.timeLine_screenName);
         screenNameTextView.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
+        screenNameTextView.setTextSize(textSize * (float) 0.8);
 
         TextView nameTextView = (TextView) convertView.findViewById(R.id.timeLine_name);
         nameTextView.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
+        nameTextView.setTextSize(textSize * (float) 0.8);
 
         TextView mainTextView = (TextView) convertView.findViewById(R.id.timeLine_maintext);
         mainTextView.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
+        mainTextView.setTextSize(textSize);
 
         TextView viaTextView = (TextView) convertView.findViewById(R.id.timeLine_via);
         viaTextView.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
+        viaTextView.setTextSize(8);
 
         TextView createdTime = (TextView) convertView.findViewById(R.id.createdDate);
         createdTime.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
+        createdTime.setTextSize(8);
 
         ImageView favoriteStar = (ImageView) convertView.findViewById(R.id.favoriteStar);
         View isMyTweetState = convertView.findViewById(R.id.isMyTweetStateView);
