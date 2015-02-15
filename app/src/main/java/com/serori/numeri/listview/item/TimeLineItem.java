@@ -22,9 +22,10 @@ public class TimeLineItem {
     private long statusId, userId;
     private static final String DATE_FORMAT = "MM/dd HH:mm:ss";
     private String screenName;
-    private boolean isRT = false, isMention = false, isFavorite = false;
-    private boolean isRetweeted = false;
+    private boolean isMyRT = false, isMention = false, isFavorite = false;
+    private boolean isRT = false;
     private boolean isMyTweet = false;
+    private boolean isProtectedUser = false;
     private String createdTime;
     private List<String> destinationUserNames = new ArrayList<>();
     private List<String> uris = new ArrayList<>();
@@ -33,23 +34,27 @@ public class TimeLineItem {
 
     public TimeLineItem(Status status, NumeriUser numeriUser) {
         statusId = status.getId();
-        userId = status.getUser().getId();
         createdTime = new SimpleDateFormat(DATE_FORMAT).format(status.getCreatedAt());
-        isRT = status.isRetweetedByMe();
+        isMyRT = status.isRetweetedByMe();
         isFavorite = status.isFavorited();
+
         if (status.isRetweet()) { //RT
-            isRetweeted = true;
+            isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
+            isRT = true;
             iconImageUrl = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
             mainText = status.getRetweetedStatus().getText();
             name = status.getRetweetedStatus().getUser().getName();
             via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName();
             screenName = status.getRetweetedStatus().getUser().getScreenName();
+            userId = status.getRetweetedStatus().getUser().getId();
         } else {//!RT
+            isProtectedUser = status.getUser().isProtected();
             iconImageUrl = status.getUser().getBiggerProfileImageURL();
             mainText = status.getText();
             name = status.getUser().getName();
             via = "via " + Html.fromHtml(status.getSource()).toString();
             screenName = status.getUser().getScreenName();
+            userId = status.getUser().getId();
             if (numeriUser.getAccessToken().getUserId() == status.getUser().getId()) {
                 isMyTweet = true;
             }
@@ -60,7 +65,7 @@ public class TimeLineItem {
         for (UserMentionEntity userMentionEntity : mentionEntity) {//?Mention
             if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
                 isMention = true;
-            } else if (!userMentionEntity.getScreenName().equals(screenName)) {
+            } else if (!userMentionEntity.getScreenName().equals(screenName) && userMentionEntity.getScreenName().equals(numeriUser.getScreenName())) {
                 destinationUserNames.add(userMentionEntity.getScreenName());
             }
         }
@@ -106,8 +111,8 @@ public class TimeLineItem {
         this.isFavorite = isFavorite;
     }
 
-    public void setRT(boolean isRT) {
-        this.isRT = isRT;
+    public void setMyRT(boolean isRT) {
+        this.isMyRT = isRT;
     }
 
     ///getter
@@ -123,8 +128,8 @@ public class TimeLineItem {
         return userId;
     }
 
-    public boolean isRT() {
-        return isRT;
+    public boolean isMyRT() {
+        return isMyRT;
     }
 
     public boolean isMention() {
@@ -143,8 +148,8 @@ public class TimeLineItem {
         return iconImageUrl;
     }
 
-    public boolean isRetweeted() {
-        return isRetweeted;
+    public boolean isRT() {
+        return isRT;
     }
 
     public Long getConversationId() {
@@ -165,5 +170,9 @@ public class TimeLineItem {
 
     public boolean isMyTweet() {
         return isMyTweet;
+    }
+
+    public boolean isProtectedUser() {
+        return isProtectedUser;
     }
 }

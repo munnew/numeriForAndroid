@@ -16,18 +16,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="0">
 
-        <TextView
-            android:id="@+id/waitImageLoading"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:layout_margin="5dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="0dp"
-            android:gravity="center_vertical"
-            android:textColor="#7F7F7F"
-            android:textSize="12dp"
-            android:text="loading..." />
-
         <com.serori.numeri.imageview.NumeriImageView
             android:id="@+id/userIcon"
             android:layout_width="55dp"
@@ -35,7 +23,8 @@
             android:layout_margin="5dp"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="0dp"
-            android:visibility="gone" />
+            android:src="@drawable/loading"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -67,13 +56,21 @@
                         android:gravity="left"
                         android:singleLine="true" />
 
+                    <ImageView
+                        android:id="@+id/key"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:contentDescription="isKeyUser"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="5dp"
+                        android:src="@drawable/key"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/createdDate"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="right"
-                        android:layout_marginRight="15dp"
                         android:layout_weight="1"
                         android:gravity="right"
                         android:singleLine="true"
@@ -126,6 +123,7 @@
         android:id="@+id/favoriteStar"
         android:layout_width="10dp"
         android:layout_height="10dp"
+        android:contentDescription="isFavorite"
         android:layout_gravity="center_vertical"
         android:layout_marginRight="10dp"
         android:layout_weight="0" />

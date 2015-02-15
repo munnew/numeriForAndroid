@@ -60,6 +60,7 @@ public class TweetBuilder {
                         UploadedMedia uploadedMedia = numeriUser.getTwitter().uploadMedia(images.get(i));
                         medias[i] = uploadedMedia.getMediaId();
                     } catch (TwitterException e) {
+                        TwitterExceptionDisplay.show(e);
                         e.printStackTrace();
                     }
                 }

@@ -6,6 +6,7 @@ import com.serori.numeri.fragment.manager.FragmentStorager;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.stream.OnStatusListener;
 import com.serori.numeri.util.toast.ToastSender;
+import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
 
     @Override
     public void onStatus(Status status) {
-        getMainActivity().runOnUiThread(() -> getTimelineListView().insertItem(new TimeLineItem(status, getNumeriUser())));
+        getTimelineListView().insertItem(new TimeLineItem(status, getNumeriUser()));
     }
 
     @Override
@@ -71,11 +72,7 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
             return responseStatuses;
         } catch (TwitterException e) {
             e.printStackTrace();
-            if (e.exceededRateLimitation()) {
-                ToastSender.sendToast("exceededRateLimitation");
-            } else {
-                ToastSender.sendToast("ネットワークを確認して下さい");
-            }
+            TwitterExceptionDisplay.show(e);
         }
         return null;
     }

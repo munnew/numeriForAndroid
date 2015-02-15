@@ -1,15 +1,15 @@
 package com.serori.numeri.config;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
@@ -17,6 +17,7 @@ import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.listview.action.TwitterActions;
 import com.serori.numeri.main.Application;
 import com.serori.numeri.main.MainActivity;
+import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,8 @@ public class ConfigActivity extends NumeriActivity {
         Button openMenuButton = (Button) findViewById(R.id.openActionMenuButton);
         if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
             openMenuButton.setTextColor(Color.parseColor("#FFFFFF"));
+            ((TextView) findViewById(R.id.tweetAdditionalAcquisitionFlagText)).setTextColor(Color.parseColor("#FFFFFF"));
+            ((TextView) findViewById(R.id.sleeplessText)).setTextColor(Color.parseColor("#FFFFFF"));
             for (int i = 0; i < actionMenu.getChildCount(); i++) {
                 ((Button) actionMenu.getChildAt(i)).setTextColor(Color.parseColor("#FFFFFF"));
             }
@@ -60,12 +63,23 @@ public class ConfigActivity extends NumeriActivity {
                 actionMenu.setVisibility(View.GONE);
             }
         });
+
         rightTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.RIGHT));
         centerTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.CENTER));
         leftTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LEFT));
         rightLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_RIGHT));
         centerLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_CENTER));
         leftLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_LEFT));
+
+        CheckBox isSleeplessCheckBox = (CheckBox) findViewById(R.id.isSleeplessCheckBox);
+        isSleeplessCheckBox.setChecked(ConfigurationStorager.EitherConfigurations.SLEEPLESS.isEnabled());
+        isSleeplessCheckBox.setOnClickListener(v -> {
+            chooseEither(ConfigurationStorager.EitherConfigurations.SLEEPLESS, ((CheckBox) v).isChecked());
+            ToastSender.sendToast("この設定は次回の起動から反映されます");
+        });
+        CheckBox isConfirmationLessGetTweetCheckBox = (CheckBox) findViewById(R.id.confirmationLessGetTweetCheckBox);
+        isConfirmationLessGetTweetCheckBox.setChecked(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET.isEnabled());
+        isConfirmationLessGetTweetCheckBox.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET, ((CheckBox) v).isChecked()));
     }
 
     private void initLayoutConfComponent() {
@@ -78,11 +92,11 @@ public class ConfigActivity extends NumeriActivity {
         Button chooseTextSizeButton = (Button) findViewById(R.id.chooseCharSizeButton);
         chooseTextSizeButton.setTextColor(Color.parseColor(textColor));
         //onCLick
-        chooseThemeButton.setOnClickListener(v -> chooseThema());
+        chooseThemeButton.setOnClickListener(v -> chooseTheme());
         chooseTextSizeButton.setOnClickListener(v -> chooseTextSize());
     }
 
-    private void chooseThema() {
+    private void chooseTheme() {
         CharSequence[] themes = {"ライトテーマ", "ダークテーマ"};
         boolean theme = ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled();
         int checkedItem = theme ? 1 : 0;
@@ -116,7 +130,6 @@ public class ConfigActivity extends NumeriActivity {
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setSingleChoiceItems(textSizes, checkedItem, (dialog, witch) -> {
                     ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE.setNumericValue(witch);
-
                     ConfigurationStorager.getInstance().saveNumercalConfigTable(ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE);
                     ((AlertDialog) dialog).hide();
                     dialog.dismiss();
@@ -144,6 +157,10 @@ public class ConfigActivity extends NumeriActivity {
         setCurrentShowDialog(alertDialog);
     }
 
+    private void chooseEither(ConfigurationStorager.EitherConfigurations eitherConfigurations, boolean isEnabled) {
+        eitherConfigurations.setEnabled(isEnabled);
+        ConfigurationStorager.getInstance().saveEitherConfigTable(eitherConfigurations);
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {

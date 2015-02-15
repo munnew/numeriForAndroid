@@ -35,7 +35,6 @@ import twitter4j.conf.ConfigurationContext;
  * 認証用の画面
  */
 public class OAuthActivity extends NumeriActivity implements OnUserDeleteListener {
-    private List<NumeriUserListItem> userListItems = new ArrayList<>();
     private UserListItemAdapter adapter;
 
     @Override
@@ -43,6 +42,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth);
         if (savedInstanceState == null) {
+            List<NumeriUserListItem> userListItems = new ArrayList<>();
             ListView numeriUserListView;
             numeriUserListView = (ListView) findViewById(R.id.numeriUserListView);
             adapter = new UserListItemAdapter(this, 0, userListItems);
@@ -133,12 +133,10 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
             @Override
             protected void onPostExecute(AccessToken token) {
                 if (resultToken != null) {
+                    Log.v("screenName", token.getScreenName());
                     ToastSender.sendToast(token.getScreenName() + "認証");
-                    NumeriUserStorager.NumeriUserTable userTable = new NumeriUserStorager.NumeriUserTable();
-                    userTable.setAccessToken(token.getToken());
-                    userTable.setAccessTokenSecret(token.getTokenSecret());
+                    NumeriUserStorager.NumeriUserTable userTable = new NumeriUserStorager.NumeriUserTable(token.getToken(), token.getTokenSecret(), token.getScreenName());
                     NumeriUserStorager.getInstance().saveNumeriUser(userTable);
-                    addItem(token);
                     if (!Application.getInstance().isDestroyMainActivity()) {
                         Application.getInstance().destroyMainActivity();
                     }
@@ -152,24 +150,12 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
     }
 
 
-    private void addItem(AccessToken token) {
-        AsyncTask.execute(() -> {
-            NumeriUserListItem userListItem = new NumeriUserListItem();
-            NumeriUser numeriUser = new NumeriUser(token);
-            userListItem.setScreenName(numeriUser.getAccessToken().getScreenName());
-            userListItem.setToken(numeriUser.getAccessToken().getToken());
-            runOnUiThread(() -> adapter.add(userListItem));
-            Log.v(token.getToken(), token.getTokenSecret());
-            Log.v(token.getScreenName(), "" + token.getUserId());
-        });
-    }
-
     private void init() {
         AsyncTask.execute(() -> {
             adapter.clear();
             List<NumeriUser> numeriUsers = new ArrayList<>();
-            for (AccessToken accessToken : NumeriUserStorager.getInstance().loadNumeriUserTokens()) {
-                numeriUsers.add(new NumeriUser(accessToken));
+            for (NumeriUserStorager.NumeriUserTable table : NumeriUserStorager.getInstance().loadNumeriUserTables()) {
+                numeriUsers.add(new NumeriUser(table));
             }
             Log.v("numeriUsersSize", "" + numeriUsers.size());
             if (!numeriUsers.isEmpty()) {

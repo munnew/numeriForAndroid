@@ -1,6 +1,7 @@
 package com.serori.numeri.config;
 
 /**
+ *
  */
 public interface EitherConfiguration {
 

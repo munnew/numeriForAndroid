@@ -19,7 +19,7 @@ import java.util.List;
 import twitter4j.auth.AccessToken;
 
 /**
- * Created by seroriKETC on 2014/12/19.
+ *
  */
 public class NumeriUserStorager {
 
@@ -52,21 +52,15 @@ public class NumeriUserStorager {
         }
     }
 
-    public List<AccessToken> loadNumeriUserTokens() {
+    public List<NumeriUserTable> loadNumeriUserTables() {
         ConnectionSource connectionSource = null;
-        List<AccessToken> tokens = new ArrayList<>();
+        List<NumeriUserTable> tables = new ArrayList<>();
         try {
             DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, NumeriUserTable.class);
             Dao<NumeriUserTable, String> dao = helper.getDao(NumeriUserTable.class);
-            List<NumeriUserTable> tables = new ArrayList<>();
             tables.addAll(dao.queryForAll());
-
-            for (NumeriUserTable table : tables) {
-                tokens.add(new AccessToken(table.getAccessToken(), table.getAccessTokenSecret()));
-            }
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -79,7 +73,7 @@ public class NumeriUserStorager {
                 }
             }
         }
-        return tokens;
+        return tables;
     }
 
     public void deleteUser(String token) {
@@ -126,21 +120,33 @@ public class NumeriUserStorager {
         private String AccessToken;
         @DatabaseField(canBeNull = false)
         private String AccessTokenSecret;
+        @DatabaseField(canBeNull = false)
+        private String screenName;
+
+        public NumeriUserTable() {
+
+        }
+
+        public NumeriUserTable(String token, String tokenSecret, String screenName) {
+            this.AccessToken = token;
+            this.AccessTokenSecret = tokenSecret;
+            this.screenName = screenName;
+        }
 
         public String getAccessToken() {
             return AccessToken;
-        }
-
-        public void setAccessToken(String accessToken) {
-            AccessToken = accessToken;
         }
 
         public String getAccessTokenSecret() {
             return AccessTokenSecret;
         }
 
-        public void setAccessTokenSecret(String accessTokenSecret) {
-            AccessTokenSecret = accessTokenSecret;
+        public String getScreenName() {
+            return screenName;
+        }
+
+        public void setScreenName(String screenName) {
+            this.screenName = screenName;
         }
     }
 }

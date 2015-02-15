@@ -1,5 +1,7 @@
 package com.serori.numeri.fragment.manager;
 
+import android.util.Log;
+
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
@@ -18,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by serioriKETC on 2014/12/27.
+ *
  */
 public class FragmentStorager {
 
@@ -103,7 +105,6 @@ public class FragmentStorager {
 
             List<NumeriUser> numeriUsers = new ArrayList<>();
             numeriUsers.addAll(Application.getInstance().getNumeriUsers().getNumeriUsers());
-
             for (FragmentsTable table : dao.queryForAll()) {
                 if (table.getFragmentType().equals(FragmentType.TL.getId())) {
                     for (NumeriUser numeriUser : numeriUsers) {

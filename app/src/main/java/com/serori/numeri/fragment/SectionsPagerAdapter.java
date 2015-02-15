@@ -42,5 +42,4 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         }
         fragments.add(fragment);
     }
-
 }

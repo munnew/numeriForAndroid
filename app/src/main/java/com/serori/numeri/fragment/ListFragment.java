@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.util.toast.ToastSender;
+import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 
 import java.util.ArrayList;
@@ -85,6 +86,7 @@ public class ListFragment extends NumeriFragment {
     @Override
     protected void onAttachedBottom(TimeLineItem item) {
         AsyncTask.execute(() -> {
+            getTimelineListView().onAttachedBottomCallbackEnabled(false);
             Paging paging = new Paging();
             paging.setMaxId(item.getStatusId());
             paging.count(31);
@@ -97,7 +99,10 @@ public class ListFragment extends NumeriFragment {
                     }
                 });
             } catch (TwitterException e) {
+                TwitterExceptionDisplay.show(e);
                 e.printStackTrace();
+            } finally {
+                getTimelineListView().onAttachedBottomCallbackEnabled(true);
             }
         });
     }

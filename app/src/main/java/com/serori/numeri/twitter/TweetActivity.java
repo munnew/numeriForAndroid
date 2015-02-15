@@ -104,6 +104,8 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             case KeyEvent.KEYCODE_BACK:
                 isReply = false;
                 currentNumeriUser = null;
+                destinationUserNames.clear();
+                appendedImages.clear();
                 finish();
                 return true;
             case KeyEvent.KEYCODE_MOVE_HOME:
@@ -138,12 +140,12 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
 
     private void sendTweet(NumeriUser numeriUser) {
         if (tweetEditText.getText().toString().equals("/add menu_button")) {
-            ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON.setEnabled(true);
-            ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON);
+            ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON.setEnabled(true);
+            ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON);
             ((MainActivity) Application.getInstance().getMainActivityContext()).addMenuButton();
         } else if (tweetEditText.getText().toString().equals("/remove menu_button")) {
-            ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON.setEnabled(false);
-            ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.ADD_MENUBUTTON);
+            ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON.setEnabled(false);
+            ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON);
             ((MainActivity) Application.getInstance().getMainActivityContext()).removeMenuButton();
         } else {
             TweetBuilder tweetBuilder = numeriUser.getTweetBuilder();
@@ -159,9 +161,11 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             }
 
             tweetBuilder.tweet();
-            tweetEditText.setText("");
-            currentNumeriUser = null;
         }
+        tweetEditText.setText("");
+        currentNumeriUser = null;
+        appendedImages.clear();
+        destinationUserNames.clear();
         inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
         finish();
     }

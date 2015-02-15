@@ -1,5 +1,6 @@
 package com.serori.numeri.user;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.serori.numeri.R;
@@ -8,7 +9,6 @@ import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;
 import com.serori.numeri.stream.StreamSwitcher;
 import com.serori.numeri.util.twitter.TweetBuilder;
-import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -22,36 +22,40 @@ import twitter4j.conf.ConfigurationBuilder;
  * need Create on Async
  */
 public class NumeriUser {
-    private AccessToken token;
     private Twitter twitter;
     private StreamEvent streamEvent;
-    private String screenName = "user";
+    private String screenName = null;
+    private NumeriUserStorager.NumeriUserTable table;
 
 
-    public NumeriUser(AccessToken token) {
-        this.token = token;
+    public NumeriUser(NumeriUserStorager.NumeriUserTable table) {
+        this.table = table;
         auth();
     }
 
 
     private void auth() {
-
         ConfigurationBuilder builder = new ConfigurationBuilder()
                 .setOAuthConsumerKey(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key))
                 .setOAuthConsumerSecret(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret))
-                .setOAuthAccessToken(token.getToken()).setOAuthAccessTokenSecret(token.getTokenSecret());
+                .setOAuthAccessToken(table.getAccessToken()).setOAuthAccessTokenSecret(table.getAccessTokenSecret());
         twitter = new TwitterFactory(builder.build()).getInstance();
         try {
             screenName = twitter.getScreenName();
+            if (!table.getScreenName().equals(screenName)) {
+                AsyncTask.execute(() -> {
+                    table.setScreenName(screenName);
+                    NumeriUserStorager.getInstance().saveNumeriUser(table);
+                });
+            }
         } catch (TwitterException e) {
-            TwitterExceptionDisplay.show(e);
-            screenName = null;
+            screenName = table.getScreenName();
         }
         Log.v("user", "getScreenName");
         TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
         twitterStream.setOAuthConsumer(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key),
                 Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
-        twitterStream.setOAuthAccessToken(token);
+        twitterStream.setOAuthAccessToken(new AccessToken(table.getAccessToken(), table.getAccessTokenSecret()));
         streamEvent = new StreamEvent(twitterStream);
     }
 
@@ -60,9 +64,8 @@ public class NumeriUser {
     }
 
     public AccessToken getAccessToken() {
-        return token;
+        return new AccessToken(table.getAccessToken(), table.getAccessTokenSecret());
     }
-
 
     public IStreamEvent getStreamEvent() {
         return streamEvent;

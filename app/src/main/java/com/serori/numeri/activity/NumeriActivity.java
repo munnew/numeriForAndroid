@@ -5,20 +5,25 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
+import android.view.WindowManager;
 
 import com.serori.numeri.R;
 import com.serori.numeri.config.ConfigurationStorager;
 
 /**
- * Created by seroriKETC on 2015/01/24.
+ * Activityが継承すべきクラス
  */
 public class NumeriActivity extends ActionBarActivity {
     private AlertDialog currentShowDialog = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
             setTheme(R.style.AppTheme_Dark);
+        }
+        if (ConfigurationStorager.EitherConfigurations.SLEEPLESS.isEnabled()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
         super.onCreate(savedInstanceState);
     }
@@ -46,7 +51,7 @@ public class NumeriActivity extends ActionBarActivity {
     /**
      * Dialogをセットすると同時に表示します
      *
-     * @param dialog
+     * @param dialog セットするダイアログ
      */
     public void setCurrentShowDialog(AlertDialog dialog) {
         runOnUiThread(dialog::show);
@@ -58,6 +63,10 @@ public class NumeriActivity extends ActionBarActivity {
         if (currentShowDialog != null) {
             currentShowDialog.dismiss();
         }
+        if (ConfigurationStorager.EitherConfigurations.SLEEPLESS.isEnabled()) {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+        currentShowDialog = null;
         super.onDestroy();
     }
 

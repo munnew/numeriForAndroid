@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="250dp"
+        android:background="#50505050"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="3dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.serori.numeri.imageview.NumeriImageView
+                    android:id="@+id/userInfoIcon"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:contentDescription="user" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="3dp"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/userInfoScreenName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12dp" />
+
+                        <ImageView
+                            android:id="@+id/userInfoProtectedKey"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:contentDescription="isProtected"
+                            android:layout_marginLeft="5dp"
+                            android:layout_gravity="center_vertical"
+                            android:visibility="gone"
+                            android:src="@drawable/key" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/userInfoName"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="12dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="0">
+
+                    <Button
+                        android:id="@+id/userInfoFollowButton"
+                        android:layout_width="90dp"
+                        android:layout_height="38dp"
+                        android:text=""
+                        android:background="#407AF1"
+                        android:textSize="12dp"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="#FFFFFF" />
+
+                    <TextView
+                        android:id="@+id/userInfoRelationIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:layout_gravity="center_horizontal"
+                        android:text="" />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="10dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BIO"
+                            android:textSize="12dp" />
+
+                        <TextView
+                            android:id="@+id/BIO"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:textSize="13dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="location"
+                            android:textSize="12dp" />
+
+                        <TextView
+                            android:id="@+id/userInfoLocation"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </ScrollView>
+
+        </LinearLayout>
+
+        <TableLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0">
+
+            <TableRow>
+
+
+                <Button
+                    android:id="@+id/userInfoShowTweetButton"
+                    android:layout_width="0dip"
+                    android:layout_height="19dp"
+                    android:layout_weight="1"
+                    android:background="#50909090"
+                    android:textSize="12dp"
+                    android:layout_margin="0dp"
+                    android:text="ツイート" />
+
+                <Button
+                    android:id="@+id/userInfoShowFavoriteButton"
+                    android:layout_width="0dip"
+                    android:layout_height="19dp"
+                    android:layout_weight="1"
+                    android:background="#50707070"
+                    android:textSize="12dp"
+                    android:layout_margin="0dp"
+                    android:text="お気に入り" />
+
+                <Button
+                    android:id="@+id/userInfoShowFollowButton"
+                    android:layout_width="0dip"
+                    android:layout_height="19dp"
+                    android:layout_weight="1"
+                    android:background="#50707070"
+                    android:textSize="12dp"
+                    android:layout_margin="0dp"
+                    android:text="フォロー" />
+
+                <Button
+                    android:id="@+id/userInfoShowFollowerButton"
+                    android:layout_width="0dip"
+                    android:layout_height="19dp"
+                    android:layout_weight="1"
+                    android:background="#50707070"
+                    android:layout_margin="0dp"
+                    android:textSize="12dp"
+                    android:text="フォロワー" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/userInfoTweetNum"
+                    android:layout_width="0dip"
+                    android:layout_height="19dp"
+                    android:layout_weight="1"
+                    android:background="#50909090"
+                    android:gravity="center_horizontal"
+                    android:text="" />
+
+                <TextView
+                    android:id="@+id/userInfoFavoriteNum"
+                    android:layout_width="0dip"
+                    android:layout_height="19dp"
+                    android:layout_weight="1"
+                    android:background="#50707070"
+                    android:gravity="center_horizontal"
+                    android:text="" />
+
+                <TextView
+                    android:id="@+id/userInfoFollowNum"
+                    android:layout_width="0dip"
+                    android:layout_height="19dp"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:background="#50707070"
+                    android:text="" />
+
+                <TextView
+                    android:id="@+id/userInfoFollowerNum"
+                    android:layout_width="0dip"
+                    android:layout_height="19dp"
+                    android:layout_weight="1"
+                    android:background="#50707070"
+                    android:gravity="center_horizontal"
+                    android:text="" />
+
+            </TableRow>
+
+        </TableLayout>
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/userInfoViewPager"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+    </android.support.v4.view.ViewPager>
+
+</LinearLayout>

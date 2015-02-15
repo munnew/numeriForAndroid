@@ -14,6 +14,7 @@ import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.media.MediaActivity;
+import com.serori.numeri.userprofile.UserInformationActivity;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.twitter.ConversationActivity;
 import com.serori.numeri.twitter.TweetActivity;
@@ -60,6 +61,8 @@ public class TwitterActions {
                 break;
             case SHOW_MEDIA:
                 showMedia(adapter.getItem(position).getMediaUris());
+            case OPEN_USER_PROFILE:
+                openUserProfile(position);
             default:
                 break;
         }
@@ -67,6 +70,10 @@ public class TwitterActions {
     }
 
     private void retweet(int position) {
+        if (adapter.getItem(position).isProtectedUser()) {
+            ToastSender.sendToast("非公開ユーザーのツイートはRTできません");
+            return;
+        }
         if (!((Activity) context).isFinishing()) {
             TimeLineItem item = adapter.getItem(position);
             AlertDialog alertDialog = new AlertDialog.Builder(context).setMessage("このツイートをRTしますか？")
@@ -74,10 +81,10 @@ public class TwitterActions {
                     })
                     .setPositiveButton("はい", (dialog, id) -> {
                         AsyncTask.execute(() -> {
-                            if (!item.isRT()) {
+                            if (!item.isMyRT()) {
                                 try {
                                     numeriUser.getTwitter().retweetStatus(item.getStatusId());
-                                    item.setRT(true);
+                                    item.setMyRT(true);
                                     ToastSender.sendToast(item.getScreenName() + "さんのツイートをRTしました");
                                 } catch (TwitterException e) {
                                     e.printStackTrace();
@@ -92,7 +99,7 @@ public class TwitterActions {
 
     private void favorite(int position) {
         TimeLineItem item = adapter.getItem(position);
-        View view = adapter.getView(position, adapter.getCurrentVeiw(), null);
+        View view = adapter.getView(position, adapter.getCurrentView(), null);
         ImageView favoriteStar = (ImageView) view.findViewById(R.id.favoriteStar);
         if (!item.isFavorite()) {
             AsyncTask.execute(() -> {
@@ -147,7 +154,9 @@ public class TwitterActions {
         if (item.isFavorite()) menuItems.add(new MenuItem(Actions.FAVORITE));
         else menuItems.add(new MenuItem(Actions.FAVORITE));
 
-        menuItems.add(new MenuItem(Actions.RT));
+        if (!item.isProtectedUser()) menuItems.add(new MenuItem(Actions.RT));
+
+        menuItems.add(new MenuItem(Actions.OPEN_USER_PROFILE));
 
         if (item.getConversationId() != -1) menuItems.add(new MenuItem(Actions.SHOW_CONVERSATION));
 
@@ -189,6 +198,8 @@ public class TwitterActions {
                         case SHOW_MEDIA:
                             showMedia(item.getMediaUris());
                             break;
+                        case OPEN_USER_PROFILE:
+                            openUserProfile(position);
                         default:
                             break;
                     }
@@ -204,6 +215,13 @@ public class TwitterActions {
     private void showMedia(List<String> uris) {
         MediaActivity.setMediaUris(uris);
         Intent intent = new Intent(context, MediaActivity.class);
+        context.startActivity(intent);
+    }
+
+    private void openUserProfile(int position) {
+        UserInformationActivity.setUserId(adapter.getItem(position).getUserId());
+        UserInformationActivity.setNumeriUser(numeriUser);
+        Intent intent = new Intent(context, UserInformationActivity.class);
         context.startActivity(intent);
     }
 

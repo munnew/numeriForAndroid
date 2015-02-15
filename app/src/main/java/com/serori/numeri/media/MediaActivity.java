@@ -68,6 +68,7 @@ public class MediaActivity extends NumeriActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            mediaFragments.clear();
             finish();
             return true;
         }

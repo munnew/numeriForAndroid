@@ -6,6 +6,7 @@ import com.serori.numeri.fragment.manager.FragmentStorager;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.stream.OnStatusListener;
 import com.serori.numeri.util.toast.ToastSender;
+import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
         for (UserMentionEntity userMentionEntity : status.getUserMentionEntities()) {
             if (userMentionEntity.getId() == getNumeriUser().getAccessToken().getUserId() && !status.isRetweet()) {
                 TimeLineItem item = new TimeLineItem(status, getNumeriUser());
-                getMainActivity().runOnUiThread(() -> getTimelineListView().insertItem(item));
+                getTimelineListView().insertItem(item);
             }
         }
     }
@@ -74,6 +75,7 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
             responceStatuses.remove(0);
             return responceStatuses;
         } catch (TwitterException e) {
+            TwitterExceptionDisplay.show(e);
             e.printStackTrace();
         }
         return null;

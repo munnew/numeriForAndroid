@@ -24,36 +24,41 @@ import twitter4j.TwitterException;
 public class ConversationActivity extends NumeriActivity {
 
     private NumeriListView conversationListView;
-    private List<TimeLineItem> timeLineItems = new ArrayList<>();
     private TimeLineItemAdapter adapter;
-    private static NumeriUser numeriUser;
+    private static NumeriUser numeriUser = null;
     private static long nextStatusId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_conversation);
-        adapter = new TimeLineItemAdapter(this, 0, timeLineItems);
-        conversationListView = (NumeriListView) findViewById(R.id.conversationListView);
         if (numeriUser == null) {
             throw new NullPointerException("numeriUserがセットされていません");
         }
-        NumeriUser user = numeriUser;
-        conversationListView.setAdapter(adapter);
-        AsyncTask.execute(() -> {
-            while (nextStatusId != -1) {
-                try {
-                    Status status = user.getTwitter().showStatus(nextStatusId);
-                    runOnUiThread(() -> adapter.add(new TimeLineItem(status, user)));
-                    nextStatusId = status.getInReplyToStatusId();
-                } catch (TwitterException e) {
-                    TwitterExceptionDisplay.show(e);
-                    e.printStackTrace();
-                    break;
+
+        if (savedInstanceState == null) {
+            List<TimeLineItem> timeLineItems = new ArrayList<>();
+            adapter = new TimeLineItemAdapter(this, 0, timeLineItems);
+            conversationListView = (NumeriListView) findViewById(R.id.conversationListView);
+
+            NumeriUser user = numeriUser;
+            conversationListView.setAdapter(adapter);
+            AsyncTask.execute(() -> {
+                while (nextStatusId != -1) {
+                    try {
+                        Status status = user.getTwitter().showStatus(nextStatusId);
+                        runOnUiThread(() -> adapter.add(new TimeLineItem(status, user)));
+                        nextStatusId = status.getInReplyToStatusId();
+                    } catch (TwitterException e) {
+                        TwitterExceptionDisplay.show(e);
+                        e.printStackTrace();
+                        break;
+                    }
                 }
-            }
-            conversationListView.onTouchItemEnabled(user, this);
-        });
+                conversationListView.onTouchItemEnabled(user, this);
+            });
+        }
+
     }
 
     /**

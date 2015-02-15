@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.listview.NumeriListView;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
@@ -38,10 +39,10 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (numeriUser == null) {
-            throw new NullPointerException("フラグメントにユーザーがセットされていません");
-        }
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
+        if (numeriUser == null) {
+            throw new NullPointerException("numeriUserがセットされていません");
+        }
         Log.v(name, "crate");
         setRetainInstance(true);
         context = rootView.getContext();
@@ -94,14 +95,18 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
 
     @Override
     public void attachedBottom(TimeLineItem item) {
-        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage("ツイートを更に読み込みますか？")
-                .setNegativeButton("いいえ", (dailog, id) -> {
-                })
-                .setPositiveButton("はい", (dialog, id) -> {
-                    this.onAttachedBottom(item);
-                })
-                .create();
-        ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
+        if (ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET.isEnabled()) {
+            onAttachedBottom(item);
+        } else {
+            AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage("ツイートを更に読み込みますか？")
+                    .setNegativeButton("いいえ", (dailog, id) -> {
+                    })
+                    .setPositiveButton("はい", (dialog, id) -> {
+                        onAttachedBottom(item);
+                    })
+                    .create();
+            ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
+        }
     }
 
     protected Activity getMainActivity() {

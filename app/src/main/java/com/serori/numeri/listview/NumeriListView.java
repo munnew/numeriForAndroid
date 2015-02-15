@@ -28,7 +28,8 @@ public class NumeriListView extends ListView {
     private float touchedCoordinatesX;
     private AttachedBottomListener attachedBottomListener;
     private boolean onAttachedBottom = false;
-    private boolean OnAttachedBottomCallbackEnabled = true;
+    private boolean onAttachedBottomCallbackEnabled = true;
+    private boolean insertItemEnable = true;
 
     private static final int LEFT = 0;
     private static final int CENTER = 1;
@@ -36,7 +37,8 @@ public class NumeriListView extends ListView {
 
     private TwitterActions twitterAction;
 
-    private List<TimeLineItem> storeedItems = new ArrayList<>();
+
+    private List<TimeLineItem> storedItems = new ArrayList<>();
 
     public NumeriListView(Context context) {
         super(context);
@@ -67,19 +69,28 @@ public class NumeriListView extends ListView {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItemPosition, int visibleItemCount, int totalItemCount) {
-                if (firstVisibleItemPosition == 0 && !storeedItems.isEmpty()) {
-                    int y = getChildAt(0).getTop();
-                    for (TimeLineItem storeedItem : storeedItems) {
-                        ((TimeLineItemAdapter) getAdapter()).insert(storeedItem, 0);
-                    }
-                    setSelectionFromTop(storeedItems.size(), y);
 
-                    storeedItems.clear();
+                if (firstVisibleItemPosition == 0 && !storedItems.isEmpty()) {
+                    int y = getChildAt(0).getTop();
+                    Log.v("ListView", "InsertEnable:" + insertItemEnable);
+                    insertItemEnable = false;
+                    while (!storedItems.isEmpty()) {
+                        ((TimeLineItemAdapter) getAdapter()).insert(storedItems.get(0), 0);
+                        storedItems.remove(0);
+                    }
+                    setSelectionFromTop(storedItems.size(), y);
+                    insertItemEnable = true;
                 }
-                if (attachedBottomListener != null && OnAttachedBottomCallbackEnabled && !onAttachedBottom &&
+
+                if (attachedBottomListener != null && onAttachedBottomCallbackEnabled && !onAttachedBottom &&
                         firstVisibleItemPosition + visibleItemCount == totalItemCount && visibleItemCount < totalItemCount) {
-                    attachedBottomListener.attachedBottom((TimeLineItem) getAdapter().getItem(totalItemCount - 1));
-                    onAttachedBottom = true;
+                    int lastItemY = getChildAt(getChildCount() - 1).getHeight();
+                    int lastItemPositionY = getChildAt(getChildCount() - 1).getTop();
+                    int itemPositionTargetLine = getHeight() - lastItemY;
+                    if (lastItemPositionY <= itemPositionTargetLine) {
+                        attachedBottomListener.attachedBottom((TimeLineItem) getAdapter().getItem(totalItemCount - 1));
+                        onAttachedBottom = true;
+                    }
                 } else if (firstVisibleItemPosition + visibleItemCount <= totalItemCount - 1) {
                     onAttachedBottom = false;
                 }
@@ -122,7 +133,7 @@ public class NumeriListView extends ListView {
 
         setOnItemClickListener((parent, view, position, id) -> {
             Log.v("ontTouchItem", "" + getTouchedCoordinates());
-            ((TimeLineItemAdapter) getAdapter()).setCurrentVeiw(view);
+            ((TimeLineItemAdapter) getAdapter()).setCurrentView(view);
             switch (getTouchedCoordinates()) {
                 case LEFT:
                     twitterAction.onTouchAction(ActionStorager.RespectTapPositionActions.LEFT, position);
@@ -164,15 +175,14 @@ public class NumeriListView extends ListView {
     }
 
     public void onAttachedBottomCallbackEnabled(boolean onAttachedBottomCallbackEnabled) {
-        OnAttachedBottomCallbackEnabled = onAttachedBottomCallbackEnabled;
+        this.onAttachedBottomCallbackEnabled = onAttachedBottomCallbackEnabled;
     }
 
     public void insertItem(TimeLineItem item) {
-        if (getFirstVisiblePosition() == 0) {
-            ((TimeLineItemAdapter) getAdapter()).insert(item, 0);
+        if (getFirstVisiblePosition() == 0 && insertItemEnable) {
+            Application.getInstance().runOnUiThread(() -> ((TimeLineItemAdapter) getAdapter()).insert(item, 0));
         } else {
-            storeedItems.add(item);
+            storedItems.add(item);
         }
     }
-
 }

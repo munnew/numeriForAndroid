@@ -1,7 +1,7 @@
 package com.serori.numeri.fragment.manager;
 
 /**
- * Created by serioriKETC on 2014/12/30.
+ *
  */
 public class FragmentDataDeleteObserver {
     private OnFragmentDataDeleteListener onFragmentDataDeleteListener;

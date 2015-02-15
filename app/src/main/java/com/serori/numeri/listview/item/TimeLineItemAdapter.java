@@ -2,12 +2,12 @@ package com.serori.numeri.listview.item;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
@@ -22,7 +22,7 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
     private Context context;
     private int resource;
     private List<TimeLineItem> objects;
-    private View currentVeiw;
+    private View currentView;
 
     public TimeLineItemAdapter(Context context, int resource, List<TimeLineItem> objects) {
         super(context, resource, objects);
@@ -42,8 +42,8 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.item_timeline, null);
         }
+
         float textSize = ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE.getNumericValue() + 8;
-        TextView waitImageLoadingBar = (TextView) convertView.findViewById(R.id.waitImageLoading);
         NumeriImageView iconImageView = (NumeriImageView) convertView.findViewById(R.id.userIcon);
 
         TextView screenNameTextView = (TextView) convertView.findViewById(R.id.timeLine_screenName);
@@ -69,7 +69,14 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         ImageView favoriteStar = (ImageView) convertView.findViewById(R.id.favoriteStar);
         View isMyTweetState = convertView.findViewById(R.id.isMyTweetStateView);
 
-        iconImageView.startLoadImage(waitImageLoadingBar, timeLineItem.getIconImageUrl());
+        ImageView isProtectedUser = (ImageView) convertView.findViewById(R.id.key);
+        if (timeLineItem.isProtectedUser()) {
+            isProtectedUser.setVisibility(View.VISIBLE);
+        } else {
+            isProtectedUser.setVisibility(View.GONE);
+        }
+
+        iconImageView.startLoadImage(NumeriImageView.ProgressType.LOAD_ICON, timeLineItem.getIconImageUrl());
         screenNameTextView.setText(timeLineItem.getScreenName());
         nameTextView.setText(timeLineItem.getName());
         mainTextView.setText(timeLineItem.getMainText());
@@ -87,7 +94,7 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
             isMyTweetState.setBackgroundColor(Color.parseColor("#00000000"));
         }
 
-        if (timeLineItem.isRetweeted()) {
+        if (timeLineItem.isRT()) {
             convertView.setBackgroundColor(Color.parseColor(ColorStorager.Colors.RT_ITEM.getColor()));
             return convertView;
         }
@@ -102,11 +109,11 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         return convertView;
     }
 
-    public View getCurrentVeiw() {
-        return currentVeiw;
+    public View getCurrentView() {
+        return currentView;
     }
 
-    public void setCurrentVeiw(View currentVeiw) {
-        this.currentVeiw = currentVeiw;
+    public void setCurrentView(View currentView) {
+        this.currentView = currentView;
     }
 }

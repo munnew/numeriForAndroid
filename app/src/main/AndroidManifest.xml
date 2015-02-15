@@ -108,6 +108,16 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.serori.numeri.userprofile.UserInformationActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="ユーザー情報">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
