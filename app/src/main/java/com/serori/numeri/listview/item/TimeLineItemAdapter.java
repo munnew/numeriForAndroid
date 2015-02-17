@@ -2,7 +2,7 @@ package com.serori.numeri.listview.item;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.media.Image;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +41,7 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         TimeLineItem timeLineItem = getItem(position);
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.item_timeline, null);
+            Log.v(getClass().toString(), "new convertView");
         }
 
         float textSize = ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE.getNumericValue() + 8;
@@ -77,6 +78,7 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         }
 
         iconImageView.startLoadImage(NumeriImageView.ProgressType.LOAD_ICON, timeLineItem.getIconImageUrl());
+
         screenNameTextView.setText(timeLineItem.getScreenName());
         nameTextView.setText(timeLineItem.getName());
         mainTextView.setText(timeLineItem.getMainText());

@@ -47,6 +47,7 @@ public class TimeLineItem {
             via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName();
             screenName = status.getRetweetedStatus().getUser().getScreenName();
             userId = status.getRetweetedStatus().getUser().getId();
+            conversationId = status.getRetweetedStatus().getInReplyToStatusId();
         } else {//!RT
             isProtectedUser = status.getUser().isProtected();
             iconImageUrl = status.getUser().getBiggerProfileImageURL();
@@ -55,6 +56,7 @@ public class TimeLineItem {
             via = "via " + Html.fromHtml(status.getSource()).toString();
             screenName = status.getUser().getScreenName();
             userId = status.getUser().getId();
+            conversationId = status.getInReplyToStatusId();
             if (numeriUser.getAccessToken().getUserId() == status.getUser().getId()) {
                 isMyTweet = true;
             }
@@ -72,7 +74,6 @@ public class TimeLineItem {
         name = name.replaceAll("\r", "");
         name = name.replaceAll("\n", "");
         name = name.replaceAll("\t", "");
-        conversationId = status.getInReplyToStatusId();
 
         for (MediaEntity mediaEntity : status.getExtendedMediaEntities()) {
             mediaUris.add(mediaEntity.getMediaURL());

@@ -1,7 +1,6 @@
 package com.serori.numeri.main;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,11 +27,10 @@ import com.serori.numeri.fragment.manager.FragmentStorager;
 import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.oauth.OAuthActivity;
 import com.serori.numeri.stream.OnFavoriteListener;
-import com.serori.numeri.userprofile.UserInformationActivity;
-import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
+import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,19 +51,26 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
     protected void onCreate(Bundle savedInstanceState) {
         Application.getInstance().setApplicationContext(getApplicationContext());
         Application.getInstance().setMainActivityContext(this);
-        ConfigurationStorager.getInstance().loadConfigurations();
-        ActionStorager.getInstance().initializeActions();
-        ColorStorager.getInstance().loadColor();
+
+        loadConfigrations();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         if (ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON.isEnabled()) {
             addMenuButton();
         }
+
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setOffscreenPageLimit(20);
-        ImageButton changeTweetActivityButton;
-        changeTweetActivityButton = (ImageButton) findViewById(R.id.goTweetButton);
+
+        ImageButton startTweetActivityButton = (ImageButton) findViewById(R.id.goTweetButton);
+        startTweetActivityButton.setOnClickListener(v -> {
+            if (!NumeriUsers.getInstance().getNumeriUsers().isEmpty())
+                startActivity(TweetActivity.class, false);
+        });
+
         if (savedInstanceState == null) {
             init();
         } else {
@@ -74,8 +79,14 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
             }
             viewPager.setAdapter(sectionsPagerAdapter);
         }
-        changeTweetActivityButton.setOnClickListener(v -> startActivity(TweetActivity.class, false));
     }
+
+    private void loadConfigrations() {
+        ConfigurationStorager.getInstance().loadConfigurations();
+        ActionStorager.getInstance().initializeActions();
+        ColorStorager.getInstance().loadColor();
+    }
+
 
     private void init() {
         {
@@ -139,16 +150,19 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
                 startActivity(ConfigActivity.class, false);
                 break;
             case R.id.action_acount:
-                startActivity(OAuthActivity.class, false);
+                if (!NumeriUsers.getInstance().getNumeriUsers().isEmpty())
+                    startActivity(OAuthActivity.class, false);
                 break;
             case R.id.action_fragment_manager:
-                startActivity(FragmentManagerActivity.class, false);
+                if (!NumeriUsers.getInstance().getNumeriUsers().isEmpty())
+                    startActivity(FragmentManagerActivity.class, false);
                 break;
             case R.id.action_color_manager:
                 startActivity(ColorManagerActivity.class, false);
                 break;
             case R.id.action_api_confirmation:
-                useApiFrequencyConfirmation();
+                if (!NumeriUsers.getInstance().getNumeriUsers().isEmpty())
+                    useApiFrequencyConfirmation();
                 return super.onOptionsItemSelected(item);
         }
 

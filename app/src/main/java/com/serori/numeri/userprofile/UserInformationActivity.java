@@ -1,10 +1,7 @@
 package com.serori.numeri.userprofile;
 
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,17 +10,11 @@ import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.imageview.NumeriImageView;
 import com.serori.numeri.user.NumeriUser;
-import com.serori.numeri.util.async.AsyncTaskUtil;
-import com.serori.numeri.util.toast.ToastSender;
-import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter4j.Friendship;
 import twitter4j.Relationship;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
 import twitter4j.User;
 
 /**
@@ -75,8 +66,8 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
 
         List<Object> UserInfoObjects = new ArrayList<>();
 
-
-        AsyncTaskUtil<Twitter, List<Object>> task = new AsyncTaskUtil<>(numeriUser.getTwitter());
+        screenName.setText("未実装っす");
+        /*AsyncTaskUtil<Twitter, List<Object>> task = new AsyncTaskUtil<>(numeriUser.getTwitter());
         task.setBackgroundRunnable(twitter -> {
             try {
                 UserInfoObjects.add(twitter.showUser(userId));
@@ -124,7 +115,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                 followerNum.setText("" + user.getFollowersCount());
             }
         });
-        task.execute();
+        task.execute();*/
     }
 
 

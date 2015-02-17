@@ -1,20 +1,14 @@
 package com.serori.numeri.imageview;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.imageview.cache.ImageCache;
 import com.serori.numeri.util.toast.ToastSender;
 
@@ -29,7 +23,8 @@ public class NumeriImageView extends ImageView {
     private OnLoadCompletedListener onLoadCompletedListener;
     private Bitmap image = null;
     private String imageName = "";
-    private String imageType = "";
+    private String imageExtension = "";
+    private String imageKey = "";
 
     public NumeriImageView(Context context) {
         super(context);
@@ -50,31 +45,29 @@ public class NumeriImageView extends ImageView {
     public void startLoadImage(ProgressType type, String url) {
         ImageCache imageCache = new ImageCache();
         imageName = Uri.parse(url).getLastPathSegment();
-        imageType = "";
+        imageKey = url;
+        imageExtension = "";
         char[] charArray = url.toCharArray();
         for (int length = charArray.length - 1; length >= 0; length--) {
             if (String.valueOf(charArray[length]).equals(".")) {
                 break;
             }
-            imageType = String.valueOf(charArray[length]) + imageType;
+            imageExtension = String.valueOf(charArray[length]) + imageExtension;
         }
-        imageCache.loadImage(url, image -> {
-                    Log.v(getClass().toString(), "loadComplete");
-                    if (image == null || image.isRecycled()) {
-                        this.startLoadImage(type, url);
-                        return;
-                    }
-                    this.image = image;
-                    this.setImageBitmap(this.image);
-                    if (onLoadCompletedListener != null) {
-                        onLoadCompletedListener.onLoadCompleted(image);
+
+        imageCache.loadImage(url, (image, key) -> {
+                    if ((image != null && !image.isRecycled()) && imageKey.equals(key)) {
+                        this.image = image;
+                        this.setImageBitmap(this.image);
+                        if (onLoadCompletedListener != null) {
+                            onLoadCompletedListener.onLoadCompleted(image);
+                        }
                     }
                 },
                 () -> {
-                    Log.v(getClass().toString(), "startDownload");
                     switch (type) {
                         case LOAD_ICON:
-                            setImageDrawable(getContext().getResources().getDrawable(R.drawable.loading));
+                            setImageDrawable(null);
                             break;
                         case LOAD_MEDIA:
                             setImageDrawable(null);
@@ -119,9 +112,9 @@ public class NumeriImageView extends ImageView {
             }
             if (existence) {
                 outputStream = new FileOutputStream(file.getAbsolutePath() + "/" + imageName);
-                if (imageType.equals("png") || imageType.equals("PNG")) {
+                if (imageExtension.equals("png") || imageExtension.equals("PNG")) {
                     image.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                } else if (imageType.equals("jpg") || imageType.equals("JPG") || imageType.equals("jpeg") || imageType.equals("JPEG")) {
+                } else if (imageExtension.equals("jpg") || imageExtension.equals("JPG") || imageExtension.equals("jpeg") || imageExtension.equals("JPEG")) {
                     image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                 }
                 outputStream.flush();

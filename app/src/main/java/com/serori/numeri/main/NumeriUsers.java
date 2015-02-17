@@ -9,7 +9,7 @@ import java.util.List;
  * アプリケーションが生きている間持つユーザーを表す
  */
 public class NumeriUsers {
-    private List<NumeriUser> numeriUsers = new ArrayList<>();
+    private final List<NumeriUser> numeriUsers = new ArrayList<>();
 
     private NumeriUsers() {
     }
@@ -24,7 +24,9 @@ public class NumeriUsers {
 
     public List<NumeriUser> getNumeriUsers() {
         List<NumeriUser> users = new ArrayList<>();
-        users.addAll(numeriUsers);
+        synchronized (numeriUsers) {
+            users.addAll(numeriUsers);
+        }
         return users;
     }
 

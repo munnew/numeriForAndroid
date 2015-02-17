@@ -55,6 +55,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_tweet);
         if (savedInstanceState == null) {
             Button changeUserButton = (Button) findViewById(R.id.changeUser);
@@ -65,7 +66,9 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             currentUserTextView = (TextView) findViewById(R.id.currentUser);
             backgroundTimeLine = (TextView) findViewById(R.id.backgroundTimeLine);
             appendedImageViews = (LinearLayout) findViewById(R.id.appendedImages);
-            currentNumeriUser = currentNumeriUser == null ? Application.getInstance().getNumeriUsers().getNumeriUsers().get(0) : currentNumeriUser;
+
+            NumeriUser defaultUser = Application.getInstance().getNumeriUsers().getNumeriUsers().get(0);
+            currentNumeriUser = currentNumeriUser == null ? defaultUser : currentNumeriUser;
             String currentTweetUserName = currentNumeriUser == null ? Application.getInstance().getNumeriUsers().getNumeriUsers().get(0).getScreenName() : currentNumeriUser.getScreenName();
 
             currentUserTextView.setText(currentTweetUserName);

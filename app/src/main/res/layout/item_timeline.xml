@@ -23,7 +23,7 @@
             android:layout_margin="5dp"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="0dp"
-            android:src="@drawable/loading"/>
+            android:background="#56A0A0A0"/>
 
     </LinearLayout>
 

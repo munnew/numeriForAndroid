@@ -1,10 +1,9 @@
 package com.serori.numeri.util.twitter;
 
 
-import android.os.AsyncTask;
-
-import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
+import com.serori.numeri.util.SimpleAsyncTask;
+import com.serori.numeri.util.toast.ToastSender;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ public class TweetBuilder {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public void tweet() {
         if (numeriUser == null) {
             throw new NullPointerException();
@@ -51,29 +51,38 @@ public class TweetBuilder {
 
         if (statusId != -1)
             statusUpdate.setInReplyToStatusId(statusId);
-        AsyncTask.execute(() -> {
-            if (!images.isEmpty()) {
-                ToastSender.sendToast("画像をアップロードします");
-                long[] medias = new long[images.size()];
-                for (int i = 0; i < images.size(); i++) {
-                    try {
-                        UploadedMedia uploadedMedia = numeriUser.getTwitter().uploadMedia(images.get(i));
-                        medias[i] = uploadedMedia.getMediaId();
-                    } catch (TwitterException e) {
-                        TwitterExceptionDisplay.show(e);
-                        e.printStackTrace();
+
+        new SimpleAsyncTask<List<File>, Void>() {
+            @Override
+            protected Void doInBackground(List<File> images) {
+                if (!images.isEmpty()) {
+                    ToastSender.sendToast("画像をアップロードします");
+                    long[] medias = new long[images.size()];
+                    for (int i = 0; i < images.size(); i++) {
+                        try {
+                            UploadedMedia uploadedMedia = numeriUser.getTwitter().uploadMedia(images.get(i));
+                            medias[i] = uploadedMedia.getMediaId();
+                        } catch (TwitterException e) {
+                            TwitterExceptionDisplay.show(e);
+                            e.printStackTrace();
+                        }
                     }
+                    statusUpdate.setMediaIds(medias);
                 }
-                statusUpdate.setMediaIds(medias);
+                try {
+                    twitter.updateStatus(statusUpdate);
+                    ToastSender.sendToast("ツイートに成功しました");
+                } catch (TwitterException e) {
+                    ToastSender.sendToast("ツイートに失敗しました");
+                    e.printStackTrace();
+                }
+                return null;
             }
 
-            try {
-                twitter.updateStatus(statusUpdate);
-                ToastSender.sendToast("ツイートに成功しました");
-            } catch (TwitterException e) {
-                ToastSender.sendToast("ツイートに失敗しました");
-                e.printStackTrace();
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                //none
             }
-        });
+        }.execute(images);
     }
 }
