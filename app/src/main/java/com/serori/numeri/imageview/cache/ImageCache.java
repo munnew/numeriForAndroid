@@ -20,14 +20,16 @@ import java.util.Map;
 
 /**
  * 画像をキャッシュするクラス
+ * 生成されたインスタンスを使いまわすことは出来ません
  */
 public class ImageCache {
     private static final int maxCacheSize = 1 * 1024 * 1024 / 10;
     private static int currentCacheSize = 0;
-
+    OnDownLoadStartListener onDownLoadStartListener = null;
     private static volatile Map<String, Bitmap> imageCache = new LinkedHashMap<>();
     private static final List<String> urls = new ArrayList<>();
     private static volatile Map<String, List<OnLoadImageCompletedListener>> onLoadImageCompletedListeners = new LinkedHashMap<>();
+    private boolean loadImageAlreadyCalled = false;
 
     private void entryRemoved() {
         while (maxCacheSize < currentCacheSize) {
@@ -35,7 +37,7 @@ public class ImageCache {
                 return;
             }
             Bitmap removedImage = imageCache.remove(urls.get(0));
-            currentCacheSize -= removedImage.getByteCount() * 1024;
+            currentCacheSize -= removedImage.getByteCount() / 1024;
             removedImage.recycle();
             urls.remove(0);
             Log.v(getClass().toString(), "remove");
@@ -44,14 +46,34 @@ public class ImageCache {
     }
 
     /**
+     * ダウンロードを開始した際に発生するイベントのリスナをセットします。<br>
+     * セットする場合はloadImage()を呼ぶ前にセットする必要があります。
+     *
+     * @param listener OnDownLoadStartListener
+     * @return 自身のインスタンス
+     */
+    public ImageCache setOnDownLoadStartListener(OnDownLoadStartListener listener) {
+        if (loadImageAlreadyCalled) {
+            throw new IllegalStateException("loadImageが呼び出された後に呼び出されました。");
+        }
+        onDownLoadStartListener = listener;
+        return this;
+    }
+
+
+    /**
      * 画像をダウンロードドする<br>
      * ダウンロード済みの画像が場合はそれをロードする
+     * おなじインスタンスから２度呼ぶことは出来ません
      *
      * @param url                 ロードしたい画像のurl
      * @param onCompletedListener 画像のロードが終了した際のリスナ
-     * @param startListener       画像のロードを開始した際のリスナ
      */
-    public void loadImage(String url, OnLoadImageCompletedListener onCompletedListener, OnDownLoadStartListener startListener) {
+    public void loadImage(String url, OnLoadImageCompletedListener onCompletedListener) {
+        if (loadImageAlreadyCalled) {
+            throw new IllegalStateException("loadImageが二度呼ばれました");
+        }
+        loadImageAlreadyCalled = true;
         Bitmap image;
         image = imageCache.get(url);
         if (image != null && !image.isRecycled()) {
@@ -64,7 +86,7 @@ public class ImageCache {
             if (s.equals(url)) {
                 startedDownload = true;
                 if (imageCache.get(url) == null) {
-                    startListener.onDownLoadStart();
+                    if (onDownLoadStartListener != null) onDownLoadStartListener.onDownLoadStart();
                     List<OnLoadImageCompletedListener> listeners = new ArrayList<>();
                     listeners.add(onCompletedListener);
                     List<OnLoadImageCompletedListener> previousListeners = onLoadImageCompletedListeners.put(url, listeners);
@@ -76,7 +98,7 @@ public class ImageCache {
         }
 
         if (!startedDownload) {
-            startListener.onDownLoadStart();
+            if (onDownLoadStartListener != null) onDownLoadStartListener.onDownLoadStart();
             urls.add(url);
             new SimpleAsyncTask<String, Bitmap>() {
                 @Override
@@ -121,6 +143,5 @@ public class ImageCache {
                 }
             }.execute(url);
         }
-
     }
 }

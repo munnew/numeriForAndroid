@@ -66,25 +66,24 @@ public class NumeriImageView extends ImageView {
             imageExtension = String.valueOf(charArray[length]) + imageExtension;
         }
 
-        imageCache.loadImage(url, (image, key) -> {
-                    if ((image != null && !image.isRecycled()) && imageKey.equals(key)) {
-                        this.image = image;
-                        this.setImageBitmap(this.image);
-                        if (onLoadCompletedListener != null) {
-                            onLoadCompletedListener.onLoadCompleted(image);
-                        }
-                    }
-                },
-                () -> {
-                    switch (type) {
-                        case LOAD_ICON:
-                            setImageDrawable(null);
-                            break;
-                        case LOAD_MEDIA:
-                            setImageDrawable(null);
-                            break;
-                    }
-                });
+        imageCache.setOnDownLoadStartListener(() -> {
+            switch (type) {
+                case LOAD_ICON:
+                    setImageDrawable(null);
+                    break;
+                case LOAD_MEDIA:
+                    setImageDrawable(null);
+                    break;
+            }
+        }).loadImage(url, (image, key) -> {
+            if ((image != null && !image.isRecycled()) && imageKey.equals(key)) {
+                this.image = image;
+                this.setImageBitmap(this.image);
+                if (onLoadCompletedListener != null) {
+                    onLoadCompletedListener.onLoadCompleted(image);
+                }
+            }
+        });
     }
 
     /**
@@ -129,6 +128,7 @@ public class NumeriImageView extends ImageView {
                 existence = true;
             }
             if (existence) {
+                //ToDO ダサい
                 outputStream = new FileOutputStream(file.getAbsolutePath() + "/" + imageName);
                 if (imageExtension.equals("png") || imageExtension.equals("PNG")) {
                     image.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
