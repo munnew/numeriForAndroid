@@ -25,21 +25,26 @@ import java.util.Map;
 public class ImageCache {
     private static final int maxCacheSize = 1 * 1024 * 1024 / 10;
     private static int currentCacheSize = 0;
-    OnDownLoadStartListener onDownLoadStartListener = null;
-    private static volatile Map<String, Bitmap> imageCache = new LinkedHashMap<>();
+    private OnDownLoadStartListener onDownLoadStartListener = null;
+    private static volatile Map<String, ImageData> imageCache = new LinkedHashMap<>();
     private static final List<String> urls = new ArrayList<>();
     private static volatile Map<String, List<OnLoadImageCompletedListener>> onLoadImageCompletedListeners = new LinkedHashMap<>();
     private boolean loadImageAlreadyCalled = false;
 
     private void entryRemoved() {
+        int index = 0;
         while (maxCacheSize < currentCacheSize) {
-            if (imageCache.isEmpty()) {
+            if (imageCache.isEmpty() && urls.size() <= index) {
                 return;
             }
-            Bitmap removedImage = imageCache.remove(urls.get(0));
-            currentCacheSize -= removedImage.getByteCount() / 1024;
-            removedImage.recycle();
-            urls.remove(0);
+            ImageData removeImage = imageCache.get(urls.get(index));
+            if (removeImage.delete()) {
+                currentCacheSize -= removeImage.getImage().getByteCount() / 1024;
+                imageCache.remove(urls.get(index));
+                urls.remove(index);
+            } else {
+                index++;
+            }
             Log.v(getClass().toString(), "remove");
         }
         Log.v(getClass().toString(), "onDownload-currentCacheSize: " + (currentCacheSize / 1024.0) + "KB / " + (maxCacheSize / 1024 / 1024.0) + "MB");
@@ -74,9 +79,9 @@ public class ImageCache {
             throw new IllegalStateException("loadImageが二度呼ばれました");
         }
         loadImageAlreadyCalled = true;
-        Bitmap image;
+        ImageData image;
         image = imageCache.get(url);
-        if (image != null && !image.isRecycled()) {
+        if (image != null && !image.getImage().isRecycled()) {
             onCompletedListener.onLoadImageCompleted(image, url);
             return;
         }
@@ -94,15 +99,16 @@ public class ImageCache {
                         onLoadImageCompletedListeners.get(url).addAll(previousListeners);
                     }
                 }
+                break;
             }
         }
 
         if (!startedDownload) {
             if (onDownLoadStartListener != null) onDownLoadStartListener.onDownLoadStart();
             urls.add(url);
-            new SimpleAsyncTask<String, Bitmap>() {
+            new SimpleAsyncTask<String, ImageData>() {
                 @Override
-                protected Bitmap doInBackground(String s) {
+                protected ImageData doInBackground(String s) {
                     try {
                         HttpGet httpGet = new HttpGet();
                         httpGet.setURI(URI.create(url));
@@ -113,10 +119,11 @@ public class ImageCache {
                             image = BitmapFactory.decodeStream(inputStream);
                             inputStream.close();
                             if (image != null) {
-                                imageCache.put(url, image);
+                                ImageData imageData = new ImageData(image);
+                                imageCache.put(url, imageData);
                                 currentCacheSize += image.getByteCount() / 1024;
                                 entryRemoved();
-                                return image;
+                                return imageData;
                             }
                         }
                     } catch (IOException e) {
@@ -127,13 +134,13 @@ public class ImageCache {
                 }
 
                 @Override
-                protected void onPostExecute(Bitmap image) {
-                    if (image != null) {
-                        onCompletedListener.onLoadImageCompleted(image, url);
+                protected void onPostExecute(ImageData imageData) {
+                    if (imageData != null) {
+                        onCompletedListener.onLoadImageCompleted(imageData, url);
                         List<OnLoadImageCompletedListener> listeners = onLoadImageCompletedListeners.get(url);
                         if (listeners != null) {
                             for (OnLoadImageCompletedListener onLoadImageCompletedListener : listeners) {
-                                onLoadImageCompletedListener.onLoadImageCompleted(image, url);
+                                onLoadImageCompletedListener.onLoadImageCompleted(imageData, url);
                             }
                             onLoadImageCompletedListeners.remove(url);
                         }
@@ -142,6 +149,62 @@ public class ImageCache {
                     }
                 }
             }.execute(url);
+        }
+    }
+
+    /**
+     * キャッシュされた画像を表すクラス
+     * 必ずsetQuantityを使用
+     */
+    public class ImageData {
+        //TODO かなりダサい
+        private Bitmap image;
+        private int usedQuantity = 0;
+
+        ImageData(Bitmap image) {
+            this.image = image;
+        }
+
+        /**
+         * Bitmapが使われていない場合それを開放します
+         *
+         * @return 開放したか否か
+         */
+        boolean delete() {
+            if (usedQuantity == 0) {
+                image.recycle();
+                return true;
+            }
+            return false;
+        }
+
+
+        /**
+         * Bitmapを取得します
+         *
+         * @return Bitmap
+         */
+        public Bitmap getImage() {
+            return image;
+        }
+
+        /**
+         * このデータをViewが使用しているか否かを設定します。<br>
+         * 使用している場合はtrueを、しなくなった場合はfalseを必ずセットしてください<b>
+         * 不適切に使用された場合はIllegalStateExceptionを投げます。
+         *
+         * @param practicableDelete true : 使われている false : 使われなくなった。
+         */
+        public void setQuantity(boolean practicableDelete) {
+            if (practicableDelete) {
+                usedQuantity++;
+            } else {
+                usedQuantity--;
+                if (usedQuantity < 0) {
+                    throw new IllegalStateException("一度もtrueを与えられずにfalseを与えられました。");
+                }
+            }
+            Log.v(getClass().toString(), image.toString() + " usedQuantity = " + usedQuantity);
         }
     }
 }

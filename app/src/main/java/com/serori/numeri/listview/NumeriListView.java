@@ -97,7 +97,6 @@ public class NumeriListView extends ListView {
         });
     }
 
-
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev) {
         touchedCoordinatesX = ev.getX();

@@ -21,7 +21,7 @@ import java.io.IOException;
  */
 public class NumeriImageView extends ImageView {
     private OnLoadCompletedListener onLoadCompletedListener;
-    private Bitmap image = null;
+    private ImageCache.ImageData imageData = null;
     private String imageName = "";
     private String imageExtension = "";
     private String imageKey = "";
@@ -75,12 +75,15 @@ public class NumeriImageView extends ImageView {
                     setImageDrawable(null);
                     break;
             }
-        }).loadImage(url, (image, key) -> {
-            if ((image != null && !image.isRecycled()) && imageKey.equals(key)) {
-                this.image = image;
-                this.setImageBitmap(this.image);
+        }).loadImage(url, (imageData, key) -> {
+            if ((imageData != null && !imageData.getImage().isRecycled()) && imageKey.equals(key) && !imageData.equals(this.imageData)) {
+                ImageCache.ImageData previousImageData = this.imageData;
+                if (previousImageData != null) previousImageData.setQuantity(false);
+                this.imageData = imageData;
+                imageData.setQuantity(true);
+                this.setImageBitmap(this.imageData.getImage());
                 if (onLoadCompletedListener != null) {
-                    onLoadCompletedListener.onLoadCompleted(image);
+                    onLoadCompletedListener.onLoadCompleted(imageData.getImage());
                 }
             }
         });
@@ -131,9 +134,9 @@ public class NumeriImageView extends ImageView {
                 //ToDO ダサい
                 outputStream = new FileOutputStream(file.getAbsolutePath() + "/" + imageName);
                 if (imageExtension.equals("png") || imageExtension.equals("PNG")) {
-                    image.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                    imageData.getImage().compress(Bitmap.CompressFormat.PNG, 100, outputStream);
                 } else if (imageExtension.equals("jpg") || imageExtension.equals("JPG") || imageExtension.equals("jpeg") || imageExtension.equals("JPEG")) {
-                    image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                    imageData.getImage().compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                 }
                 outputStream.flush();
                 outputStream.close();
@@ -143,6 +146,12 @@ public class NumeriImageView extends ImageView {
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        if (imageData != null) imageData.setQuantity(false);
+        super.onDetachedFromWindow();
     }
 
     public static enum ProgressType {
