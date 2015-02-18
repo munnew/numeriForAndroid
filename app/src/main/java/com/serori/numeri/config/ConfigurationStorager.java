@@ -11,7 +11,7 @@ import com.serori.numeri.util.database.DataBaseHelper;
 import java.sql.SQLException;
 
 /**
- *
+ * 設定を保存したり読み出したりするためのクラス
  */
 public class ConfigurationStorager {
 
@@ -19,6 +19,11 @@ public class ConfigurationStorager {
         return ConfigurationStoragerHolder.instance;
     }
 
+    /**
+     * 数値的な情報をもつ設定を保存する
+     *
+     * @param numericalConfiguration numericalConfiguration
+     */
     public void saveNumercalConfigTable(NumericalConfiguration numericalConfiguration) {
         ConnectionSource connectionSource = null;
         try {
@@ -42,6 +47,11 @@ public class ConfigurationStorager {
         }
     }
 
+    /**
+     * どちらかを選ぶ2値的な情報を持つ設定を保存する
+     *
+     * @param eitherConfiguration eitherConfiguration
+     */
     public void saveEitherConfigTable(EitherConfiguration eitherConfiguration) {
         ConnectionSource connectionSource = null;
         try {
@@ -66,6 +76,9 @@ public class ConfigurationStorager {
         }
     }
 
+    /**
+     * アプリケーションの設定をすべて読み込む
+     */
     public void loadConfigurations() {
         ConnectionSource connectionSource = null;
         try {
@@ -103,6 +116,9 @@ public class ConfigurationStorager {
         }
     }
 
+    /**
+     * どちらかを選ぶ2値的な情報を持つ設定を保存するテーブル
+     */
     @DatabaseTable(tableName = "eitherConfig")
     public static class EitherConfigTable {
         EitherConfigTable() {
@@ -129,6 +145,9 @@ public class ConfigurationStorager {
 
     }
 
+    /**
+     * 数値的な情報をもつ設定を保存するテーブル
+     */
     @DatabaseTable(tableName = "numericalConfig")
     public static class NumericalConfigTable {
         NumericalConfigTable() {

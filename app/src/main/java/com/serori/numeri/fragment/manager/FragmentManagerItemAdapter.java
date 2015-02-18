@@ -13,7 +13,7 @@ import com.serori.numeri.R;
 import java.util.List;
 
 /**
- * Created by serioriKETC on 2014/12/27.
+ * FragmentManagerActivityがもつリストのアダプタ
  */
 public class FragmentManagerItemAdapter extends ArrayAdapter<FragmentManagerItem> {
     private LayoutInflater layoutInflater;

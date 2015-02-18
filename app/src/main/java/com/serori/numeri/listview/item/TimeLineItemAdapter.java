@@ -17,6 +17,9 @@ import com.serori.numeri.imageview.NumeriImageView;
 
 import java.util.List;
 
+/**
+ * タイムラインを表示するためのアダプタ
+ */
 public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
     private LayoutInflater layoutInflater;
     private Context context;

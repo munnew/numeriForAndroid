@@ -9,12 +9,12 @@ import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.serori.numeri.fragment.AttachedBottomListener;
 import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.listview.action.TwitterActions;
-import com.serori.numeri.main.Application;
-import com.serori.numeri.fragment.AttachedBottomListener;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import java.util.List;
 
 
 /**
- * NumeriListView
+ * タイムラインを表示するためのリストビュー
  */
 public class NumeriListView extends ListView {
     private float touchedCoordinatesX;
@@ -71,14 +71,13 @@ public class NumeriListView extends ListView {
             public void onScroll(AbsListView view, int firstVisibleItemPosition, int visibleItemCount, int totalItemCount) {
 
                 if (firstVisibleItemPosition == 0 && !storedItems.isEmpty()) {
-                    int y = getChildAt(0).getTop();
                     Log.v("ListView", "InsertEnable:" + insertItemEnable);
                     insertItemEnable = false;
                     while (!storedItems.isEmpty()) {
                         ((TimeLineItemAdapter) getAdapter()).insert(storedItems.get(0), 0);
                         storedItems.remove(0);
                     }
-                    setSelectionFromTop(storedItems.size(), y);
+                    setSelection(storedItems.size());
                     insertItemEnable = true;
                 }
 
@@ -117,7 +116,12 @@ public class NumeriListView extends ListView {
         throw new InternalError("何らかの原因で返される値が正常ではありません");
     }
 
-
+    /**
+     * タッチによるアクションの実行を有効にする
+     *
+     * @param numeriUser アクションを実行するユーザー
+     * @param context    Context
+     */
     public void onTouchItemEnabled(NumeriUser numeriUser, Context context) {
         if (numeriUser == null) {
             throw new NullPointerException("numeriUserがセットされていません");

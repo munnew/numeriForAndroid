@@ -2,7 +2,6 @@ package com.serori.numeri.oauth;
 
 
 /**
- * Created by seroriKETC on 2014/12/19.
  */
 public class NumeriUserListItem {
 

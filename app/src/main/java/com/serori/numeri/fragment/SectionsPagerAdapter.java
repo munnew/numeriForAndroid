@@ -7,7 +7,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * NumeriFragment用のPagerAdapter
+ */
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
     private List<Fragment> fragments = new ArrayList<>();
 

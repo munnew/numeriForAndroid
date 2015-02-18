@@ -38,10 +38,21 @@ public class NumeriImageView extends ImageView {
         super(context, attrs, defStyleAttr);
     }
 
+    /**
+     * 画像のロードが終了した際のリスナをセットする
+     *
+     * @param listener 画像のロードが終了した際のリスナ
+     */
     public void setOnLoadCompletedListener(OnLoadCompletedListener listener) {
         onLoadCompletedListener = listener;
     }
 
+    /**
+     * 画像のロードをスタートする
+     *
+     * @param type その画像の種類
+     * @param url  ロードしたい画像のurl
+     */
     public void startLoadImage(ProgressType type, String url) {
         ImageCache imageCache = new ImageCache();
         imageName = Uri.parse(url).getLastPathSegment();
@@ -76,6 +87,13 @@ public class NumeriImageView extends ImageView {
                 });
     }
 
+    /**
+     * 長押しでの画像の保存の機能が有効か否かを切り替える
+     * 必ず保存するか否かのDialogを表示する
+     *
+     * @param enabled  true : 有効 false : 無効
+     * @param activity Activity Dialogを表示するActivity
+     */
     public void setSaveImageFunctionEnabled(boolean enabled, NumeriActivity activity) {
         if (enabled) {
             setOnLongClickListener(v -> {

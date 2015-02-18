@@ -11,6 +11,7 @@ import com.serori.numeri.util.database.DataBaseHelper;
 import java.sql.SQLException;
 
 /**
+ * ツイートに対するアクションについての設定を保存したり読み込むためのクラス
  */
 public class ActionStorager {
 
@@ -19,6 +20,9 @@ public class ActionStorager {
         return ActionStoragerHolder.instance;
     }
 
+    /**
+     * 現在のアクションに設定を保存する
+     */
     public void saveActions() {
         ConnectionSource connectionSource = null;
         try {
@@ -43,6 +47,9 @@ public class ActionStorager {
         }
     }
 
+    /**
+     * アクションに付いての設定を読み込み初期化する
+     */
     public void initializeActions() {
         ConnectionSource connectionSource = null;
         TwitterActions.Actions[] defaultActions = new TwitterActions.Actions[6];
@@ -88,6 +95,9 @@ public class ActionStorager {
         private static final ActionStorager instance = new ActionStorager();
     }
 
+    /**
+     * アクションについての設定の情報を保存するテーブルクラス
+     */
     @DatabaseTable(tableName = "actionTable")
     public static class ActionTable {
         public ActionTable() {

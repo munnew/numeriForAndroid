@@ -41,6 +41,9 @@ import twitter4j.Status;
 import twitter4j.TwitterException;
 import twitter4j.User;
 
+/**
+ * MainActivity
+ */
 public class MainActivity extends NumeriActivity implements OnFavoriteListener {
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ViewPager viewPager;
@@ -89,33 +92,33 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
 
 
     private void init() {
-        {
-            Log.v("initLoad", "init");
-            List<NumeriUserStorager.NumeriUserTable> tables = new ArrayList<>();
-            tables.addAll(NumeriUserStorager.getInstance().loadNumeriUserTables());
-            if (tables.isEmpty()) {
-                startActivity(OAuthActivity.class, true);
-            } else {
-                AsyncTask.execute(() -> {
-                    Application.getInstance().getNumeriUsers().clear();
-                    for (NumeriUserStorager.NumeriUserTable table : tables) {
-                        Application.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
-                    }
-                    for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                        numeriUser.getStreamSwitcher().startStream();
-                        numeriUser.getStreamEvent().addOwnerOnfavoriteListener(this);
-                    }
-                    numeriFragments.clear();
-
-                    numeriFragments.addAll(FragmentStorager.getInstance().getFragments());
+        Log.v("initLoad", "init");
+        List<NumeriUserStorager.NumeriUserTable> tables = new ArrayList<>();
+        tables.addAll(NumeriUserStorager.getInstance().loadNumeriUserTables());
+        if (tables.isEmpty()) {
+            startActivity(OAuthActivity.class, true);
+        } else {
+            AsyncTask.execute(() -> {
+                Application.getInstance().getNumeriUsers().clear();
+                for (NumeriUserStorager.NumeriUserTable table : tables) {
+                    Application.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
+                }
+                for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+                    numeriUser.getStreamSwitcher().startStream();
+                    numeriUser.getStreamEvent().addOwnerOnfavoriteListener(this);
+                }
+                numeriFragments.clear();
+                List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
+                if (!numeriUsers.isEmpty()) {
+                    numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
                     runOnUiThread(() -> {
                         for (NumeriFragment numeriFragment : numeriFragments) {
                             sectionsPagerAdapter.add(numeriFragment);
                         }
                         viewPager.setAdapter(sectionsPagerAdapter);
                     });
-                });
-            }
+                }
+            });
         }
     }
 

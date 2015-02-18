@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by serioriKETC on 2014/12/30.
+ * 色設定に表示されるリストのアダプタ
  */
 public class ColorListAdapter extends ArrayAdapter<ColorManagerItem> {
     private LayoutInflater layoutInflater;

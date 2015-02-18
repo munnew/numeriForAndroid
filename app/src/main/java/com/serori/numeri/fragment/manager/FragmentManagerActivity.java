@@ -19,13 +19,12 @@ import com.serori.numeri.user.NumeriUser;
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter4j.PagableResponseList;
 import twitter4j.ResponseList;
 import twitter4j.TwitterException;
 import twitter4j.UserList;
 
 /**
- * Created by serioriKETC on 2014/12/27.
+ * Fragment管理用のActivity
  */
 public class FragmentManagerActivity extends NumeriActivity implements OnFragmentDataDeleteListener {
     private FragmentManagerItemAdapter adapter;

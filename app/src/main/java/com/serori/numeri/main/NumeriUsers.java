@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * アプリケーションが生きている間持つユーザーを表す
+ * アプリケーションが生きている間持つユーザーたちを表す
  */
 public class NumeriUsers {
     private final List<NumeriUser> numeriUsers = new ArrayList<>();

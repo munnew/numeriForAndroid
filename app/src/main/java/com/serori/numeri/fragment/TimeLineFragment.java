@@ -17,7 +17,9 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
-
+/**
+ * ホームタイムラインを表示するためのFragment
+ */
 public class TimeLineFragment extends NumeriFragment implements OnStatusListener {
 
     public TimeLineFragment() {
@@ -43,7 +45,7 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
                 for (Status status : timeLine) {
                     items.add(new TimeLineItem(status, getNumeriUser()));
                 }
-                getMainActivity().runOnUiThread(() -> {
+                getActivity().runOnUiThread(() -> {
                     getAdapter().addAll(items);
                     getNumeriUser().getStreamEvent().addOwnerOnStatusListener(this);
                 });
@@ -87,7 +89,7 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
                 for (Status status : previousTimeLine) {
                     items.add(new TimeLineItem(status, getNumeriUser()));
                 }
-                getMainActivity().runOnUiThread(() -> getAdapter().addAll(items));
+                getActivity().runOnUiThread(() -> getAdapter().addAll(items));
             }
             getTimelineListView().onAttachedBottomCallbackEnabled(true);
         });

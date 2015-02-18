@@ -6,7 +6,7 @@ import android.graphics.Point;
 import android.view.WindowManager;
 
 /**
- * Application
+ * Applicationのフィールド的な役割を持つクラス
  */
 public class Application extends android.app.Application {
     private Application() {
@@ -45,6 +45,9 @@ public class Application extends android.app.Application {
         }
     }
 
+    /**
+     * 現在のMainActivityを殺す
+     */
     public void destroyMainActivity() {
         if (mainActivityContext != null) {
             if (!isDestroyMainActivity()) {
@@ -53,10 +56,20 @@ public class Application extends android.app.Application {
         }
     }
 
+    /**
+     * MainActivityのUIThreadで実行する
+     *
+     * @param runnable Runnable
+     */
     public void runOnUiThread(Runnable runnable) {
         ((Activity) mainActivityContext).runOnUiThread(runnable);
     }
 
+    /**
+     * 今のMainActivityが生きているかどうか
+     *
+     * @return true : 生きている false : 死んでいる
+     */
     public boolean isDestroyMainActivity() {
         return ((Activity) mainActivityContext).isFinishing();
     }

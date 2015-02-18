@@ -49,7 +49,8 @@ public class NumeriActivity extends ActionBarActivity {
 
 
     /**
-     * Dialogをセットすると同時に表示します
+     * Dialogをセットすると同時に表示します<br>
+     * このメソッドを使用してDialogを表示した場合、そのDialogのライフサイクルはActivityのライフサイクルに準じます
      *
      * @param dialog セットするダイアログ
      */
@@ -70,6 +71,12 @@ public class NumeriActivity extends ActionBarActivity {
         super.onDestroy();
     }
 
+    /**
+     * 指定したActivityに遷移します
+     *
+     * @param activityClass 遷移するActivityのクラス
+     * @param finish        現在のActivityを終了するか否か<br>true:終了する<br>false:終了しない
+     */
     protected void startActivity(Class activityClass, boolean finish) {
         Intent intent = new Intent(this, activityClass);
         super.startActivity(intent);

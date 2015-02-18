@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * config
+ * アプリケーションの設定についてのActivity
  */
 public class ConfigActivity extends NumeriActivity {
 

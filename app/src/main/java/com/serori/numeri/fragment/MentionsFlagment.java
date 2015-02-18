@@ -18,6 +18,9 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.UserMentionEntity;
 
+/**
+ * ユーザーへのリプライを表示するFragment
+ */
 public class MentionsFlagment extends NumeriFragment implements OnStatusListener {
 
     @Override
@@ -35,7 +38,8 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
                 for (Status status : timeLine) {
                     items.add(new TimeLineItem(status, getNumeriUser()));
                 }
-                getMainActivity().runOnUiThread(() -> {
+                
+                getActivity().runOnUiThread(() -> {
                     getAdapter().addAll(items);
                     getNumeriUser().getStreamEvent().addOwnerOnStatusListener(this);
                 });
@@ -91,7 +95,7 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
                 for (Status status : previousTimeLine) {
                     items.add(new TimeLineItem(status, getNumeriUser()));
                 }
-                getMainActivity().runOnUiThread(() -> getAdapter().addAll(items));
+                getActivity().runOnUiThread(() -> getAdapter().addAll(items));
             }
             getTimelineListView().onAttachedBottomCallbackEnabled(true);
         });

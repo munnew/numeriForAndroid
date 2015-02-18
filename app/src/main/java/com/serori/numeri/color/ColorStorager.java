@@ -22,7 +22,9 @@ public class ColorStorager {
         return ColorStoragerHolder.instance;
     }
 
-
+    /**
+     * 現在設定されている色情報をすべて保存する
+     */
     public void saveColorData() {
         ConnectionSource connectionSource = null;
         try {
@@ -49,7 +51,7 @@ public class ColorStorager {
     }
 
     /**
-     * 色設定をColorsにローカルから読み込む。<br>
+     * 色設定をローカルから読み込む。<br>
      * 任意のタイミングで呼び出し。
      */
     public void loadColor() {
@@ -87,7 +89,9 @@ public class ColorStorager {
         }
     }
 
-
+    /**
+     * 色の情報を保存するテーブル
+     */
     @DatabaseTable(tableName = "ColorData")
     public static class ColorData {
         public ColorData() {

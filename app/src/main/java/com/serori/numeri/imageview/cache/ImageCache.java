@@ -18,6 +18,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 画像をキャッシュするクラス
+ */
 public class ImageCache {
     private static final int maxCacheSize = 1 * 1024 * 1024 / 10;
     private static int currentCacheSize = 0;
@@ -40,12 +43,19 @@ public class ImageCache {
         Log.v(getClass().toString(), "onDownload-currentCacheSize: " + (currentCacheSize / 1024.0) + "KB / " + (maxCacheSize / 1024 / 1024.0) + "MB");
     }
 
-
-    public void loadImage(String url, OnLoadImageCompletedListener listener, OnDownLoadStartListener startListener) {
+    /**
+     * 画像をダウンロードドする<br>
+     * ダウンロード済みの画像が場合はそれをロードする
+     *
+     * @param url                 ロードしたい画像のurl
+     * @param onCompletedListener 画像のロードが終了した際のリスナ
+     * @param startListener       画像のロードを開始した際のリスナ
+     */
+    public void loadImage(String url, OnLoadImageCompletedListener onCompletedListener, OnDownLoadStartListener startListener) {
         Bitmap image;
         image = imageCache.get(url);
         if (image != null && !image.isRecycled()) {
-            listener.onLoadImageCompleted(image, url);
+            onCompletedListener.onLoadImageCompleted(image, url);
             return;
         }
 
@@ -56,7 +66,7 @@ public class ImageCache {
                 if (imageCache.get(url) == null) {
                     startListener.onDownLoadStart();
                     List<OnLoadImageCompletedListener> listeners = new ArrayList<>();
-                    listeners.add(listener);
+                    listeners.add(onCompletedListener);
                     List<OnLoadImageCompletedListener> previousListeners = onLoadImageCompletedListeners.put(url, listeners);
                     if (previousListeners != null) {
                         onLoadImageCompletedListeners.get(url).addAll(previousListeners);
@@ -97,7 +107,7 @@ public class ImageCache {
                 @Override
                 protected void onPostExecute(Bitmap image) {
                     if (image != null) {
-                        listener.onLoadImageCompleted(image, url);
+                        onCompletedListener.onLoadImageCompleted(image, url);
                         List<OnLoadImageCompletedListener> listeners = onLoadImageCompletedListeners.get(url);
                         if (listeners != null) {
                             for (OnLoadImageCompletedListener onLoadImageCompletedListener : listeners) {

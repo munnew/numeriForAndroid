@@ -1,7 +1,7 @@
 package com.serori.numeri.fragment.manager;
 
 /**
- *
+ * 保存されたFragmentが削除されたかどうかを監視するクラス
  */
 public class FragmentDataDeleteObserver {
     private OnFragmentDataDeleteListener onFragmentDataDeleteListener;

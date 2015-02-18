@@ -1,6 +1,5 @@
 package com.serori.numeri.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.listview.NumeriListView;
 import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
-import com.serori.numeri.main.Application;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
@@ -25,7 +23,8 @@ import java.util.List;
 
 
 /**
- * Fragment
+ * タイムラインを表示するFragmentが継承すべきクラス<br>
+ * 親のActivityはNumeriActivityを継承している必要がある
  */
 public abstract class NumeriFragment extends Fragment implements AttachedBottomListener {
 
@@ -39,6 +38,9 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (!(getActivity() instanceof NumeriActivity)) {
+            throw new IllegalStateException("親のアクティビティがNunmeriActivityを継承してません");
+        }
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
         if (numeriUser == null) {
             throw new NullPointerException("numeriUserがセットされていません");
@@ -89,8 +91,16 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         return numeriUser;
     }
 
+    /**
+     * タイムラインを取得して表示する処理を実装するメソッド
+     */
     protected abstract void initializeLoad();
 
+    /**
+     * リストビューの一番下までスクロールした際に発生するイベントハンドラ
+     *
+     * @param item 一番下のアイテム
+     */
     protected abstract void onAttachedBottom(TimeLineItem item);
 
     @Override
@@ -109,7 +119,12 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         }
     }
 
-    protected Activity getMainActivity() {
-        return ((Activity) Application.getInstance().getMainActivityContext());
+    /**
+     * 親のNumeriActivityを取得する
+     *
+     * @return 親のNmeriActivity
+     */
+    protected NumeriActivity getNumeriActivity() {
+        return (NumeriActivity) getActivity();
     }
 }

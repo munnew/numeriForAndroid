@@ -1,17 +1,15 @@
 package com.serori.numeri.fragment.manager;
 
-import android.util.Log;
-
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
 import com.serori.numeri.fragment.ListFragment;
-import com.serori.numeri.main.Application;
 import com.serori.numeri.fragment.MentionsFlagment;
 import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.fragment.TimeLineFragment;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.database.DataBaseHelper;
 
@@ -23,7 +21,11 @@ import java.util.List;
  *
  */
 public class FragmentStorager {
-
+    /**
+     * Fragmentを生成するための情報を保存する
+     *
+     * @param table Fragmentを生成するための情報
+     */
     public void saveFragmentData(FragmentsTable table) {
         ConnectionSource connectionSource = null;
         try {
@@ -47,6 +49,11 @@ public class FragmentStorager {
         }
     }
 
+    /**
+     * 指定したキーのFragmentの情報を削除する
+     *
+     * @param fragmentKey 削除したいFragmentのキー
+     */
     public void deleteFragmentData(String fragmentKey) {
         ConnectionSource connectionSource = null;
         try {
@@ -70,6 +77,11 @@ public class FragmentStorager {
         }
     }
 
+    /**
+     * Fragmentを生成するための情報のリストを取得する
+     *
+     * @return Fragmentを生成するための情報のリスト
+     */
     public List<FragmentsTable> getFragmentsData() {
         ConnectionSource connectionSource = null;
         List<FragmentsTable> fragmentsData = new ArrayList<>();
@@ -94,7 +106,17 @@ public class FragmentStorager {
         return fragmentsData;
     }
 
-    public List<NumeriFragment> getFragments() {
+    /**
+     * 渡されたユーザーリスト内に存在するユーザーが持ち主である複数の保存されたFragmentを返します<br>
+     * 空のリストを渡された場合はIllegalArgumentExceptionが発生
+     *
+     * @param numeriUsers ユーザーたち
+     * @return Fragmentのリスト
+     */
+    public List<NumeriFragment> getFragments(List<NumeriUser> numeriUsers) {
+        if (numeriUsers.isEmpty()) {
+            throw new IllegalArgumentException("userが存在しません");
+        }
         ConnectionSource connectionSource = null;
         List<NumeriFragment> fragments = new ArrayList<>();
         try {
@@ -103,8 +125,6 @@ public class FragmentStorager {
             TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
             Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
 
-            List<NumeriUser> numeriUsers = new ArrayList<>();
-            numeriUsers.addAll(Application.getInstance().getNumeriUsers().getNumeriUsers());
             for (FragmentsTable table : dao.queryForAll()) {
                 if (table.getFragmentType().equals(FragmentType.TL.getId())) {
                     for (NumeriUser numeriUser : numeriUsers) {
@@ -129,7 +149,6 @@ public class FragmentStorager {
                         }
                     }
                 }
-
             }
 
         } catch (SQLException e) {
@@ -155,7 +174,9 @@ public class FragmentStorager {
         return numeriFragment;
     }
 
-
+    /**
+     * Fragmentを生成するための情報を保存するテーブルクラス
+     */
     @DatabaseTable(tableName = "fragments")
     public static class FragmentsTable {
 
@@ -221,6 +242,9 @@ public class FragmentStorager {
         private static final FragmentStorager instance = new FragmentStorager();
     }
 
+    /**
+     * Fragmentの種類を表す列挙型
+     */
     public static enum FragmentType {
         TL("TimeLine"),
         MENTIONS("Mentions"),

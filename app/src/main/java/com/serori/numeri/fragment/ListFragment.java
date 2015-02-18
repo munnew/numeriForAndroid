@@ -19,6 +19,7 @@ import twitter4j.TwitterException;
 import twitter4j.User;
 
 /**
+ * ユーザーリストを表示するFragment
  */
 public class ListFragment extends NumeriFragment {
 
@@ -51,7 +52,7 @@ public class ListFragment extends NumeriFragment {
                 }
                 Log.v(toString(), "listUsers" + listUserIds.size());
 
-                getMainActivity().runOnUiThread(() -> {
+                getActivity().runOnUiThread(() -> {
                     for (Status status : statuses) {
                         getAdapter().add(new TimeLineItem(status, getNumeriUser()));
                     }
@@ -93,7 +94,7 @@ public class ListFragment extends NumeriFragment {
             try {
                 ResponseList<Status> statuses = getNumeriUser().getTwitter().getUserListStatuses(listId, paging);
                 statuses.remove(0);
-                getMainActivity().runOnUiThread(() -> {
+                getActivity().runOnUiThread(() -> {
                     for (Status status : statuses) {
                         getAdapter().add(new TimeLineItem(status, getNumeriUser()));
                     }

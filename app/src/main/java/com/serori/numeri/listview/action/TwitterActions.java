@@ -26,7 +26,7 @@ import java.util.List;
 import twitter4j.TwitterException;
 
 /**
- * Numeri
+ * ツイートに対するアクション
  */
 public class TwitterActions {
 

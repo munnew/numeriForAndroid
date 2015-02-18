@@ -1,8 +1,11 @@
 package com.serori.numeri.imageview.cache;
 
 /**
- * Created by serioriKETC on 2015/02/15.
+ * OnDownLoadStartListener
  */
 public interface OnDownLoadStartListener {
+    /**
+     * 画像のダウンロードがスタートした際のイベントハンドラ
+     */
     void onDownLoadStart();
 }
