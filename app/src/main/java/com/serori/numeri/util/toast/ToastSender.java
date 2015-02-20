@@ -5,6 +5,7 @@ import android.widget.Toast;
 import com.serori.numeri.main.Application;
 
 /**
+ * MainActivityのUIThread上でToastするクラス
  */
 public class ToastSender {
     public static void sendToast(String text) {

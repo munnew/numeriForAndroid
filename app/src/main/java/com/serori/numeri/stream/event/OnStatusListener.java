@@ -1,9 +1,10 @@
-package com.serori.numeri.stream;
+package com.serori.numeri.stream.event;
+
 
 import twitter4j.Status;
 
 /**
- * Created by serioriKETC on 2014/12/19.
+ * OnStatusListener
  */
 public interface OnStatusListener {
     public void onStatus(Status status);

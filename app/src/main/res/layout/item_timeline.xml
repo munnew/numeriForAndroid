@@ -23,7 +23,7 @@
             android:layout_margin="5dp"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="0dp"
-            android:background="#56A0A0A0"/>
+            android:background="#56A0A0A0" />
 
     </LinearLayout>
 
@@ -31,6 +31,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_marginRight="5dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -125,6 +126,8 @@
         android:layout_height="10dp"
         android:contentDescription="isFavorite"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="10dp"
-        android:layout_weight="0" />
+        android:layout_marginRight="5dp"
+        android:layout_weight="0"
+        android:src="@drawable/favorite_star"
+        android:visibility="gone" />
 </LinearLayout>

@@ -1,6 +1,6 @@
 package com.serori.numeri.fragment;
 
-import com.serori.numeri.listview.item.TimeLineItem;
+import com.serori.numeri.twitter.SimpleTweetStatus;
 
 /**
  * AttachedBottomListener
@@ -11,5 +11,5 @@ public interface AttachedBottomListener {
      *
      * @param item 一番下のアイテム
      */
-    void attachedBottom(TimeLineItem item);
+    void attachedBottom(SimpleTweetStatus item);
 }

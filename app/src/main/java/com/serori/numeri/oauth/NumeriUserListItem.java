@@ -2,6 +2,7 @@ package com.serori.numeri.oauth;
 
 
 /**
+ * OAuthActivityに表示するリストビューのセルのモデルクラス
  */
 public class NumeriUserListItem {
 

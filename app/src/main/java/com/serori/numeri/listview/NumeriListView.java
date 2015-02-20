@@ -1,5 +1,6 @@
 package com.serori.numeri.listview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
@@ -9,12 +10,13 @@ import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.serori.numeri.R;
 import com.serori.numeri.fragment.AttachedBottomListener;
 import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.listview.action.TwitterActions;
-import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.main.Application;
+import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
@@ -31,6 +33,10 @@ public class NumeriListView extends ListView {
     private boolean onAttachedBottomCallbackEnabled = true;
     private boolean insertItemEnable = true;
 
+    private int _firstVisibleItemPosition = 0;
+    private int _visibleItemCount = 0;
+    private int _totalItemCount = 0;
+
     private static final int LEFT = 0;
     private static final int CENTER = 1;
     private static final int RIGHT = 2;
@@ -38,7 +44,7 @@ public class NumeriListView extends ListView {
     private TwitterActions twitterAction;
 
 
-    private List<TimeLineItem> storedItems = new ArrayList<>();
+    private List<SimpleTweetStatus> storedItems = new ArrayList<>();
 
     public NumeriListView(Context context) {
         super(context);
@@ -52,10 +58,6 @@ public class NumeriListView extends ListView {
         super(context, attrs, defStyle);
     }
 
-    @Override
-    public ListAdapter getAdapter() {
-        return super.getAdapter();
-    }
 
     public void setAttachedBottomListener(AttachedBottomListener listener) {
         attachedBottomListener = listener;
@@ -69,7 +71,9 @@ public class NumeriListView extends ListView {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItemPosition, int visibleItemCount, int totalItemCount) {
-
+                _firstVisibleItemPosition = firstVisibleItemPosition;
+                _visibleItemCount = visibleItemCount;
+                _totalItemCount = totalItemCount;
                 if (firstVisibleItemPosition == 0 && !storedItems.isEmpty()) {
                     Log.v("ListView", "InsertEnable:" + insertItemEnable);
                     insertItemEnable = false;
@@ -87,7 +91,7 @@ public class NumeriListView extends ListView {
                     int lastItemPositionY = getChildAt(getChildCount() - 1).getTop();
                     int itemPositionTargetLine = getHeight() - lastItemY;
                     if (lastItemPositionY <= itemPositionTargetLine) {
-                        attachedBottomListener.attachedBottom((TimeLineItem) getAdapter().getItem(totalItemCount - 1));
+                        attachedBottomListener.attachedBottom((SimpleTweetStatus) getAdapter().getItem(totalItemCount - 1));
                         onAttachedBottom = true;
                     }
                 } else if (firstVisibleItemPosition + visibleItemCount <= totalItemCount - 1) {
@@ -136,7 +140,6 @@ public class NumeriListView extends ListView {
 
         setOnItemClickListener((parent, view, position, id) -> {
             Log.v("ontTouchItem", "" + getTouchedCoordinates());
-            ((TimeLineItemAdapter) getAdapter()).setCurrentView(view);
             switch (getTouchedCoordinates()) {
                 case LEFT:
                     twitterAction.onTouchAction(ActionStorager.RespectTapPositionActions.LEFT, position);
@@ -170,6 +173,32 @@ public class NumeriListView extends ListView {
         });
     }
 
+    public void startObserveFavorite(NumeriUser numeriUser) {
+        numeriUser.getStreamEvent().addOnFavoriteListener((user1, user2, favoritedStatus) -> {
+            SimpleTweetStatus simpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
+            ((Activity) getContext()).runOnUiThread(() -> setFavoriteStar(simpleTweetStatus, true));
+        }).addOnUnFavoriteListener((user1, user2, unFavoritedStatus) -> {
+            SimpleTweetStatus simpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
+            ((Activity) getContext()).runOnUiThread(() -> setFavoriteStar(simpleTweetStatus, false));
+        });
+    }
+
+    private void setFavoriteStar(SimpleTweetStatus simpleTweetStatus, boolean enabled) {
+        for (int i = 0; i < _visibleItemCount; i++) {
+            SimpleTweetStatus simpleTweetStatus1 = ((SimpleTweetStatus) getAdapter().getItem(_firstVisibleItemPosition + i));
+            if (simpleTweetStatus.equals(simpleTweetStatus1)) {
+                if (enabled) {
+                    getChildAt(i).findViewById(R.id.favoriteStar).setVisibility(VISIBLE);
+                    Log.v(getClass().toString(), "favorite");
+                } else {
+                    getChildAt(i).findViewById(R.id.favoriteStar).setVisibility(GONE);
+                    Log.v(getClass().toString(), "unFavorite");
+                }
+
+            }
+        }
+    }
+
     @Override
     public void setAdapter(ListAdapter adapter) {
         if (!(adapter instanceof TimeLineItemAdapter))
@@ -181,7 +210,7 @@ public class NumeriListView extends ListView {
         this.onAttachedBottomCallbackEnabled = onAttachedBottomCallbackEnabled;
     }
 
-    public void insertItem(TimeLineItem item) {
+    public void insertItem(SimpleTweetStatus item) {
         if (getFirstVisiblePosition() == 0 && insertItemEnable) {
             Application.getInstance().runOnUiThread(() -> ((TimeLineItemAdapter) getAdapter()).insert(item, 0));
         } else {

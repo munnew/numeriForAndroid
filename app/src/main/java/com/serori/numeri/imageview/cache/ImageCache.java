@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.serori.numeri.util.SimpleAsyncTask;
+import com.serori.numeri.util.async.SimpleAsyncTask;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,7 +25,7 @@ import java.util.Map;
 public class ImageCache {
     private static final int maxCacheSize = 1 * 1024 * 1024 / 10;
     private static int currentCacheSize = 0;
-    private OnDownLoadStartListener onDownLoadStartListener = null;
+    private OnStartDownLoadListener onStartDownLoadListener = null;
     private static volatile Map<String, ImageData> imageCache = new LinkedHashMap<>();
     private static final List<String> urls = new ArrayList<>();
     private static volatile Map<String, List<OnLoadImageCompletedListener>> onLoadImageCompletedListeners = new LinkedHashMap<>();
@@ -57,11 +57,11 @@ public class ImageCache {
      * @param listener OnDownLoadStartListener
      * @return 自身のインスタンス
      */
-    public ImageCache setOnDownLoadStartListener(OnDownLoadStartListener listener) {
+    public ImageCache setOnStartDownLoadListener(OnStartDownLoadListener listener) {
         if (loadImageAlreadyCalled) {
             throw new IllegalStateException("loadImageが呼び出された後に呼び出されました。");
         }
-        onDownLoadStartListener = listener;
+        onStartDownLoadListener = listener;
         return this;
     }
 
@@ -91,7 +91,8 @@ public class ImageCache {
             if (s.equals(url)) {
                 startedDownload = true;
                 if (imageCache.get(url) == null) {
-                    if (onDownLoadStartListener != null) onDownLoadStartListener.onDownLoadStart();
+                    if (onStartDownLoadListener != null)
+                        onStartDownLoadListener.onDownLoadStart(url);
                     List<OnLoadImageCompletedListener> listeners = new ArrayList<>();
                     listeners.add(onCompletedListener);
                     List<OnLoadImageCompletedListener> previousListeners = onLoadImageCompletedListeners.put(url, listeners);
@@ -104,7 +105,7 @@ public class ImageCache {
         }
 
         if (!startedDownload) {
-            if (onDownLoadStartListener != null) onDownLoadStartListener.onDownLoadStart();
+            if (onStartDownLoadListener != null) onStartDownLoadListener.onDownLoadStart(url);
             urls.add(url);
             new SimpleAsyncTask<String, ImageData>() {
                 @Override
@@ -168,7 +169,7 @@ public class ImageCache {
         /**
          * Bitmapが使われていない場合それを開放します
          *
-         * @return 開放したか否か
+         * @return 開放したか否か true : 開放した false : 開放出来なかった
          */
         boolean delete() {
             if (usedQuantity == 0) {
@@ -204,7 +205,7 @@ public class ImageCache {
                     throw new IllegalStateException("一度もtrueを与えられずにfalseを与えられました。");
                 }
             }
-            Log.v(getClass().toString(), image.toString() + " usedQuantity = " + usedQuantity);
+            // Log.v(getClass().toString(), image.toString() + " usedQuantity = " + usedQuantity);
         }
     }
 }

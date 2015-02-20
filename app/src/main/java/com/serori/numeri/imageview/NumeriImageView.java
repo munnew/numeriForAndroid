@@ -66,14 +66,16 @@ public class NumeriImageView extends ImageView {
             imageExtension = String.valueOf(charArray[length]) + imageExtension;
         }
 
-        imageCache.setOnDownLoadStartListener(() -> {
-            switch (type) {
-                case LOAD_ICON:
-                    setImageDrawable(null);
-                    break;
-                case LOAD_MEDIA:
-                    setImageDrawable(null);
-                    break;
+        imageCache.setOnStartDownLoadListener(key -> {
+            if (key.equals(imageKey)) {
+                switch (type) {
+                    case LOAD_ICON:
+                        setImageDrawable(null);
+                        break;
+                    case LOAD_MEDIA:
+                        setImageDrawable(null);
+                        break;
+                }
             }
         }).loadImage(url, (imageData, key) -> {
             if ((imageData != null && !imageData.getImage().isRecycled()) && imageKey.equals(key) && !imageData.equals(this.imageData)) {

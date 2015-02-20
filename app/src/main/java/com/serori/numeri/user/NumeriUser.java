@@ -19,7 +19,7 @@ import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
 
 /**
- * need Create on Async
+ * このアプリケーションを使用するユーザーを表す
  */
 public class NumeriUser {
     private Twitter twitter;
@@ -27,7 +27,11 @@ public class NumeriUser {
     private String screenName = null;
     private NumeriUserStorager.NumeriUserTable table;
 
-
+    /**
+     * このコンストラクタは非同期タスクで実行する必要があります
+     *
+     * @param table NumeriUserTable
+     */
     public NumeriUser(NumeriUserStorager.NumeriUserTable table) {
         this.table = table;
         auth();
@@ -56,7 +60,7 @@ public class NumeriUser {
         twitterStream.setOAuthConsumer(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key),
                 Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
         twitterStream.setOAuthAccessToken(new AccessToken(table.getAccessToken(), table.getAccessTokenSecret()));
-        streamEvent = new StreamEvent(twitterStream);
+        streamEvent = new StreamEvent(twitterStream, this);
     }
 
     public Twitter getTwitter() {
@@ -67,14 +71,25 @@ public class NumeriUser {
         return new AccessToken(table.getAccessToken(), table.getAccessTokenSecret());
     }
 
+    /**
+     * @return IStreamEvent
+     */
     public IStreamEvent getStreamEvent() {
         return streamEvent;
     }
 
+    /**
+     * @return StreamSwitcher
+     */
     public StreamSwitcher getStreamSwitcher() {
         return streamEvent;
     }
 
+    /**
+     * TweetBuilderを取得します
+     *
+     * @return TweetBuilder
+     */
     public TweetBuilder getTweetBuilder() {
         return new TweetBuilder(this);
     }

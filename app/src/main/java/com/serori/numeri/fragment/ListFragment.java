@@ -3,10 +3,8 @@ package com.serori.numeri.fragment;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.serori.numeri.listview.item.TimeLineItem;
-import com.serori.numeri.util.toast.ToastSender;
+import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,18 +52,14 @@ public class ListFragment extends NumeriFragment {
 
                 getActivity().runOnUiThread(() -> {
                     for (Status status : statuses) {
-                        getAdapter().add(new TimeLineItem(status, getNumeriUser()));
+                        getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
                     }
                 });
                 startPseudoStream();
 
             } catch (TwitterException e) {
                 e.printStackTrace();
-                if (e.exceededRateLimitation()) {
-                    ToastSender.sendToast("exceededRateLimitation");
-                } else {
-                    ToastSender.sendToast("ネットワークを確認して下さい");
-                }
+                TwitterExceptionDisplay.show(e);
             }
         });
     }
@@ -74,10 +68,10 @@ public class ListFragment extends NumeriFragment {
      * ユーザーリストでの擬似的なストリームを開始する。
      */
     private void startPseudoStream() {
-        getNumeriUser().getStreamEvent().addOwnerOnStatusListener(status -> {
+        getNumeriUser().getStreamEvent().addOnStatusListener(status -> {
             for (Long listUserId : listUserIds) {
                 if (status.getUser().getId() == listUserId && status.getUserMentionEntities().length == 0) {
-                    getTimelineListView().insertItem(new TimeLineItem(status, getNumeriUser()));
+                    getTimelineListView().insertItem(SimpleTweetStatus.build(status, getNumeriUser()));
                     break;
                 }
             }
@@ -85,7 +79,7 @@ public class ListFragment extends NumeriFragment {
     }
 
     @Override
-    protected void onAttachedBottom(TimeLineItem item) {
+    protected void onAttachedBottom(SimpleTweetStatus item) {
         AsyncTask.execute(() -> {
             getTimelineListView().onAttachedBottomCallbackEnabled(false);
             Paging paging = new Paging();
@@ -96,7 +90,7 @@ public class ListFragment extends NumeriFragment {
                 statuses.remove(0);
                 getActivity().runOnUiThread(() -> {
                     for (Status status : statuses) {
-                        getAdapter().add(new TimeLineItem(status, getNumeriUser()));
+                        getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
                     }
                 });
             } catch (TwitterException e) {

@@ -3,8 +3,8 @@ package com.serori.numeri.fragment;
 import android.os.AsyncTask;
 
 import com.serori.numeri.fragment.manager.FragmentStorager;
-import com.serori.numeri.listview.item.TimeLineItem;
-import com.serori.numeri.stream.OnStatusListener;
+import com.serori.numeri.twitter.SimpleTweetStatus;
+import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
@@ -32,7 +32,7 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
 
     @Override
     public void onStatus(Status status) {
-        getTimelineListView().insertItem(new TimeLineItem(status, getNumeriUser()));
+        getTimelineListView().insertItem(SimpleTweetStatus.build(status, getNumeriUser()));
     }
 
     @Override
@@ -41,13 +41,13 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
             Twitter twitter = getNumeriUser().getTwitter();
             ResponseList<Status> timeLine = loadTimeLine(twitter);
             if (timeLine != null) {
-                List<TimeLineItem> items = new ArrayList<>();
+                List<SimpleTweetStatus> items = new ArrayList<>();
                 for (Status status : timeLine) {
-                    items.add(new TimeLineItem(status, getNumeriUser()));
+                    items.add(SimpleTweetStatus.build(status, getNumeriUser()));
                 }
                 getActivity().runOnUiThread(() -> {
                     getAdapter().addAll(items);
-                    getNumeriUser().getStreamEvent().addOwnerOnStatusListener(this);
+                    getNumeriUser().getStreamEvent().addOnStatusListener(this);
                 });
             }
         });
@@ -58,7 +58,7 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
             return twitter.getHomeTimeline();
         } catch (TwitterException e) {
             ToastSender.sendToast("ツイートを読み込めませんでした。ストリームを開始します");
-            getNumeriUser().getStreamEvent().addOwnerOnStatusListener(this);
+            getNumeriUser().getStreamEvent().addOnStatusListener(this);
             e.printStackTrace();
         }
         return null;
@@ -80,14 +80,14 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
     }
 
     @Override
-    protected void onAttachedBottom(TimeLineItem item) {
+    protected void onAttachedBottom(SimpleTweetStatus item) {
         AsyncTask.execute(() -> {
             getTimelineListView().onAttachedBottomCallbackEnabled(false);
             ResponseList<Status> previousTimeLine = loadPreviousTimeLine(getNumeriUser().getTwitter(), item.getStatusId());
             if (previousTimeLine != null) {
-                List<TimeLineItem> items = new ArrayList<>();
+                List<SimpleTweetStatus> items = new ArrayList<>();
                 for (Status status : previousTimeLine) {
-                    items.add(new TimeLineItem(status, getNumeriUser()));
+                    items.add(SimpleTweetStatus.build(status, getNumeriUser()));
                 }
                 getActivity().runOnUiThread(() -> getAdapter().addAll(items));
             }

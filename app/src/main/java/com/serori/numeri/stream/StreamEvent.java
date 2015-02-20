@@ -1,5 +1,10 @@
 package com.serori.numeri.stream;
 
+import com.serori.numeri.stream.event.OnFavoriteListener;
+import com.serori.numeri.stream.event.OnStatusListener;
+import com.serori.numeri.stream.event.OnUnFavoriteListener;
+import com.serori.numeri.user.NumeriUser;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +26,9 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
     private TwitterStream userStream;
     private List<OnStatusListener> onStatusListeners = new ArrayList<>();
     private List<OnFavoriteListener> onFavoriteListeners = new ArrayList<>();
+    private List<OnUnFavoriteListener> onUnFavoriteListeners = new ArrayList<>();
 
-
-    public StreamEvent(TwitterStream stream) {
+    public StreamEvent(TwitterStream stream, NumeriUser numeriUser) {
         stream.addListener(this);
         userStream = stream;
     }
@@ -39,14 +44,20 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
 
 
     @Override
-    public IStreamEvent addOwnerOnStatusListener(OnStatusListener listener) {
+    public IStreamEvent addOnStatusListener(OnStatusListener listener) {
         onStatusListeners.add(listener);
         return this;
     }
 
     @Override
-    public IStreamEvent addOwnerOnfavoriteListener(OnFavoriteListener listener) {
+    public IStreamEvent addOnFavoriteListener(OnFavoriteListener listener) {
         onFavoriteListeners.add(listener);
+        return this;
+    }
+
+    @Override
+    public IStreamEvent addOnUnFavoriteListener(OnUnFavoriteListener listener) {
+        onUnFavoriteListeners.add(listener);
         return this;
     }
 
@@ -71,7 +82,9 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
 
     @Override
     public void onUnfavorite(User source, User target, Status unfavoritedStatus) {
-
+        for (OnUnFavoriteListener onUnFavoriteListener : onUnFavoriteListeners) {
+            onUnFavoriteListener.onUnfavorite(source, target, unfavoritedStatus);
+        }
     }
 
     @Override

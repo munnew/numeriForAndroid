@@ -1,22 +1,26 @@
-package com.serori.numeri.listview.item;
+package com.serori.numeri.twitter;
 
 import android.text.Html;
+import android.util.Log;
 
 import com.serori.numeri.user.NumeriUser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import twitter4j.MediaEntity;
 import twitter4j.Status;
+import twitter4j.TwitterException;
 import twitter4j.URLEntity;
 import twitter4j.UserMentionEntity;
 
 /**
- * タイムラインに表示するアイテムのモデルクラス
+ * Statusから生成される軽量化されたオブジェクト
  */
-public class TimeLineItem {
+public class SimpleTweetStatus {
     private String iconImageUrl;
     private String name, mainText, via;
     private long statusId, userId;
@@ -30,15 +34,57 @@ public class TimeLineItem {
     private List<String> destinationUserNames = new ArrayList<>();
     private List<String> uris = new ArrayList<>();
     private List<String> mediaUris = new ArrayList<>();
-    private Long conversationId;
+    private long inReplyToStatusId;
+    private static Map<String, SimpleTweetStatus> simpleTweetStatusMap = new LinkedHashMap<>();
 
-    public TimeLineItem(Status status, NumeriUser numeriUser) {
-        statusId = status.getId();
+    /**
+     * StatusをSimpleTweetStatusとしてキャッシュします。
+     *
+     * @param status     取得済みのStatus
+     * @param numeriUser そのStatusを取得したユーザー
+     * @return キャッシュされたSimpleTweetStatus
+     */
+    public static SimpleTweetStatus build(Status status, NumeriUser numeriUser) {
+        String key = numeriUser.getScreenName() + status.getId();
+        SimpleTweetStatus simpleTweetStatus = simpleTweetStatusMap.get(key);
+        if (simpleTweetStatus == null) {
+            simpleTweetStatus = new SimpleTweetStatus(status, numeriUser);
+            simpleTweetStatusMap.put(key, simpleTweetStatus);
+            Log.v("SimpleTweetStatus", "new " + key + " : " + status.getText());
+            return simpleTweetStatus;
+        }
+        Log.v("SimpleTweetStatus", key + " : " + status.getText());
+        return simpleTweetStatus;
+    }
+
+    /**
+     * 指定されたIdのStatusを参照しSimpleTweetStatusを返します<br>
+     * 取得されたStatusはSimpleTweetStatusとしてキャッシュされます<br>
+     * 存在しなければnullを返します<br>
+     * このメソッドは非同期タスクで実行されるべきです。
+     *
+     * @param statusId   参照するStatusのId
+     * @param numeriUser 参照させたいユーザー
+     * @return 参照されたキャッシュ済みのSimpleTweetStatus
+     * @throws TwitterException
+     */
+    public static SimpleTweetStatus showStatus(long statusId, NumeriUser numeriUser) throws TwitterException {
+        String key = numeriUser.getScreenName() + statusId;
+        SimpleTweetStatus simpleTweetStatus = simpleTweetStatusMap.get(key);
+        if (simpleTweetStatus != null) return simpleTweetStatus;
+        Status status = numeriUser.getTwitter().showStatus(statusId);
+        if (status != null) {
+            return build(status, numeriUser);
+        }
+        return null;
+    }
+
+    private SimpleTweetStatus(Status status, NumeriUser numeriUser) {
         createdTime = new SimpleDateFormat(DATE_FORMAT).format(status.getCreatedAt());
-        isMyRT = status.isRetweetedByMe();
-        isFavorite = status.isFavorited();
+
 
         if (status.isRetweet()) { //RT
+            statusId = status.getRetweetedStatus().getId();
             isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
             isRT = true;
             iconImageUrl = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
@@ -46,17 +92,22 @@ public class TimeLineItem {
             name = status.getRetweetedStatus().getUser().getName();
             via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName();
             screenName = status.getRetweetedStatus().getUser().getScreenName();
+            isFavorite = status.getRetweetedStatus().isFavorited();
             userId = status.getRetweetedStatus().getUser().getId();
-            conversationId = status.getRetweetedStatus().getInReplyToStatusId();
+            inReplyToStatusId = status.getRetweetedStatus().getInReplyToStatusId();
+            isMyRT = status.getRetweetedStatus().isRetweetedByMe();
         } else {//!RT
+            statusId = status.getId();
             isProtectedUser = status.getUser().isProtected();
             iconImageUrl = status.getUser().getBiggerProfileImageURL();
             mainText = status.getText();
             name = status.getUser().getName();
             via = "via " + Html.fromHtml(status.getSource()).toString();
             screenName = status.getUser().getScreenName();
+            isFavorite = status.isFavorited();
             userId = status.getUser().getId();
-            conversationId = status.getInReplyToStatusId();
+            inReplyToStatusId = status.getInReplyToStatusId();
+            isMyRT = status.isRetweetedByMe();
             if (numeriUser.getAccessToken().getUserId() == status.getUser().getId()) {
                 isMyTweet = true;
             }
@@ -67,7 +118,7 @@ public class TimeLineItem {
         for (UserMentionEntity userMentionEntity : mentionEntity) {//?Mention
             if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
                 isMention = true;
-            } else if (!userMentionEntity.getScreenName().equals(screenName) && userMentionEntity.getScreenName().equals(numeriUser.getScreenName())) {
+            } else if (!userMentionEntity.getScreenName().equals(screenName)) {
                 destinationUserNames.add(userMentionEntity.getScreenName());
             }
         }
@@ -91,6 +142,8 @@ public class TimeLineItem {
     }
 
     public List<String> getDestinationUserNames() {
+        List<String> destinationUserNames = new ArrayList<>();
+        destinationUserNames.addAll(this.destinationUserNames);
         return destinationUserNames;
     }
 
@@ -141,7 +194,7 @@ public class TimeLineItem {
         return isFavorite;
     }
 
-    public String getcreatedTime() {
+    public String getCreatedTime() {
         return createdTime;
     }
 
@@ -153,8 +206,8 @@ public class TimeLineItem {
         return isRT;
     }
 
-    public Long getConversationId() {
-        return conversationId;
+    public Long getInReplyToStatusId() {
+        return inReplyToStatusId;
     }
 
     public List<String> getUris() {
@@ -175,5 +228,11 @@ public class TimeLineItem {
 
     public boolean isProtectedUser() {
         return isProtectedUser;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean isSimpleTweetStatus = o instanceof SimpleTweetStatus;
+        return isSimpleTweetStatus && (getStatusId() == ((SimpleTweetStatus) o).getStatusId());
     }
 }

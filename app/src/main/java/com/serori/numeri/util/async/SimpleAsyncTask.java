@@ -1,8 +1,9 @@
-package com.serori.numeri.util;
+package com.serori.numeri.util.async;
 
 import android.os.AsyncTask;
 
 /**
+ * ただonPostExecuteが自動で補完されるようにしたいが為に作成されたクラス
  */
 public abstract class SimpleAsyncTask<Param, Result> extends AsyncTask<Param, Void, Result> {
     @SuppressWarnings("unchecked")

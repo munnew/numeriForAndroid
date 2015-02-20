@@ -15,7 +15,7 @@ import com.serori.numeri.user.NumeriUserStorager;
 import java.util.List;
 
 /**
- * Created by seroriKETC on 2014/12/19.
+ * OAuthActivityに表示するリストビューのアダプタ
  */
 public class UserListItemAdapter extends ArrayAdapter<NumeriUserListItem> {
     private LayoutInflater layoutInflater;

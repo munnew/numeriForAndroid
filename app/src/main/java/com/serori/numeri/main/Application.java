@@ -57,12 +57,13 @@ public class Application extends android.app.Application {
     }
 
     /**
-     * MainActivityのUIThreadで実行する
+     * 生きているMainActivityのUIThreadで実行する
      *
      * @param runnable Runnable
      */
     public void runOnUiThread(Runnable runnable) {
-        ((Activity) mainActivityContext).runOnUiThread(runnable);
+        if (!((Activity) mainActivityContext).isFinishing())
+            ((Activity) mainActivityContext).runOnUiThread(runnable);
     }
 
     /**

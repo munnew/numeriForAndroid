@@ -7,7 +7,6 @@ import android.view.KeyEvent;
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.listview.NumeriListView;
-import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
@@ -15,7 +14,6 @@ import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter4j.Status;
 import twitter4j.TwitterException;
 
 /**
@@ -37,8 +35,8 @@ public class ConversationActivity extends NumeriActivity {
         }
 
         if (savedInstanceState == null) {
-            List<TimeLineItem> timeLineItems = new ArrayList<>();
-            adapter = new TimeLineItemAdapter(this, 0, timeLineItems);
+            List<SimpleTweetStatus> simpleTweetStatuses = new ArrayList<>();
+            adapter = new TimeLineItemAdapter(this, 0, simpleTweetStatuses);
             conversationListView = (NumeriListView) findViewById(R.id.conversationListView);
 
             NumeriUser user = numeriUser;
@@ -46,8 +44,8 @@ public class ConversationActivity extends NumeriActivity {
             AsyncTask.execute(() -> {
                 while (nextStatusId != -1) {
                     try {
-                        Status status = user.getTwitter().showStatus(nextStatusId);
-                        runOnUiThread(() -> adapter.add(new TimeLineItem(status, user)));
+                        SimpleTweetStatus status = SimpleTweetStatus.showStatus(nextStatusId, numeriUser);
+                        runOnUiThread(() -> adapter.add(status));
                         nextStatusId = status.getInReplyToStatusId();
                     } catch (TwitterException e) {
                         TwitterExceptionDisplay.show(e);
@@ -56,6 +54,7 @@ public class ConversationActivity extends NumeriActivity {
                     }
                 }
                 conversationListView.onTouchItemEnabled(user, this);
+                conversationListView.startObserveFavorite(user);
             });
         }
 

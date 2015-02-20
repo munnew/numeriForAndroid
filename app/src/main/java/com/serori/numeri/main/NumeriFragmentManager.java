@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by serioriKETC on 2014/12/31.
+ * NumeriFragmentを一時的に保存したりするクラス
  */
 public class NumeriFragmentManager {
     private NumeriFragmentManager() {

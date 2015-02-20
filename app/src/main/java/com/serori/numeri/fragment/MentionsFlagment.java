@@ -3,8 +3,8 @@ package com.serori.numeri.fragment;
 import android.os.AsyncTask;
 
 import com.serori.numeri.fragment.manager.FragmentStorager;
-import com.serori.numeri.listview.item.TimeLineItem;
-import com.serori.numeri.stream.OnStatusListener;
+import com.serori.numeri.twitter.SimpleTweetStatus;
+import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
@@ -34,14 +34,14 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
             Twitter twitter = getNumeriUser().getTwitter();
             ResponseList<Status> timeLine = loadMentions(twitter);
             if (timeLine != null) {
-                List<TimeLineItem> items = new ArrayList<>();
+                List<SimpleTweetStatus> items = new ArrayList<>();
                 for (Status status : timeLine) {
-                    items.add(new TimeLineItem(status, getNumeriUser()));
+                    items.add(SimpleTweetStatus.build(status, getNumeriUser()));
                 }
-                
+
                 getActivity().runOnUiThread(() -> {
                     getAdapter().addAll(items);
-                    getNumeriUser().getStreamEvent().addOwnerOnStatusListener(this);
+                    getNumeriUser().getStreamEvent().addOnStatusListener(this);
                 });
             }
         });
@@ -53,7 +53,7 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
             return twitter.getMentionsTimeline();
         } catch (TwitterException e) {
             ToastSender.sendToast("ツイートを読み込めませんでした。ストリームを開始します");
-            getNumeriUser().getStreamEvent().addOwnerOnStatusListener(this);
+            getNumeriUser().getStreamEvent().addOnStatusListener(this);
             getTimelineListView().onAttachedBottomCallbackEnabled(true);
             e.printStackTrace();
         }
@@ -64,7 +64,7 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
     public void onStatus(Status status) {
         for (UserMentionEntity userMentionEntity : status.getUserMentionEntities()) {
             if (userMentionEntity.getId() == getNumeriUser().getAccessToken().getUserId() && !status.isRetweet()) {
-                TimeLineItem item = new TimeLineItem(status, getNumeriUser());
+                SimpleTweetStatus item = SimpleTweetStatus.build(status, getNumeriUser());
                 getTimelineListView().insertItem(item);
             }
         }
@@ -86,14 +86,14 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
     }
 
     @Override
-    protected void onAttachedBottom(TimeLineItem item) {
+    protected void onAttachedBottom(SimpleTweetStatus item) {
         AsyncTask.execute(() -> {
             getTimelineListView().onAttachedBottomCallbackEnabled(false);
             ResponseList<Status> previousTimeLine = loadPreviousMentionsTimeLine(getNumeriUser().getTwitter(), item.getStatusId());
             if (previousTimeLine != null) {
-                List<TimeLineItem> items = new ArrayList<>();
+                List<SimpleTweetStatus> items = new ArrayList<>();
                 for (Status status : previousTimeLine) {
-                    items.add(new TimeLineItem(status, getNumeriUser()));
+                    items.add(SimpleTweetStatus.build(status, getNumeriUser()));
                 }
                 getActivity().runOnUiThread(() -> getAdapter().addAll(items));
             }

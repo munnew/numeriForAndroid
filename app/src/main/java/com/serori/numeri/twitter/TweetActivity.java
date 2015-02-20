@@ -55,7 +55,6 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_tweet);
         if (savedInstanceState == null) {
             Button changeUserButton = (Button) findViewById(R.id.changeUser);
@@ -74,11 +73,9 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             currentUserTextView.setText(currentTweetUserName);
             inputMethodManager = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
 
-            if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
 
-            }
             for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                numeriUser.getStreamEvent().addOwnerOnStatusListener(status -> {
+                numeriUser.getStreamEvent().addOnStatusListener(status -> {
                     String owner = status.getUser().getScreenName();
                     String text = status.getText();
                     runOnUiThread(() -> backgroundTimeLine.setText(owner + " : " + text));
@@ -264,9 +261,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     public static void setDestination(long statusId, List<String> destinationNames) {
         isReply = true;
         destinationStatusId = statusId;
-        for (String destinationName : destinationNames) {
-            destinationUserNames.add(destinationName);
-        }
+        destinationUserNames.addAll(destinationNames);
     }
 
     public static void setTweetNunmeriUser(NumeriUser numeriUser) {

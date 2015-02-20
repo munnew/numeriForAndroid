@@ -2,7 +2,7 @@ package com.serori.numeri.util.twitter;
 
 
 import com.serori.numeri.user.NumeriUser;
-import com.serori.numeri.util.SimpleAsyncTask;
+import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.io.File;

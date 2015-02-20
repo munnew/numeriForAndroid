@@ -12,7 +12,7 @@ import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.imageview.NumeriImageView;
 import com.serori.numeri.user.NumeriUser;
-import com.serori.numeri.util.SimpleAsyncTask;
+import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import twitter4j.Relationship;

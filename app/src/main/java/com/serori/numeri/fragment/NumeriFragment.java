@@ -14,7 +14,7 @@ import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.listview.NumeriListView;
-import com.serori.numeri.listview.item.TimeLineItem;
+import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
 
@@ -33,7 +33,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
 
     private NumeriListView timelineListView;
     private TimeLineItemAdapter adapter;
-    private List<TimeLineItem> timeLineItems;
+    private List<SimpleTweetStatus> timeLineItems;
     protected Context context;
 
     @Override
@@ -60,6 +60,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
             Log.v("restoredInfo:", name + getNumeriUser().getAccessToken().getUserId());
         }
         timelineListView.onTouchItemEnabled(getNumeriUser(), getActivity());
+        timelineListView.startObserveFavorite(getNumeriUser());
         return rootView;
     }
 
@@ -71,7 +72,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         return adapter;
     }
 
-    protected List<TimeLineItem> getTimeLineItems() {
+    protected List<SimpleTweetStatus> getTimeLineItems() {
         return timeLineItems;
     }
 
@@ -101,10 +102,10 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
      *
      * @param item 一番下のアイテム
      */
-    protected abstract void onAttachedBottom(TimeLineItem item);
+    protected abstract void onAttachedBottom(SimpleTweetStatus item);
 
     @Override
-    public void attachedBottom(TimeLineItem item) {
+    public void attachedBottom(SimpleTweetStatus item) {
         if (ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET.isEnabled()) {
             onAttachedBottom(item);
         } else {

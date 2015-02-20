@@ -14,20 +14,21 @@ import com.serori.numeri.R;
 import com.serori.numeri.color.ColorStorager;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.imageview.NumeriImageView;
+import com.serori.numeri.twitter.SimpleTweetStatus;
 
 import java.util.List;
 
 /**
  * タイムラインを表示するためのアダプタ
  */
-public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
+public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
     private LayoutInflater layoutInflater;
     private Context context;
     private int resource;
-    private List<TimeLineItem> objects;
+    private List<SimpleTweetStatus> objects;
     private View currentView;
 
-    public TimeLineItemAdapter(Context context, int resource, List<TimeLineItem> objects) {
+    public TimeLineItemAdapter(Context context, int resource, List<SimpleTweetStatus> objects) {
         super(context, resource, objects);
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.context = context;
@@ -41,7 +42,7 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        TimeLineItem timeLineItem = getItem(position);
+        SimpleTweetStatus simpleTweetStatus = getItem(position);
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.item_timeline, null);
             Log.v(getClass().toString(), "new convertView");
@@ -74,37 +75,37 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         View isMyTweetState = convertView.findViewById(R.id.isMyTweetStateView);
 
         ImageView isProtectedUser = (ImageView) convertView.findViewById(R.id.key);
-        if (timeLineItem.isProtectedUser()) {
+        if (simpleTweetStatus.isProtectedUser()) {
             isProtectedUser.setVisibility(View.VISIBLE);
         } else {
             isProtectedUser.setVisibility(View.GONE);
         }
 
-        iconImageView.startLoadImage(NumeriImageView.ProgressType.LOAD_ICON, timeLineItem.getIconImageUrl());
+        iconImageView.startLoadImage(NumeriImageView.ProgressType.LOAD_ICON, simpleTweetStatus.getIconImageUrl());
 
-        screenNameTextView.setText(timeLineItem.getScreenName());
-        nameTextView.setText(timeLineItem.getName());
-        mainTextView.setText(timeLineItem.getMainText());
-        viaTextView.setText(timeLineItem.getVia());
-        createdTime.setText(timeLineItem.getcreatedTime());
-        if (timeLineItem.isFavorite()) {
-            favoriteStar.setImageDrawable(getContext().getResources().getDrawable(R.drawable.favorite_star));
+        screenNameTextView.setText(simpleTweetStatus.getScreenName());
+        nameTextView.setText(simpleTweetStatus.getName());
+        mainTextView.setText(simpleTweetStatus.getMainText());
+        viaTextView.setText(simpleTweetStatus.getVia());
+        createdTime.setText(simpleTweetStatus.getCreatedTime());
+        if (simpleTweetStatus.isFavorite()) {
+            favoriteStar.setVisibility(View.VISIBLE);
         } else {
-            favoriteStar.setImageBitmap(null);
+            favoriteStar.setVisibility(View.GONE);
         }
 
-        if (timeLineItem.isMyTweet()) {
+        if (simpleTweetStatus.isMyTweet()) {
             isMyTweetState.setBackgroundColor(Color.parseColor(ColorStorager.Colors.MYTWEET_MARK.getColor()));
         } else {
             isMyTweetState.setBackgroundColor(Color.parseColor("#00000000"));
         }
 
-        if (timeLineItem.isRT()) {
+        if (simpleTweetStatus.isRT()) {
             convertView.setBackgroundColor(Color.parseColor(ColorStorager.Colors.RT_ITEM.getColor()));
             return convertView;
         }
 
-        if (timeLineItem.isMention()) {
+        if (simpleTweetStatus.isMention()) {
             convertView.setBackgroundColor(Color.parseColor(ColorStorager.Colors.MENTION_ITEM.getColor()));
             return convertView;
         }
@@ -112,13 +113,5 @@ public class TimeLineItemAdapter extends ArrayAdapter<TimeLineItem> {
         convertView.setBackgroundColor(Color.parseColor(ColorStorager.Colors.NORMAL_ITEM.getColor()));
 
         return convertView;
-    }
-
-    public View getCurrentView() {
-        return currentView;
-    }
-
-    public void setCurrentView(View currentView) {
-        this.currentView = currentView;
     }
 }

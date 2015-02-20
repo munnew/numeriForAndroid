@@ -26,7 +26,7 @@ import com.serori.numeri.fragment.manager.FragmentManagerActivity;
 import com.serori.numeri.fragment.manager.FragmentStorager;
 import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.oauth.OAuthActivity;
-import com.serori.numeri.stream.OnFavoriteListener;
+import com.serori.numeri.stream.event.OnFavoriteListener;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
@@ -105,7 +105,7 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
                 }
                 for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
                     numeriUser.getStreamSwitcher().startStream();
-                    numeriUser.getStreamEvent().addOwnerOnfavoriteListener(this);
+                    numeriUser.getStreamEvent().addOnFavoriteListener(this);
                 }
                 numeriFragments.clear();
                 List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();

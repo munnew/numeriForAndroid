@@ -6,19 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.view.View;
-import android.widget.ImageView;
 
-import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.listview.item.TimeLineItem;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.media.MediaActivity;
-import com.serori.numeri.userprofile.UserInformationActivity;
-import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.twitter.ConversationActivity;
+import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
+import com.serori.numeri.userprofile.UserInformationActivity;
+import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +72,7 @@ public class TwitterActions {
             return;
         }
         if (!((Activity) context).isFinishing()) {
-            TimeLineItem item = adapter.getItem(position);
+            SimpleTweetStatus item = adapter.getItem(position);
             AlertDialog alertDialog = new AlertDialog.Builder(context).setMessage("このツイートをRTしますか？")
                     .setNegativeButton("いいえ", (dialog, id) -> {
                     })
@@ -98,15 +95,12 @@ public class TwitterActions {
     }
 
     private void favorite(int position) {
-        TimeLineItem item = adapter.getItem(position);
-        View view = adapter.getView(position, adapter.getCurrentView(), null);
-        ImageView favoriteStar = (ImageView) view.findViewById(R.id.favoriteStar);
+        SimpleTweetStatus item = adapter.getItem(position);
         if (!item.isFavorite()) {
             AsyncTask.execute(() -> {
                 try {
                     numeriUser.getTwitter().createFavorite(item.getStatusId());
                     item.setFavorite(true);
-                    ((Activity) context).runOnUiThread(() -> favoriteStar.setImageDrawable(context.getResources().getDrawable(R.drawable.favorite_star)));
                     ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
@@ -117,7 +111,6 @@ public class TwitterActions {
                 try {
                     numeriUser.getTwitter().destroyFavorite(item.getStatusId());
                     item.setFavorite(false);
-                    ((Activity) context).runOnUiThread(() -> favoriteStar.setImageBitmap(null));
                     ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
@@ -127,7 +120,7 @@ public class TwitterActions {
     }
 
     private void reply(int position) {
-        TimeLineItem item = adapter.getItem(position);
+        SimpleTweetStatus item = adapter.getItem(position);
         item.getStatusId();
         TweetActivity.setDestination(item.getStatusId(), item.getDestinationUserNames());
         TweetActivity.setTweetNunmeriUser(numeriUser);
@@ -136,8 +129,8 @@ public class TwitterActions {
     }
 
     private void showConversation(int position) {
-        TimeLineItem item = adapter.getItem(position);
-        if (item.getConversationId() != -1) {
+        SimpleTweetStatus item = adapter.getItem(position);
+        if (item.getInReplyToStatusId() != -1) {
             ConversationActivity.setNumeriUser(numeriUser);
             ConversationActivity.setConversationStatusId(item.getStatusId());
             Intent intent = new Intent(context, ConversationActivity.class);
@@ -147,7 +140,7 @@ public class TwitterActions {
 
 
     private void showMenu(int position) {
-        TimeLineItem item = adapter.getItem(position);
+        SimpleTweetStatus item = adapter.getItem(position);
         List<MenuItem> menuItems = new ArrayList<>();
         menuItems.add(new MenuItem(Actions.REPLY));
 
@@ -158,7 +151,8 @@ public class TwitterActions {
 
         menuItems.add(new MenuItem(Actions.OPEN_USER_PROFILE));
 
-        if (item.getConversationId() != -1) menuItems.add(new MenuItem(Actions.SHOW_CONVERSATION));
+        if (item.getInReplyToStatusId() != -1)
+            menuItems.add(new MenuItem(Actions.SHOW_CONVERSATION));
 
         if (!item.getMediaUris().isEmpty()) menuItems.add(new MenuItem(Actions.SHOW_MEDIA));
 
