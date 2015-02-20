@@ -5,6 +5,9 @@ import android.content.Context;
 import android.graphics.Point;
 import android.view.WindowManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Applicationのフィールド的な役割を持つクラス
  */
@@ -16,9 +19,9 @@ public class Application extends android.app.Application {
         return ApplicationHolder.instance;
     }
 
+    private List<OnFinishMainActivityListener> onFinishMainActivityListeners = new ArrayList<>();
     private Context applicationContext;
     private Context mainActivityContext;
-
 
     public Context getApplicationContext() {
         return applicationContext;
@@ -56,6 +59,17 @@ public class Application extends android.app.Application {
         }
     }
 
+    public void addOnFinishMainActivityListener(OnFinishMainActivityListener listener) {
+        onFinishMainActivityListeners.add(listener);
+    }
+
+    void finishMainActivity() {
+        for (OnFinishMainActivityListener onFinishMainActivityListener : onFinishMainActivityListeners) {
+            onFinishMainActivityListener.finish();
+        }
+        onFinishMainActivityListeners.clear();
+    }
+
     /**
      * 生きているMainActivityのUIThreadで実行する
      *
@@ -85,6 +99,7 @@ public class Application extends android.app.Application {
         wm.getDefaultDisplay().getSize(size);
         return size;
     }
+
 
     private static class ApplicationHolder {
         private static final Application instance = new Application();

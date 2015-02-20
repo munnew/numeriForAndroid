@@ -22,11 +22,12 @@ import com.serori.numeri.config.ConfigActivity;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.fragment.SectionsPagerAdapter;
-import com.serori.numeri.fragment.manager.FragmentManagerActivity;
-import com.serori.numeri.fragment.manager.FragmentStorager;
 import com.serori.numeri.listview.action.ActionStorager;
+import com.serori.numeri.main.manager.FragmentManagerActivity;
+import com.serori.numeri.main.manager.FragmentStorager;
 import com.serori.numeri.oauth.OAuthActivity;
 import com.serori.numeri.stream.event.OnFavoriteListener;
+import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
@@ -56,18 +57,12 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
         Application.getInstance().setMainActivityContext(this);
 
         loadConfigrations();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON.isEnabled()) {
-            addMenuButton();
-        }
-
+        addMenuButton();
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setOffscreenPageLimit(20);
-
         ImageButton startTweetActivityButton = (ImageButton) findViewById(R.id.goTweetButton);
         startTweetActivityButton.setOnClickListener(v -> {
             if (!NumeriUsers.getInstance().getNumeriUsers().isEmpty())
@@ -110,6 +105,7 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
                 numeriFragments.clear();
                 List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
                 if (!numeriUsers.isEmpty()) {
+                    SimpleTweetStatus.startObserveFavorite();
                     numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
                     runOnUiThread(() -> {
                         for (NumeriFragment numeriFragment : numeriFragments) {
@@ -222,5 +218,11 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
             });
         }).create();
         setCurrentShowDialog(alertDialog);
+    }
+
+    @Override
+    public void finish() {
+        Application.getInstance().finishMainActivity();
+        super.finish();
     }
 }

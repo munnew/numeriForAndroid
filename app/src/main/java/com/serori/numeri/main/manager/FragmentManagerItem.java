@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.manager;
+package com.serori.numeri.main.manager;
 
 /**
  * FragmentManagerActivityに表示されるリストのセルが持つモデル

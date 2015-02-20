@@ -1,7 +1,10 @@
 <resources>
+
     <style name="AppTheme_Light" parent="Theme.AppCompat.Light.NoActionBar" />
 
-    <style name="AppTheme_Dark" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+
+    <style name="AppTheme_Dark" parent="ThemeOverlay.AppCompat.Dark">
         <item name="android:textCursorDrawable">@drawable/dark_cursor</item>
     </style>
+
 </resources>

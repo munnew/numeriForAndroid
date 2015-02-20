@@ -2,7 +2,7 @@ package com.serori.numeri.fragment;
 
 import android.os.AsyncTask;
 
-import com.serori.numeri.fragment.manager.FragmentStorager;
+import com.serori.numeri.main.manager.FragmentStorager;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.util.toast.ToastSender;

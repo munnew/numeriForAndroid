@@ -3,6 +3,7 @@ package com.serori.numeri.twitter;
 import android.text.Html;
 import android.util.Log;
 
+import com.serori.numeri.main.Application;
 import com.serori.numeri.user.NumeriUser;
 
 import java.text.SimpleDateFormat;
@@ -36,6 +37,7 @@ public class SimpleTweetStatus {
     private List<String> mediaUris = new ArrayList<>();
     private long inReplyToStatusId;
     private static Map<String, SimpleTweetStatus> simpleTweetStatusMap = new LinkedHashMap<>();
+    private static boolean observeFavoriteStarted = false;
 
     /**
      * StatusをSimpleTweetStatusとしてキャッシュします。
@@ -79,10 +81,40 @@ public class SimpleTweetStatus {
         return null;
     }
 
+    /**
+     * お気に入りにイベントの監視を開始しアプリケーションのユーザーがお気に入り登録を行った場合はそのパラメータを変更する<br>
+     * このメソッドはアプリケーションが生きている間一度しか実行することが出来ない
+     */
+    public static void startObserveFavorite() {
+        List<NumeriUser> numeriUsers = Application.getInstance().getNumeriUsers().getNumeriUsers();
+        if (observeFavoriteStarted || numeriUsers.isEmpty()) return;
+        observeFavoriteStarted = true;
+        for (NumeriUser numeriUser : numeriUsers) {
+            numeriUser.getStreamEvent().addOnFavoriteListener((user1, user2, favoritedStatus) -> {
+
+                SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
+                for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
+                    if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
+                        simpleTweetStatus.setFavorite(true);
+                    }
+                }
+
+            }).addOnUnFavoriteListener((user1, user2, unFavoritedStatus) -> {
+
+                SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
+                for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
+                    if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
+                        simpleTweetStatus.setFavorite(false);
+                    }
+                }
+
+            });
+        }
+        Application.getInstance().addOnFinishMainActivityListener(() -> observeFavoriteStarted = false);
+    }
+
     private SimpleTweetStatus(Status status, NumeriUser numeriUser) {
         createdTime = new SimpleDateFormat(DATE_FORMAT).format(status.getCreatedAt());
-
-
         if (status.isRetweet()) { //RT
             statusId = status.getRetweetedStatus().getId();
             isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
@@ -235,4 +267,5 @@ public class SimpleTweetStatus {
         boolean isSimpleTweetStatus = o instanceof SimpleTweetStatus;
         return isSimpleTweetStatus && (getStatusId() == ((SimpleTweetStatus) o).getStatusId());
     }
+
 }

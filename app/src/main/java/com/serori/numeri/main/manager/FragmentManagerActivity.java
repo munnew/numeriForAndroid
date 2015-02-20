@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.manager;
+package com.serori.numeri.main.manager;
 
 import android.app.AlertDialog;
 import android.os.AsyncTask;

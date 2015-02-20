@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.manager;
+package com.serori.numeri.main.manager;
 
 /**
  * Created by serioriKETC on 2014/12/30.

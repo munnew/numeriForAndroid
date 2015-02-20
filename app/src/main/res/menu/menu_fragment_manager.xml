@@ -1,7 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" tools:context="com.serori.numeri.fragment.manager.FragmentManagerActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.serori.numeri.main.manager.FragmentManagerActivity">
 
-    <item android:id="@+id/action_addfragment" android:orderInCategory="100"
-        android:title="追加"/>
+    <item
+        android:id="@+id/action_addfragment"
+        android:orderInCategory="100"
+        android:title="追加" />
 
 </menu>

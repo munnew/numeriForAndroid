@@ -9,14 +9,12 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
 import com.serori.numeri.main.Application;
-import com.serori.numeri.fragment.manager.FragmentStorager;
+import com.serori.numeri.main.manager.FragmentStorager;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import twitter4j.auth.AccessToken;
 
 /**
  *

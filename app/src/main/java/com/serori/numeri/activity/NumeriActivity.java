@@ -16,7 +16,6 @@ import com.serori.numeri.config.ConfigurationStorager;
 public class NumeriActivity extends ActionBarActivity {
     private AlertDialog currentShowDialog = null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {

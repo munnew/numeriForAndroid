@@ -184,7 +184,6 @@ public class ConfigurationStorager {
      */
     public static enum EitherConfigurations implements EitherConfiguration {
         DARK_THEME("DARK_THEME"),
-        ADD_MENU_BUTTON("ADD_MENU_BUTTON"),
         SLEEPLESS("SLEEPLESS"),
         CONFIRMATION_LESS_GET_TWEET("CONFIRMATION_LESS_GET_TWEET");
 

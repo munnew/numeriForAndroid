@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.manager;
+package com.serori.numeri.main.manager;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;

@@ -40,10 +40,13 @@ public class ConfigActivity extends NumeriActivity {
     private void initActionConfComponent() {
         LinearLayout actionMenu = (LinearLayout) findViewById(R.id.actionMenu);
         Button openMenuButton = (Button) findViewById(R.id.openActionMenuButton);
+        TextView tweetAdditionalAcquisitionFlagText = ((TextView) findViewById(R.id.tweetAdditionalAcquisitionFlagText));
+        TextView sleeplessText = ((TextView) findViewById(R.id.sleeplessText));
+        ((TextView) findViewById(R.id.sleeplessText)).setTextColor(Color.parseColor("#FFFFFF"));
         if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
             openMenuButton.setTextColor(Color.parseColor("#FFFFFF"));
-            ((TextView) findViewById(R.id.tweetAdditionalAcquisitionFlagText)).setTextColor(Color.parseColor("#FFFFFF"));
-            ((TextView) findViewById(R.id.sleeplessText)).setTextColor(Color.parseColor("#FFFFFF"));
+            tweetAdditionalAcquisitionFlagText.setTextColor(Color.parseColor("#FFFFFF"));
+            sleeplessText.setTextColor(Color.parseColor("#FFFFFF"));
             for (int i = 0; i < actionMenu.getChildCount(); i++) {
                 ((Button) actionMenu.getChildAt(i)).setTextColor(Color.parseColor("#FFFFFF"));
             }
@@ -73,13 +76,13 @@ public class ConfigActivity extends NumeriActivity {
 
         CheckBox isSleeplessCheckBox = (CheckBox) findViewById(R.id.isSleeplessCheckBox);
         isSleeplessCheckBox.setChecked(ConfigurationStorager.EitherConfigurations.SLEEPLESS.isEnabled());
-        isSleeplessCheckBox.setOnClickListener(v -> {
-            chooseEither(ConfigurationStorager.EitherConfigurations.SLEEPLESS, ((CheckBox) v).isChecked());
-            ToastSender.sendToast("この設定は次回の起動から反映されます");
-        });
+        isSleeplessCheckBox.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.SLEEPLESS, (CheckBox) v));
+        sleeplessText.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.SLEEPLESS, isSleeplessCheckBox));
+
         CheckBox isConfirmationLessGetTweetCheckBox = (CheckBox) findViewById(R.id.confirmationLessGetTweetCheckBox);
         isConfirmationLessGetTweetCheckBox.setChecked(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET.isEnabled());
-        isConfirmationLessGetTweetCheckBox.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET, ((CheckBox) v).isChecked()));
+        isConfirmationLessGetTweetCheckBox.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET, (CheckBox) v));
+        tweetAdditionalAcquisitionFlagText.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET, isConfirmationLessGetTweetCheckBox));
     }
 
     private void initLayoutConfComponent() {
@@ -157,9 +160,12 @@ public class ConfigActivity extends NumeriActivity {
         setCurrentShowDialog(alertDialog);
     }
 
-    private void chooseEither(ConfigurationStorager.EitherConfigurations eitherConfigurations, boolean isEnabled) {
-        eitherConfigurations.setEnabled(isEnabled);
+    private void chooseEither(ConfigurationStorager.EitherConfigurations eitherConfigurations, CheckBox checkBox) {
+        eitherConfigurations.setEnabled(!eitherConfigurations.isEnabled());
+        checkBox.setChecked(eitherConfigurations.isEnabled());
         ConfigurationStorager.getInstance().saveEitherConfigTable(eitherConfigurations);
+        if (eitherConfigurations.equals(ConfigurationStorager.EitherConfigurations.SLEEPLESS))
+            ToastSender.sendToast("この設定は次回の起動から適用されます");
     }
 
     @Override

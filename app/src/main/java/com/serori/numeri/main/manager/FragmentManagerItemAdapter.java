@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.manager;
+package com.serori.numeri.main.manager;
 
 import android.content.Context;
 import android.view.LayoutInflater;

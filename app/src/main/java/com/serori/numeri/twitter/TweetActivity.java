@@ -22,10 +22,8 @@ import android.widget.TextView;
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.main.Application;
-import com.serori.numeri.config.ConfigurationStorager;
-import com.serori.numeri.main.MainActivity;
-import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
+import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.util.twitter.TweetBuilder;
 
 import java.io.File;
@@ -139,29 +137,20 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     }
 
     private void sendTweet(NumeriUser numeriUser) {
-        if (tweetEditText.getText().toString().equals("/add menu_button")) {
-            ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON.setEnabled(true);
-            ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON);
-            ((MainActivity) Application.getInstance().getMainActivityContext()).addMenuButton();
-        } else if (tweetEditText.getText().toString().equals("/remove menu_button")) {
-            ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON.setEnabled(false);
-            ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.ADD_MENU_BUTTON);
-            ((MainActivity) Application.getInstance().getMainActivityContext()).removeMenuButton();
-        } else {
-            TweetBuilder tweetBuilder = numeriUser.getTweetBuilder();
-            tweetBuilder.setText(tweetEditText.getText().toString());
 
-            if (isReply) {
-                tweetBuilder.setReplyDestinationId(destinationStatusId);
-                isReply = false;
-            }
+        TweetBuilder tweetBuilder = numeriUser.getTweetBuilder();
+        tweetBuilder.setText(tweetEditText.getText().toString());
 
-            if (!appendedImages.isEmpty()) {
-                tweetBuilder.addImages(appendedImages);
-            }
-
-            tweetBuilder.tweet();
+        if (isReply) {
+            tweetBuilder.setReplyDestinationId(destinationStatusId);
+            isReply = false;
         }
+
+        if (!appendedImages.isEmpty()) {
+            tweetBuilder.addImages(appendedImages);
+        }
+
+        tweetBuilder.tweet();
         tweetEditText.setText("");
         currentNumeriUser = null;
         appendedImages.clear();

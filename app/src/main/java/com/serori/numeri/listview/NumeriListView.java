@@ -37,10 +37,10 @@ public class NumeriListView extends ListView {
     private int _visibleItemCount = 0;
     private int _totalItemCount = 0;
 
+    private int currentY = 0;
     private static final int LEFT = 0;
     private static final int CENTER = 1;
     private static final int RIGHT = 2;
-
     private TwitterActions twitterAction;
 
 
@@ -106,6 +106,7 @@ public class NumeriListView extends ListView {
         touchedCoordinatesX = ev.getX();
         return super.onTouchEvent(ev);
     }
+
 
     private int getTouchedCoordinates() {
         float windowX = Application.getInstance().getWindowSize().x;
@@ -206,7 +207,6 @@ public class NumeriListView extends ListView {
                     getChildAt(i).findViewById(R.id.favoriteStar).setVisibility(GONE);
                     Log.v(getClass().toString(), "unFavorite");
                 }
-                simpleTweetStatus1.setFavorite(enabled);
             }
         }
     }
