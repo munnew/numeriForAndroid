@@ -175,14 +175,26 @@ public class NumeriListView extends ListView {
 
     public void startObserveFavorite(NumeriUser numeriUser) {
         numeriUser.getStreamEvent().addOnFavoriteListener((user1, user2, favoritedStatus) -> {
+
             SimpleTweetStatus simpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
-            ((Activity) getContext()).runOnUiThread(() -> setFavoriteStar(simpleTweetStatus, true));
+            if (user1.getId() == numeriUser.getAccessToken().getUserId())
+                ((Activity) getContext()).runOnUiThread(() -> setFavoriteStar(simpleTweetStatus, true));
+
         }).addOnUnFavoriteListener((user1, user2, unFavoritedStatus) -> {
+
             SimpleTweetStatus simpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
-            ((Activity) getContext()).runOnUiThread(() -> setFavoriteStar(simpleTweetStatus, false));
+            if (user1.getId() == numeriUser.getAccessToken().getUserId())
+                ((Activity) getContext()).runOnUiThread(() -> setFavoriteStar(simpleTweetStatus, false));
+
         });
     }
 
+    /**
+     * お気に入りの星の表示、非表示を切り替える
+     *
+     * @param simpleTweetStatus 切り替えるSimpleTweetStatus
+     * @param enabled           true : 表示 : false 非表示
+     */
     private void setFavoriteStar(SimpleTweetStatus simpleTweetStatus, boolean enabled) {
         for (int i = 0; i < _visibleItemCount; i++) {
             SimpleTweetStatus simpleTweetStatus1 = ((SimpleTweetStatus) getAdapter().getItem(_firstVisibleItemPosition + i));
@@ -194,7 +206,7 @@ public class NumeriListView extends ListView {
                     getChildAt(i).findViewById(R.id.favoriteStar).setVisibility(GONE);
                     Log.v(getClass().toString(), "unFavorite");
                 }
-
+                simpleTweetStatus1.setFavorite(enabled);
             }
         }
     }

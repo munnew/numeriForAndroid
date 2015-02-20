@@ -100,7 +100,6 @@ public class TwitterActions {
             AsyncTask.execute(() -> {
                 try {
                     numeriUser.getTwitter().createFavorite(item.getStatusId());
-                    item.setFavorite(true);
                     ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
@@ -110,7 +109,6 @@ public class TwitterActions {
             AsyncTask.execute(() -> {
                 try {
                     numeriUser.getTwitter().destroyFavorite(item.getStatusId());
-                    item.setFavorite(false);
                     ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
