@@ -1,7 +1,6 @@
 package com.serori.numeri.main;
 
 import android.app.AlertDialog;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
@@ -31,6 +30,7 @@ import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
+import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
         if (tables.isEmpty()) {
             startActivity(OAuthActivity.class, true);
         } else {
-            AsyncTask.execute(() -> {
+            SimpleAsyncTask.backgroundExecute(() -> {
                 Application.getInstance().getNumeriUsers().clear();
                 for (NumeriUserStorager.NumeriUserTable table : tables) {
                     Application.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
@@ -205,7 +205,7 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
             names[i] = Application.getInstance().getNumeriUsers().getNumeriUsers().get(i).getScreenName();
         }
         AlertDialog alertDialog = new AlertDialog.Builder(this).setTitle("ユーザーを選択").setItems(names, (dialog, witch) -> {
-            AsyncTask.execute(() -> {
+            SimpleAsyncTask.backgroundExecute(() -> {
                 try {
                     Map<String, RateLimitStatus> rateLimitStatus = Application.getInstance().getNumeriUsers().getNumeriUsers().get(witch)
                             .getTwitter().getRateLimitStatus("statuses");

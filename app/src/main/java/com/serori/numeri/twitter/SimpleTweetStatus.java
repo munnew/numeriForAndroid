@@ -36,8 +36,9 @@ public class SimpleTweetStatus {
     private List<String> uris = new ArrayList<>();
     private List<String> mediaUris = new ArrayList<>();
     private long inReplyToStatusId;
-    private static Map<String, SimpleTweetStatus> simpleTweetStatusMap = new LinkedHashMap<>();
+    private volatile static Map<String, SimpleTweetStatus> simpleTweetStatusMap = new LinkedHashMap<>();
     private static boolean observeFavoriteStarted = false;
+    private long statusAcquirerId;
 
     /**
      * StatusをSimpleTweetStatusとしてキャッシュします。
@@ -89,25 +90,27 @@ public class SimpleTweetStatus {
         List<NumeriUser> numeriUsers = Application.getInstance().getNumeriUsers().getNumeriUsers();
         if (observeFavoriteStarted || numeriUsers.isEmpty()) return;
         observeFavoriteStarted = true;
+
         for (NumeriUser numeriUser : numeriUsers) {
             numeriUser.getStreamEvent().addOnFavoriteListener((user1, user2, favoritedStatus) -> {
-
-                SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
-                for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
-                    if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
-                        simpleTweetStatus.setFavorite(true);
+                if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
+                    SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
+                    for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
+                        if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
+                            simpleTweetStatus.setFavorite(true);
+                        }
                     }
                 }
 
             }).addOnUnFavoriteListener((user1, user2, unFavoritedStatus) -> {
-
-                SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
-                for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
-                    if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
-                        simpleTweetStatus.setFavorite(false);
+                if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
+                    SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
+                    for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
+                        if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
+                            simpleTweetStatus.setFavorite(false);
+                        }
                     }
                 }
-
             });
         }
         Application.getInstance().addOnFinishMainActivityListener(() -> observeFavoriteStarted = false);
@@ -115,6 +118,7 @@ public class SimpleTweetStatus {
 
     private SimpleTweetStatus(Status status, NumeriUser numeriUser) {
         createdTime = new SimpleDateFormat(DATE_FORMAT).format(status.getCreatedAt());
+        statusAcquirerId = numeriUser.getAccessToken().getUserId();
         if (status.isRetweet()) { //RT
             statusId = status.getRetweetedStatus().getId();
             isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
@@ -146,11 +150,10 @@ public class SimpleTweetStatus {
         }
 
         UserMentionEntity[] mentionEntity = status.getUserMentionEntities();
-        destinationUserNames.add(screenName);
         for (UserMentionEntity userMentionEntity : mentionEntity) {//?Mention
             if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
                 isMention = true;
-            } else if (!userMentionEntity.getScreenName().equals(screenName)) {
+            } else {
                 destinationUserNames.add(userMentionEntity.getScreenName());
             }
         }
@@ -265,7 +268,8 @@ public class SimpleTweetStatus {
     @Override
     public boolean equals(Object o) {
         boolean isSimpleTweetStatus = o instanceof SimpleTweetStatus;
-        return isSimpleTweetStatus && (getStatusId() == ((SimpleTweetStatus) o).getStatusId());
+        return isSimpleTweetStatus && (getStatusId() == ((SimpleTweetStatus) o).getStatusId()) && ((SimpleTweetStatus) o).statusAcquirerId == this.statusAcquirerId;
     }
+
 
 }

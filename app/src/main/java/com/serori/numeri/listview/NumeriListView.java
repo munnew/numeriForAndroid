@@ -35,9 +35,7 @@ public class NumeriListView extends ListView {
 
     private int _firstVisibleItemPosition = 0;
     private int _visibleItemCount = 0;
-    private int _totalItemCount = 0;
 
-    private int currentY = 0;
     private static final int LEFT = 0;
     private static final int CENTER = 1;
     private static final int RIGHT = 2;
@@ -73,7 +71,6 @@ public class NumeriListView extends ListView {
             public void onScroll(AbsListView view, int firstVisibleItemPosition, int visibleItemCount, int totalItemCount) {
                 _firstVisibleItemPosition = firstVisibleItemPosition;
                 _visibleItemCount = visibleItemCount;
-                _totalItemCount = totalItemCount;
                 if (firstVisibleItemPosition == 0 && !storedItems.isEmpty()) {
                     Log.v("ListView", "InsertEnable:" + insertItemEnable);
                     insertItemEnable = false;
@@ -176,17 +173,17 @@ public class NumeriListView extends ListView {
 
     public void startObserveFavorite(NumeriUser numeriUser) {
         numeriUser.getStreamEvent().addOnFavoriteListener((user1, user2, favoritedStatus) -> {
-
-            SimpleTweetStatus simpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
-            if (user1.getId() == numeriUser.getAccessToken().getUserId())
+            if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
+                SimpleTweetStatus simpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
                 ((Activity) getContext()).runOnUiThread(() -> setFavoriteStar(simpleTweetStatus, true));
+            }
 
         }).addOnUnFavoriteListener((user1, user2, unFavoritedStatus) -> {
-
-            SimpleTweetStatus simpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
-            if (user1.getId() == numeriUser.getAccessToken().getUserId())
+            if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
+                SimpleTweetStatus simpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
                 ((Activity) getContext()).runOnUiThread(() -> setFavoriteStar(simpleTweetStatus, false));
 
+            }
         });
     }
 

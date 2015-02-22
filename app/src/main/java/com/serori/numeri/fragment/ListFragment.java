@@ -1,9 +1,9 @@
 package com.serori.numeri.fragment;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.serori.numeri.twitter.SimpleTweetStatus;
+import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class ListFragment extends NumeriFragment {
 
     @Override
     protected void initializeLoad() {
-        AsyncTask.execute(() -> {
+        SimpleAsyncTask.backgroundExecute(() -> {
             Paging pages = new Paging(1);
             pages.count(31);
             try {
@@ -80,8 +80,8 @@ public class ListFragment extends NumeriFragment {
 
     @Override
     protected void onAttachedBottom(SimpleTweetStatus item) {
-        AsyncTask.execute(() -> {
-            getTimelineListView().onAttachedBottomCallbackEnabled(false);
+        getTimelineListView().onAttachedBottomCallbackEnabled(false);
+        SimpleAsyncTask.backgroundExecute(() -> {
             Paging paging = new Paging();
             paging.setMaxId(item.getStatusId());
             paging.count(31);
@@ -92,11 +92,11 @@ public class ListFragment extends NumeriFragment {
                     for (Status status : statuses) {
                         getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
                     }
+                    getTimelineListView().onAttachedBottomCallbackEnabled(true);
                 });
             } catch (TwitterException e) {
                 TwitterExceptionDisplay.show(e);
                 e.printStackTrace();
-            } finally {
                 getTimelineListView().onAttachedBottomCallbackEnabled(true);
             }
         });

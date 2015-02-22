@@ -17,5 +17,19 @@ public abstract class SimpleAsyncTask<Param, Result> extends AsyncTask<Param, Vo
     @Override
     protected abstract void onPostExecute(Result result);
 
+    /**
+     * 簡易的なdoInBackground
+     *
+     * @param runnable Runnable
+     */
+    public static void backgroundExecute(Runnable runnable) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                runnable.run();
+                return null;
+            }
+        }.execute();
+    }
 
 }

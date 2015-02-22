@@ -1,10 +1,9 @@
 package com.serori.numeri.fragment;
 
-import android.os.AsyncTask;
-
 import com.serori.numeri.main.manager.FragmentStorager;
-import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.stream.event.OnStatusListener;
+import com.serori.numeri.twitter.SimpleTweetStatus;
+import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
@@ -30,7 +29,7 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
 
     @Override
     protected void initializeLoad() {
-        AsyncTask.execute(() -> {
+        SimpleAsyncTask.backgroundExecute(() -> {
             Twitter twitter = getNumeriUser().getTwitter();
             ResponseList<Status> timeLine = loadMentions(twitter);
             if (timeLine != null) {
@@ -87,17 +86,22 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
 
     @Override
     protected void onAttachedBottom(SimpleTweetStatus item) {
-        AsyncTask.execute(() -> {
-            getTimelineListView().onAttachedBottomCallbackEnabled(false);
+        getTimelineListView().onAttachedBottomCallbackEnabled(false);
+        SimpleAsyncTask.backgroundExecute(() -> {
             ResponseList<Status> previousTimeLine = loadPreviousMentionsTimeLine(getNumeriUser().getTwitter(), item.getStatusId());
             if (previousTimeLine != null) {
                 List<SimpleTweetStatus> items = new ArrayList<>();
                 for (Status status : previousTimeLine) {
                     items.add(SimpleTweetStatus.build(status, getNumeriUser()));
                 }
-                getActivity().runOnUiThread(() -> getAdapter().addAll(items));
+                getActivity().runOnUiThread(() -> {
+                    getAdapter().addAll(items);
+                    getTimelineListView().onAttachedBottomCallbackEnabled(true);
+                });
+            } else {
+                getTimelineListView().onAttachedBottomCallbackEnabled(true);
             }
-            getTimelineListView().onAttachedBottomCallbackEnabled(true);
+
         });
     }
 }
