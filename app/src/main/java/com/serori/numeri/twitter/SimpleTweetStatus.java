@@ -150,10 +150,11 @@ public class SimpleTweetStatus {
         }
 
         UserMentionEntity[] mentionEntity = status.getUserMentionEntities();
+        destinationUserNames.add(screenName);
         for (UserMentionEntity userMentionEntity : mentionEntity) {//?Mention
             if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
                 isMention = true;
-            } else {
+            } else if (!screenName.equals(userMentionEntity.getScreenName())) {
                 destinationUserNames.add(userMentionEntity.getScreenName());
             }
         }
@@ -195,7 +196,7 @@ public class SimpleTweetStatus {
         return via;
     }
 
-    ///setter
+    //setter
     public void setFavorite(boolean isFavorite) {
         this.isFavorite = isFavorite;
     }
@@ -204,7 +205,7 @@ public class SimpleTweetStatus {
         this.isMyRT = isRT;
     }
 
-    ///getter
+    //getter
     public long getStatusId() {
         return statusId;
     }
@@ -270,6 +271,4 @@ public class SimpleTweetStatus {
         boolean isSimpleTweetStatus = o instanceof SimpleTweetStatus;
         return isSimpleTweetStatus && (getStatusId() == ((SimpleTweetStatus) o).getStatusId()) && ((SimpleTweetStatus) o).statusAcquirerId == this.statusAcquirerId;
     }
-
-
 }

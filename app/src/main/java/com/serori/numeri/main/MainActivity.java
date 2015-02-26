@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.serori.numeri.R;
@@ -25,7 +26,6 @@ import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.main.manager.FragmentManagerActivity;
 import com.serori.numeri.main.manager.FragmentStorager;
 import com.serori.numeri.oauth.OAuthActivity;
-import com.serori.numeri.stream.event.OnFavoriteListener;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
@@ -38,28 +38,26 @@ import java.util.List;
 import java.util.Map;
 
 import twitter4j.RateLimitStatus;
-import twitter4j.Status;
 import twitter4j.TwitterException;
-import twitter4j.User;
 
 /**
  * MainActivity
  */
-public class MainActivity extends NumeriActivity implements OnFavoriteListener {
+public class MainActivity extends NumeriActivity {
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ViewPager viewPager;
-    private List<NumeriFragment> numeriFragments = new ArrayList<>();
-
+    private List<NumeriFragment> temporaryNumeriFragments = new ArrayList<>();
+    private TextView infoTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Application.getInstance().setApplicationContext(getApplicationContext());
         Application.getInstance().setMainActivityContext(this);
-
-        loadConfigrations();
+        loadConfigurations();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         addMenuButton();
+        infoTextView = (TextView) findViewById(R.id.infoText);
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setOffscreenPageLimit(20);
@@ -79,13 +77,13 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
         }
     }
 
-    private void loadConfigrations() {
+    private void loadConfigurations() {
         ConfigurationStorager.getInstance().loadConfigurations();
         ActionStorager.getInstance().initializeActions();
         ColorStorager.getInstance().loadColor();
     }
 
-
+    @SuppressWarnings("unchecked")
     private void init() {
         Log.v("initLoad", "init");
         List<NumeriUserStorager.NumeriUserTable> tables = new ArrayList<>();
@@ -93,28 +91,48 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
         if (tables.isEmpty()) {
             startActivity(OAuthActivity.class, true);
         } else {
-            SimpleAsyncTask.backgroundExecute(() -> {
-                Application.getInstance().getNumeriUsers().clear();
-                for (NumeriUserStorager.NumeriUserTable table : tables) {
-                    Application.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
-                }
-                for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-                    numeriUser.getStreamSwitcher().startStream();
-                    numeriUser.getStreamEvent().addOnFavoriteListener(this);
-                }
-                numeriFragments.clear();
-                List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
-                if (!numeriUsers.isEmpty()) {
-                    SimpleTweetStatus.startObserveFavorite();
-                    numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
+
+            new SimpleAsyncTask<List<NumeriUserStorager.NumeriUserTable>, List<NumeriFragment>>() {
+
+                @Override
+                protected List<NumeriFragment> doInBackground(List<NumeriUserStorager.NumeriUserTable> numeriUserTables) {
                     runOnUiThread(() -> {
+                        infoTextView.setVisibility(View.VISIBLE);
+                        infoTextView.setText("ユーザー情報を取得中...");
+                    });
+                    Application.getInstance().getNumeriUsers().clear();
+                    for (NumeriUserStorager.NumeriUserTable table : numeriUserTables) {
+                        Application.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
+                    }
+                    for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+                        numeriUser.getStreamSwitcher().startStream();
+                        runOnUiThread(() -> infoTextView.setText(numeriUser.getScreenName() + " : startStream"));
+                    }
+                    List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
+                    List<NumeriFragment> numeriFragments = new ArrayList<>();
+                    if (!numeriUsers.isEmpty()) {
+                        SimpleTweetStatus.startObserveFavorite();
+                        numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
+                    }
+                    return numeriFragments;
+                }
+
+                @Override
+                protected void onPostExecute(List<NumeriFragment> numeriFragments) {
+                    temporaryNumeriFragments.clear();
+                    if (!numeriFragments.isEmpty()) {
+                        temporaryNumeriFragments.addAll(numeriFragments);
+                        infoTextView.setText("フラグメントを生成しています...");
                         for (NumeriFragment numeriFragment : numeriFragments) {
                             sectionsPagerAdapter.add(numeriFragment);
                         }
                         viewPager.setAdapter(sectionsPagerAdapter);
-                    });
+                        infoTextView.setVisibility(View.GONE);
+                    } else {
+                        infoTextView.setText("メニュー -> フラグメント管理 からフラグメントを追加してください。");
+                    }
                 }
-            });
+            }.execute(tables);
         }
     }
 
@@ -122,16 +140,17 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (!numeriFragments.isEmpty()) {
-            NumeriFragmentManager.getInstance().putFragments(numeriFragments);
+        if (!temporaryNumeriFragments.isEmpty()) {
+            NumeriFragmentManager.getInstance().putFragments(temporaryNumeriFragments);
         }
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        temporaryNumeriFragments.clear();
         if (!NumeriFragmentManager.getInstance().getNumeriFragments().isEmpty()) {
-            numeriFragments.addAll(NumeriFragmentManager.getInstance().getNumeriFragments());
+            temporaryNumeriFragments.addAll(NumeriFragmentManager.getInstance().getNumeriFragments());
         }
     }
 
@@ -177,14 +196,6 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
         return false;
     }
 
-    @Override
-    public void onFavorite(User source, User target, Status favoritedStatus) {
-        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
-            if (target.getId() == numeriUser.getAccessToken().getUserId()) {
-                ToastSender.sendToast(source.getScreenName() + "さんに" + target.getScreenName() + "のツイートがお気に入り登録されました");
-            }
-        }
-    }
 
     public void addMenuButton() {
         LinearLayout menuButton = (LinearLayout) findViewById(R.id.menuButton);
@@ -193,10 +204,6 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
         menuButton.getChildAt(0).setOnClickListener(v -> openOptionsMenu());
     }
 
-    public void removeMenuButton() {
-        LinearLayout menuButton = (LinearLayout) findViewById(R.id.menuButton);
-        menuButton.setVisibility(View.GONE);
-    }
 
     private void useApiFrequencyConfirmation() {
 
@@ -222,7 +229,7 @@ public class MainActivity extends NumeriActivity implements OnFavoriteListener {
 
     @Override
     public void finish() {
-        Application.getInstance().finishMainActivity();
+        Application.getInstance().restartMainActivityCallBack();
         super.finish();
     }
 }

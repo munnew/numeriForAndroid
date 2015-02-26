@@ -6,7 +6,7 @@ import android.view.KeyEvent;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.listview.NumeriListView;
+import com.serori.numeri.listview.TimeLineListView;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
@@ -21,7 +21,7 @@ import twitter4j.TwitterException;
  */
 public class ConversationActivity extends NumeriActivity {
 
-    private NumeriListView conversationListView;
+    private TimeLineListView conversationListView;
     private TimeLineItemAdapter adapter;
     private static NumeriUser numeriUser = null;
     private static long nextStatusId;
@@ -37,7 +37,7 @@ public class ConversationActivity extends NumeriActivity {
         if (savedInstanceState == null) {
             List<SimpleTweetStatus> simpleTweetStatuses = new ArrayList<>();
             adapter = new TimeLineItemAdapter(this, 0, simpleTweetStatuses);
-            conversationListView = (NumeriListView) findViewById(R.id.conversationListView);
+            conversationListView = (TimeLineListView) findViewById(R.id.conversationListView);
 
             NumeriUser user = numeriUser;
             conversationListView.setAdapter(adapter);

@@ -3,7 +3,6 @@ package com.serori.numeri.stream;
 import com.serori.numeri.stream.event.OnFavoriteListener;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.stream.event.OnUnFavoriteListener;
-import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
     private List<OnFavoriteListener> onFavoriteListeners = new ArrayList<>();
     private List<OnUnFavoriteListener> onUnFavoriteListeners = new ArrayList<>();
 
-    public StreamEvent(TwitterStream stream, NumeriUser numeriUser) {
+    public StreamEvent(TwitterStream stream) {
         stream.addListener(this);
         userStream = stream;
     }

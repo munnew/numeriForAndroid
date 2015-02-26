@@ -5,7 +5,7 @@
     tools:context=".MainActivity$PlaceholderFragment">
 
 
-    <com.serori.numeri.listview.NumeriListView
+    <com.serori.numeri.listview.TimeLineListView
         android:id="@+id/timeLineListView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

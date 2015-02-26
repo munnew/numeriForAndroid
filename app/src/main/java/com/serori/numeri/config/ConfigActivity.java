@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
@@ -26,9 +27,11 @@ import java.util.List;
  * アプリケーションの設定についてのActivity
  */
 public class ConfigActivity extends NumeriActivity {
+    private boolean previousTheme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        previousTheme = ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
         if (savedInstanceState == null) {
@@ -42,7 +45,6 @@ public class ConfigActivity extends NumeriActivity {
         Button openMenuButton = (Button) findViewById(R.id.openActionMenuButton);
         TextView tweetAdditionalAcquisitionFlagText = ((TextView) findViewById(R.id.tweetAdditionalAcquisitionFlagText));
         TextView sleeplessText = ((TextView) findViewById(R.id.sleeplessText));
-        ((TextView) findViewById(R.id.sleeplessText)).setTextColor(Color.parseColor("#FFFFFF"));
         if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
             openMenuButton.setTextColor(Color.parseColor("#FFFFFF"));
             tweetAdditionalAcquisitionFlagText.setTextColor(Color.parseColor("#FFFFFF"));
@@ -116,7 +118,6 @@ public class ConfigActivity extends NumeriActivity {
                             ConfigurationStorager.EitherConfigurations.DARK_THEME.setEnabled(false);
                     }
                     ConfigurationStorager.getInstance().saveEitherConfigTable(ConfigurationStorager.EitherConfigurations.DARK_THEME);
-                    Application.getInstance().destroyMainActivity();
                     ((AlertDialog) dialog).hide();
                     dialog.dismiss();
                 })
@@ -171,6 +172,10 @@ public class ConfigActivity extends NumeriActivity {
     @Override
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (previousTheme != ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+                Application.getInstance().destroyMainActivity();
+                Toast.makeText(this, "テーマが変更されました。アプリケーションを再起動します。", Toast.LENGTH_SHORT).show();
+            }
             if (Application.getInstance().isDestroyMainActivity()) {
                 startActivity(MainActivity.class, true);
             } else {

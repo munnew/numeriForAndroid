@@ -202,6 +202,9 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
         setCurrentShowDialog(alertDialog);
     }
 
+    /**
+     * 未実装、もしかしたら実装しない
+     */
     private void createDMFragmentsListDialog() {
 
     }

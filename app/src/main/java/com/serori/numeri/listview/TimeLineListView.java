@@ -6,12 +6,9 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.AbsListView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.fragment.AttachedBottomListener;
 import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.listview.action.TwitterActions;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
@@ -26,11 +23,8 @@ import java.util.List;
 /**
  * タイムラインを表示するためのリストビュー
  */
-public class NumeriListView extends ListView {
+public class TimeLineListView extends AttachedBottomCallBackListView {
     private float touchedCoordinatesX;
-    private AttachedBottomListener attachedBottomListener;
-    private boolean onAttachedBottom = false;
-    private boolean onAttachedBottomCallbackEnabled = true;
     private boolean insertItemEnable = true;
 
     private int _firstVisibleItemPosition = 0;
@@ -44,56 +38,21 @@ public class NumeriListView extends ListView {
 
     private List<SimpleTweetStatus> storedItems = new ArrayList<>();
 
-    public NumeriListView(Context context) {
-        super(context);
-    }
 
-    public NumeriListView(Context context, AttributeSet attrs) {
+    public TimeLineListView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    public NumeriListView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
-
-
-    public void setAttachedBottomListener(AttachedBottomListener listener) {
-        attachedBottomListener = listener;
-
-
-        setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItemPosition, int visibleItemCount, int totalItemCount) {
-                _firstVisibleItemPosition = firstVisibleItemPosition;
-                _visibleItemCount = visibleItemCount;
-                if (firstVisibleItemPosition == 0 && !storedItems.isEmpty()) {
-                    Log.v("ListView", "InsertEnable:" + insertItemEnable);
-                    insertItemEnable = false;
-                    while (!storedItems.isEmpty()) {
-                        ((TimeLineItemAdapter) getAdapter()).insert(storedItems.get(0), 0);
-                        storedItems.remove(0);
-                    }
-                    setSelection(storedItems.size());
-                    insertItemEnable = true;
+        setOnItemScrollListener((view, firstVisibleItemPosition, visibleItemCount, totalItemCount) -> {
+            _firstVisibleItemPosition = firstVisibleItemPosition;
+            _visibleItemCount = visibleItemCount;
+            if (firstVisibleItemPosition == 0 && !storedItems.isEmpty()) {
+                Log.v("ListView", "InsertEnable:" + insertItemEnable);
+                insertItemEnable = false;
+                while (!storedItems.isEmpty()) {
+                    ((TimeLineItemAdapter) getAdapter()).insert(storedItems.get(0), 0);
+                    storedItems.remove(0);
                 }
-
-                if (attachedBottomListener != null && onAttachedBottomCallbackEnabled && !onAttachedBottom &&
-                        firstVisibleItemPosition + visibleItemCount == totalItemCount && visibleItemCount < totalItemCount) {
-                    int lastItemY = getChildAt(getChildCount() - 1).getHeight();
-                    int lastItemPositionY = getChildAt(getChildCount() - 1).getTop();
-                    int itemPositionTargetLine = getHeight() - lastItemY;
-                    if (lastItemPositionY <= itemPositionTargetLine) {
-                        attachedBottomListener.attachedBottom((SimpleTweetStatus) getAdapter().getItem(totalItemCount - 1));
-                        onAttachedBottom = true;
-                    }
-                } else if (firstVisibleItemPosition + visibleItemCount <= totalItemCount - 1) {
-                    onAttachedBottom = false;
-                }
+                setSelection(storedItems.size());
+                insertItemEnable = true;
             }
         });
     }
@@ -171,6 +130,11 @@ public class NumeriListView extends ListView {
         });
     }
 
+    /**
+     * ユーザーのお気に入り動作を監視し星をつけたり消したりし始めるためのメソッド
+     *
+     * @param numeriUser ユーザー
+     */
     public void startObserveFavorite(NumeriUser numeriUser) {
         numeriUser.getStreamEvent().addOnFavoriteListener((user1, user2, favoritedStatus) -> {
             if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
@@ -215,9 +179,6 @@ public class NumeriListView extends ListView {
         super.setAdapter(adapter);
     }
 
-    public void onAttachedBottomCallbackEnabled(boolean onAttachedBottomCallbackEnabled) {
-        this.onAttachedBottomCallbackEnabled = onAttachedBottomCallbackEnabled;
-    }
 
     public void insertItem(SimpleTweetStatus item) {
         if (getFirstVisiblePosition() == 0 && insertItemEnable) {

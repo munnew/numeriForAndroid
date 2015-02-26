@@ -60,7 +60,7 @@ public class NumeriUser {
         twitterStream.setOAuthConsumer(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key),
                 Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
         twitterStream.setOAuthAccessToken(new AccessToken(table.getAccessToken(), table.getAccessTokenSecret()));
-        streamEvent = new StreamEvent(twitterStream, this);
+        streamEvent = new StreamEvent(twitterStream);
     }
 
     public Twitter getTwitter() {

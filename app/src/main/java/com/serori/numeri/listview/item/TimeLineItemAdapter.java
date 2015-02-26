@@ -23,22 +23,12 @@ import java.util.List;
  */
 public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
     private LayoutInflater layoutInflater;
-    private Context context;
-    private int resource;
-    private List<SimpleTweetStatus> objects;
-    private View currentView;
 
     public TimeLineItemAdapter(Context context, int resource, List<SimpleTweetStatus> objects) {
         super(context, resource, objects);
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        this.context = context;
-        this.resource = resource;
-        this.objects = objects;
     }
 
-    public TimeLineItemAdapter clone() {
-        return new TimeLineItemAdapter(context, resource, objects);
-    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {

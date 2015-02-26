@@ -63,7 +63,7 @@ public class Application extends android.app.Application {
         onFinishMainActivityListeners.add(listener);
     }
 
-    void finishMainActivity() {
+    void restartMainActivityCallBack() {
         for (OnFinishMainActivityListener onFinishMainActivityListener : onFinishMainActivityListeners) {
             onFinishMainActivityListener.finish();
         }
@@ -89,6 +89,7 @@ public class Application extends android.app.Application {
         return ((Activity) mainActivityContext).isFinishing();
     }
 
+   
     public NumeriUsers getNumeriUsers() {
         return NumeriUsers.getInstance();
     }

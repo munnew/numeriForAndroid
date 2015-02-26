@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.config.ConfigurationStorager;
-import com.serori.numeri.listview.NumeriListView;
+import com.serori.numeri.listview.TimeLineListView;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
@@ -31,7 +31,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
     protected String name = "fragment";
     private NumeriUser numeriUser = null;
 
-    private NumeriListView timelineListView;
+    private TimeLineListView timelineListView;
     private TimeLineItemAdapter adapter;
     private List<SimpleTweetStatus> timeLineItems;
     protected Context context;
@@ -48,7 +48,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         Log.v(name, "crate");
         setRetainInstance(true);
         context = rootView.getContext();
-        timelineListView = (NumeriListView) rootView.findViewById(R.id.timeLineListView);
+        timelineListView = (TimeLineListView) rootView.findViewById(R.id.timeLineListView);
         timelineListView.setAttachedBottomListener(this);
         if (savedInstanceState == null) {
             timeLineItems = new ArrayList<>();
@@ -64,7 +64,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         return rootView;
     }
 
-    protected NumeriListView getTimelineListView() {
+    protected TimeLineListView getTimelineListView() {
         return timelineListView;
     }
 
@@ -123,7 +123,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
     /**
      * 親のNumeriActivityを取得する
      *
-     * @return 親のNmeriActivity
+     * @return 親のNumeriActivity
      */
     protected NumeriActivity getNumeriActivity() {
         return (NumeriActivity) getActivity();
