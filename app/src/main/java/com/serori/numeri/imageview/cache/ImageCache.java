@@ -107,6 +107,7 @@ public class ImageCache {
         if (!startedDownload) {
             if (onStartDownLoadListener != null) onStartDownLoadListener.onDownLoadStart(url);
             urls.add(url);
+
             new SimpleAsyncTask<String, ImageData>() {
                 @Override
                 protected ImageData doInBackground(String s) {

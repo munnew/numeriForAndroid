@@ -87,7 +87,7 @@ public class ListFragment extends NumeriFragment {
             paging.count(31);
             try {
                 ResponseList<Status> statuses = getNumeriUser().getTwitter().getUserListStatuses(listId, paging);
-                statuses.remove(0);
+                if(!statuses.isEmpty())statuses.remove(0);
                 getActivity().runOnUiThread(() -> {
                     for (Status status : statuses) {
                         getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
