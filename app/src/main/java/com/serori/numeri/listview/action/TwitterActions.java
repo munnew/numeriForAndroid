@@ -50,6 +50,9 @@ public class TwitterActions {
             case RT:
                 retweet(position);
                 break;
+            case QT:
+                quoteRetweet(position);
+                break;
             case SHOW_CONVERSATION:
                 showConversation(position);
                 break;
@@ -73,6 +76,7 @@ public class TwitterActions {
         }
         if (!((Activity) context).isFinishing()) {
             SimpleTweetStatus item = adapter.getItem(position);
+            long statusId = item.isRT() ? item.getRetweetedStatusId() : item.getStatusId();
             AlertDialog alertDialog = new AlertDialog.Builder(context).setMessage("このツイートをRTしますか？")
                     .setNegativeButton("いいえ", (dialog, id) -> {
                     })
@@ -80,7 +84,7 @@ public class TwitterActions {
                         AsyncTask.execute(() -> {
                             if (!item.isMyRT()) {
                                 try {
-                                    numeriUser.getTwitter().retweetStatus(item.getStatusId());
+                                    numeriUser.getTwitter().retweetStatus(statusId);
                                     item.setMyRT(true);
                                     ToastSender.sendToast(item.getScreenName() + "さんのツイートをRTしました");
                                 } catch (TwitterException e) {
@@ -96,10 +100,11 @@ public class TwitterActions {
 
     private void favorite(int position) {
         SimpleTweetStatus item = adapter.getItem(position);
+        long statusId = item.isRT() ? item.getRetweetedStatusId() : item.getStatusId();
         if (!item.isFavorite()) {
             AsyncTask.execute(() -> {
                 try {
-                    numeriUser.getTwitter().createFavorite(item.getStatusId());
+                    numeriUser.getTwitter().createFavorite(statusId);
                     ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
@@ -108,7 +113,7 @@ public class TwitterActions {
         } else {
             AsyncTask.execute(() -> {
                 try {
-                    numeriUser.getTwitter().destroyFavorite(item.getStatusId());
+                    numeriUser.getTwitter().destroyFavorite(statusId);
                     ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
@@ -119,9 +124,8 @@ public class TwitterActions {
 
     private void reply(int position) {
         SimpleTweetStatus item = adapter.getItem(position);
-        item.getStatusId();
         TweetActivity.setDestination(item.getStatusId(), item.getDestinationUserNames());
-        TweetActivity.setTweetNunmeriUser(numeriUser);
+        TweetActivity.setTweetNumeriUser(numeriUser);
         Intent intent = new Intent(context, TweetActivity.class);
         context.startActivity(intent);
     }
@@ -146,6 +150,8 @@ public class TwitterActions {
         else menuItems.add(new MenuItem(Actions.FAVORITE));
 
         if (!item.isProtectedUser()) menuItems.add(new MenuItem(Actions.RT));
+
+        if (!item.isProtectedUser()) menuItems.add(new MenuItem(Actions.QT));
 
         menuItems.add(new MenuItem(Actions.OPEN_USER_PROFILE));
 
@@ -181,6 +187,9 @@ public class TwitterActions {
                         case RT:
                             retweet(position);
                             break;
+                        case QT:
+                            quoteRetweet(position);
+                            break;
                         case SHOW_CONVERSATION:
                             showConversation(position);
                             break;
@@ -214,6 +223,20 @@ public class TwitterActions {
         UserInformationActivity.setUserId(adapter.getItem(position).getUserId());
         UserInformationActivity.setNumeriUser(numeriUser);
         Intent intent = new Intent(context, UserInformationActivity.class);
+        context.startActivity(intent);
+    }
+
+    private void quoteRetweet(int position) {
+        SimpleTweetStatus item = adapter.getItem(position);
+        if (item.isProtectedUser()) {
+            ToastSender.sendToast("非公開ユーザーのツイートは引用RTできません");
+            return;
+        }
+        TweetActivity.setDestination(item.getStatusId(), item.getDestinationUserNames());
+        TweetActivity.setTweetNumeriUser(numeriUser);
+        String qtText = "QT @" + item.getScreenName() + " > " + item.getMainText() + " : ";
+        TweetActivity.setTweetText(qtText);
+        Intent intent = new Intent(context, TweetActivity.class);
         context.startActivity(intent);
     }
 

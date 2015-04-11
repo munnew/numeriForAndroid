@@ -1,8 +1,12 @@
 package com.serori.numeri.stream;
 
+import android.util.Log;
+
+import com.serori.numeri.stream.event.OnDeletionNoticeListener;
 import com.serori.numeri.stream.event.OnFavoriteListener;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.stream.event.OnUnFavoriteListener;
+import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,7 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
     private List<OnStatusListener> onStatusListeners = new ArrayList<>();
     private List<OnFavoriteListener> onFavoriteListeners = new ArrayList<>();
     private List<OnUnFavoriteListener> onUnFavoriteListeners = new ArrayList<>();
+    private List<OnDeletionNoticeListener> onDeletionNoticeListeners = new ArrayList<>();
 
     public StreamEvent(TwitterStream stream) {
         stream.addListener(this);
@@ -45,7 +50,13 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
     @Override
     public IStreamEvent addOnStatusListener(OnStatusListener listener) {
         onStatusListeners.add(listener);
+        Log.v(getClass().toString(), "" + onStatusListeners.size());
         return this;
+    }
+
+    @Override
+    public void removeOnStatusListener(OnStatusListener listener) {
+        onStatusListeners.remove(listener);
     }
 
     @Override
@@ -55,11 +66,30 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
     }
 
     @Override
+    public void removeOnFavoriteListener(OnFavoriteListener listener) {
+        onFavoriteListeners.remove(listener);
+    }
+
+    @Override
     public IStreamEvent addOnUnFavoriteListener(OnUnFavoriteListener listener) {
         onUnFavoriteListeners.add(listener);
         return this;
     }
 
+    @Override
+    public void removeOnUnFavoriteListener(OnUnFavoriteListener listener) {
+        onUnFavoriteListeners.remove(listener);
+    }
+
+    @Override
+    public void addOnDeletionNoticeListener(OnDeletionNoticeListener listener) {
+        onDeletionNoticeListeners.add(listener);
+    }
+
+    @Override
+    public void removeOnDeletionNoticeListener(OnDeletionNoticeListener listener) {
+        onDeletionNoticeListeners.remove(listener);
+    }
 
     //以下Streamイベント
     @Override
@@ -160,7 +190,10 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
 
     @Override
     public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
-
+        for (OnDeletionNoticeListener onDeletionNoticeListener : onDeletionNoticeListeners) {
+            onDeletionNoticeListener.onDeletionNotice(statusDeletionNotice);
+            ToastSender.sendToast("destroyTweet " + statusDeletionNotice.getStatusId());
+        }
     }
 
     @Override

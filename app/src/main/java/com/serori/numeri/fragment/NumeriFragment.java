@@ -61,6 +61,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         }
         timelineListView.onTouchItemEnabled(getNumeriUser(), getActivity());
         timelineListView.startObserveFavorite(getNumeriUser());
+        timelineListView.startObserveDestroyTweet(getNumeriUser());
         return rootView;
     }
 

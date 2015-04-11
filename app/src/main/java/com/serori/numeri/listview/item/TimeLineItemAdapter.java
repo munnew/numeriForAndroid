@@ -16,6 +16,7 @@ import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.imageview.NumeriImageView;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,10 +24,12 @@ import java.util.List;
  */
 public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
     private LayoutInflater layoutInflater;
+    private List<SimpleTweetStatus> simpleTweetStatusList;
 
     public TimeLineItemAdapter(Context context, int resource, List<SimpleTweetStatus> objects) {
         super(context, resource, objects);
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        simpleTweetStatusList = objects;
     }
 
 
@@ -104,4 +107,19 @@ public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
 
         return convertView;
     }
+
+    public void remove(long statusId) {
+        SimpleTweetStatus simpleStatus = null;
+        for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusList) {
+            if (simpleTweetStatus.getStatusId() == statusId) {
+                simpleStatus = simpleTweetStatus;
+                break;
+            }
+        }
+
+        if (simpleStatus != null) {
+            simpleTweetStatusList.remove(simpleStatus);
+        }
+    }
+
 }

@@ -19,16 +19,15 @@ import twitter4j.URLEntity;
 import twitter4j.UserMentionEntity;
 
 /**
- * Statusから生成される軽量化されたオブジェクト
+ * Statusから生成される軽量化されたStatus
  */
 public class SimpleTweetStatus {
     private String iconImageUrl;
     private String name, mainText, via;
-    private long statusId, userId;
+    private long statusId, userId, retweetedStatusId = -1;
     private static final String DATE_FORMAT = "MM/dd HH:mm:ss";
     private String screenName;
     private boolean isMyRT = false, isMention = false, isFavorite = false;
-    private boolean isRT = false;
     private boolean isMyTweet = false;
     private boolean isProtectedUser = false;
     private String createdTime;
@@ -39,6 +38,7 @@ public class SimpleTweetStatus {
     private volatile static Map<String, SimpleTweetStatus> simpleTweetStatusMap = new LinkedHashMap<>();
     private static boolean observeFavoriteStarted = false;
     private long statusAcquirerId;
+    private static boolean observeDestroyTweetStarted = false;
 
     /**
      * StatusをSimpleTweetStatusとしてキャッシュします。
@@ -48,7 +48,7 @@ public class SimpleTweetStatus {
      * @return キャッシュされたSimpleTweetStatus
      */
     public static SimpleTweetStatus build(Status status, NumeriUser numeriUser) {
-        String key = numeriUser.getScreenName() + status.getId();
+        String key = createSimpleTweetStatusKey(numeriUser, status.getId());
         SimpleTweetStatus simpleTweetStatus = simpleTweetStatusMap.get(key);
         if (simpleTweetStatus == null) {
             simpleTweetStatus = new SimpleTweetStatus(status, numeriUser);
@@ -72,7 +72,7 @@ public class SimpleTweetStatus {
      * @throws TwitterException
      */
     public static SimpleTweetStatus showStatus(long statusId, NumeriUser numeriUser) throws TwitterException {
-        String key = numeriUser.getScreenName() + statusId;
+        String key = createSimpleTweetStatusKey(numeriUser, statusId);
         SimpleTweetStatus simpleTweetStatus = simpleTweetStatusMap.get(key);
         if (simpleTweetStatus != null) return simpleTweetStatus;
         Status status = numeriUser.getTwitter().showStatus(statusId);
@@ -116,24 +116,43 @@ public class SimpleTweetStatus {
         Application.getInstance().addOnFinishMainActivityListener(() -> observeFavoriteStarted = false);
     }
 
+    /**
+     * ツイートの削除イベントの監視を開始し削除された場合はキャッシュから削除する<br>
+     * このメソッドはアプリケーションが生きている間一度しか実行することが出来ない
+     */
+    public static void startObserveDestroyTweet() {
+        List<NumeriUser> numeriUsers = Application.getInstance().getNumeriUsers().getNumeriUsers();
+        if (observeDestroyTweetStarted || numeriUsers.isEmpty()) return;
+
+        for (NumeriUser numeriUser : numeriUsers) {
+            numeriUser.getStreamEvent().addOnDeletionNoticeListener(statusDeletionNotice -> {
+                long deletedStatusId = statusDeletionNotice.getStatusId();
+                simpleTweetStatusMap.remove(createSimpleTweetStatusKey(numeriUser, deletedStatusId));
+            });
+        }
+    }
+
+    private static String createSimpleTweetStatusKey(NumeriUser numeriUser, long statusId) {
+        return numeriUser.getScreenName() + statusId;
+    }
+
     private SimpleTweetStatus(Status status, NumeriUser numeriUser) {
         createdTime = new SimpleDateFormat(DATE_FORMAT).format(status.getCreatedAt());
         statusAcquirerId = numeriUser.getAccessToken().getUserId();
+        statusId = status.getId();
         if (status.isRetweet()) { //RT
-            statusId = status.getRetweetedStatus().getId();
             isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
-            isRT = true;
             iconImageUrl = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
             mainText = status.getRetweetedStatus().getText();
             name = status.getRetweetedStatus().getUser().getName();
-            via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName();
+            via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName() + "\n RT count : " + status.getRetweetedStatus().getRetweetCount();
             screenName = status.getRetweetedStatus().getUser().getScreenName();
             isFavorite = status.getRetweetedStatus().isFavorited();
             userId = status.getRetweetedStatus().getUser().getId();
             inReplyToStatusId = status.getRetweetedStatus().getInReplyToStatusId();
             isMyRT = status.getRetweetedStatus().isRetweetedByMe();
+            retweetedStatusId = status.getRetweetedStatus().getId();
         } else {//!RT
-            statusId = status.getId();
             isProtectedUser = status.getUser().isProtected();
             iconImageUrl = status.getUser().getBiggerProfileImageURL();
             mainText = status.getText();
@@ -239,7 +258,7 @@ public class SimpleTweetStatus {
     }
 
     public boolean isRT() {
-        return isRT;
+        return retweetedStatusId != -1;
     }
 
     public Long getInReplyToStatusId() {
@@ -266,9 +285,23 @@ public class SimpleTweetStatus {
         return isProtectedUser;
     }
 
+    public long getRetweetedStatusId() {
+        return retweetedStatusId;
+    }
+
     @Override
     public boolean equals(Object o) {
         boolean isSimpleTweetStatus = o instanceof SimpleTweetStatus;
-        return isSimpleTweetStatus && (getStatusId() == ((SimpleTweetStatus) o).getStatusId()) && ((SimpleTweetStatus) o).statusAcquirerId == this.statusAcquirerId;
+        if (!isSimpleTweetStatus) return false;
+        boolean isSameTweet;
+        if (this.isRT()) {
+            isSameTweet = this.retweetedStatusId == ((SimpleTweetStatus) o).getStatusId()
+                    || this.retweetedStatusId == ((SimpleTweetStatus) o).getRetweetedStatusId();
+        } else {
+            isSameTweet = this.statusId == ((SimpleTweetStatus) o).getStatusId()
+                    || this.statusId == ((SimpleTweetStatus) o).getRetweetedStatusId();
+        }
+
+        return isSameTweet && ((SimpleTweetStatus) o).statusAcquirerId == this.statusAcquirerId;
     }
 }

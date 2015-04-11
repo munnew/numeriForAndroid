@@ -172,6 +172,19 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
         }
     }
 
+    public void startObserveDestroyTweet(NumeriUser numeriUser) {
+        numeriUser.getStreamEvent().addOnDeletionNoticeListener(statusDeletionNotice -> {
+            long deletedStatusId = statusDeletionNotice.getStatusId();
+            for (int i = 0; i < _visibleItemCount; i++) {
+                SimpleTweetStatus simpleTweetStatus = ((SimpleTweetStatus) getAdapter().getItem(_firstVisibleItemPosition + i));
+                if (simpleTweetStatus.getStatusId() == deletedStatusId) {
+                    removeViewAt(i);
+                }
+            }
+            ((TimeLineItemAdapter) getAdapter()).remove(deletedStatusId);
+        });
+    }
+
     @Override
     public void setAdapter(ListAdapter adapter) {
         if (!(adapter instanceof TimeLineItemAdapter))
