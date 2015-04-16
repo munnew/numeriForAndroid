@@ -22,7 +22,6 @@ public class Application extends android.app.Application {
     private List<OnFinishMainActivityListener> onFinishMainActivityListeners = new ArrayList<>();
     private Context applicationContext;
     private Context mainActivityContext;
-    private FragmentOwnerRegister fragmentOwnerRegister = new FragmentOwnerRegister();
 
     public Context getApplicationContext() {
         return applicationContext;
@@ -95,9 +94,6 @@ public class Application extends android.app.Application {
         return NumeriUsers.getInstance();
     }
 
-    public FragmentOwnerRegister getFragmentOwnerRegister() {
-        return fragmentOwnerRegister;
-    }
 
     public Point getWindowSize() {
         WindowManager wm = (WindowManager) mainActivityContext.getSystemService(WINDOW_SERVICE);
