@@ -3,17 +3,16 @@ buildscript {
         jcenter()
     }
     dependencies {
-
-        classpath 'me.tatarka:gradle-retrolambda:+'
+        classpath 'me.tatarka:gradle-retrolambda:3.0.1'
     }
 }
-apply plugin: 'retrolambda'
+apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.android.application'
 
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "20.0.0"
+    buildToolsVersion '21.1.2'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -60,9 +59,8 @@ dependencies {
     compile 'org.twitter4j:twitter4j-stream:4.0.2'
     compile 'com.j256.ormlite:ormlite-core:4.48'
     compile 'com.j256.ormlite:ormlite-android:4.48'
-    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:appcompat-v7:21.0.0'
     compile fileTree(include: ['*.jar'], dir: 'libs')
-
 }
 
 

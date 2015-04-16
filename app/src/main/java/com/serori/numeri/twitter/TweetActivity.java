@@ -1,6 +1,7 @@
 package com.serori.numeri.twitter;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -46,14 +47,32 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     private TextView backgroundTimeLine;
     private TextView currentUserTextView;
     private InputMethodManager inputMethodManager;
-    private static boolean isReply = false;
-    private static long destinationStatusId;
+    private static long destinationStatusId = -1;
     private static String tweetText = "";
     private static List<String> destinationUserNames = new ArrayList<>();
     private static NumeriUser currentNumeriUser = null;
     private List<File> appendedImages = new ArrayList<>();
     private LinearLayout appendedImageViews;
     private Map<String, OnStatusListener> onStatusListeners = new LinkedHashMap<>();
+
+    public static void replyTweet(Context activityContext, NumeriUser numeriUser, SimpleTweetStatus destinationTweetStatus) {
+        if (!(activityContext instanceof NumeriActivity)) return;
+        currentNumeriUser = numeriUser;
+        destinationUserNames.addAll(destinationTweetStatus.getDestinationUserNames());
+        if (!destinationTweetStatus.isRT()) {
+            destinationStatusId = destinationTweetStatus.getStatusId();
+        } else {
+            destinationStatusId = destinationTweetStatus.getRetweetedStatusId();
+        }
+        ((NumeriActivity) activityContext).startActivity(TweetActivity.class, false);
+    }
+
+    public static void quoteRetweet(Context activityContext, NumeriUser numeriUser, SimpleTweetStatus quotedTweetStatus) {
+        if (!(activityContext instanceof NumeriActivity)) return;
+        currentNumeriUser = numeriUser;
+        tweetText = "QT " + quotedTweetStatus.getScreenName() + " >" + quotedTweetStatus.getMainText() + " : ";
+        ((NumeriActivity) activityContext).startActivity(TweetActivity.class, false);
+    }
 
 
     @Override
@@ -97,7 +116,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             });
         }
 
-        if (isReply) setUserNames();
+        if (destinationStatusId != -1) setUserNames();
         if (!tweetText.isEmpty()) {
             tweetEditText.setText(tweetText);
             tweetEditText.setSelection(tweetEditText.length());
@@ -109,10 +128,6 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                isReply = false;
-                currentNumeriUser = null;
-                destinationUserNames.clear();
-                appendedImages.clear();
                 finish();
                 return true;
             case KeyEvent.KEYCODE_MOVE_HOME:
@@ -150,9 +165,9 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
         TweetBuilder tweetBuilder = numeriUser.getTweetBuilder();
         tweetBuilder.setText(tweetEditText.getText().toString());
 
-        if (isReply) {
+        if (destinationStatusId != -1) {
             tweetBuilder.setReplyDestinationId(destinationStatusId);
-            isReply = false;
+            destinationStatusId = -1;
         }
 
         if (!appendedImages.isEmpty()) {
@@ -161,9 +176,6 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
 
         tweetBuilder.tweet();
         tweetEditText.setText("");
-        currentNumeriUser = null;
-        appendedImages.clear();
-        destinationUserNames.clear();
         inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
         finish();
     }
@@ -256,15 +268,6 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
                 .create().show();
     }
 
-    public static void setDestination(long statusId, List<String> destinationNames) {
-        isReply = true;
-        destinationStatusId = statusId;
-        destinationUserNames.addAll(destinationNames);
-    }
-
-    public static void setTweetNumeriUser(NumeriUser numeriUser) {
-        currentNumeriUser = numeriUser;
-    }
 
     private void setUserNames() {
         for (String destinationUserName : destinationUserNames) {
@@ -288,9 +291,6 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
         }).create().show();
     }
 
-    public static void setTweetText(String text) {
-        tweetText = text;
-    }
 
     @Override
     public void finish() {
@@ -298,6 +298,10 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             numeriUser.getStreamEvent().removeOnStatusListener(onStatusListeners.get(numeriUser.getScreenName()));
         }
         tweetText = "";
+        currentNumeriUser = null;
+        destinationStatusId = -1;
+        destinationUserNames.clear();
+        appendedImages.clear();
         super.finish();
     }
 }

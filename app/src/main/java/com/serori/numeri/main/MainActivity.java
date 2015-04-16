@@ -112,7 +112,7 @@ public class MainActivity extends NumeriActivity {
                     List<NumeriFragment> numeriFragments = new ArrayList<>();
                     if (!numeriUsers.isEmpty()) {
                         SimpleTweetStatus.startObserveFavorite();
-                        SimpleTweetStatus.startObserveDestroyTweet();
+                        //SimpleTweetStatus.startObserveDestroyTweet();
 
                         numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
                     }

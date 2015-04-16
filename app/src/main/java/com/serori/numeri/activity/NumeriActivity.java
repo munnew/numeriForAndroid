@@ -76,7 +76,7 @@ public class NumeriActivity extends ActionBarActivity {
      * @param activityClass 遷移するActivityのクラス
      * @param finish        現在のActivityを終了するか否か<br>true:終了する<br>false:終了しない
      */
-    protected void startActivity(Class activityClass, boolean finish) {
+    public void startActivity(Class activityClass, boolean finish) {
         Intent intent = new Intent(this, activityClass);
         super.startActivity(intent);
         if (finish) {

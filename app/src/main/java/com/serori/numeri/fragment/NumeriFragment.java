@@ -14,6 +14,7 @@ import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.listview.TimeLineListView;
+import com.serori.numeri.main.Application;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
@@ -29,8 +30,8 @@ import java.util.List;
 public abstract class NumeriFragment extends Fragment implements AttachedBottomListener {
 
     protected String name = "fragment";
-    private NumeriUser numeriUser = null;
 
+    private String ownerScreenName = "";
     private TimeLineListView timelineListView;
     private TimeLineItemAdapter adapter;
     private List<SimpleTweetStatus> timeLineItems;
@@ -42,7 +43,8 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
             throw new IllegalStateException("親のアクティビティがNunmeriActivityを継承してません");
         }
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
-        if (numeriUser == null) {
+        if (Application.getInstance().getFragmentOwnerRegister().get(getFragmentName()) == null
+                || ownerScreenName.equals("")) {
             throw new NullPointerException("numeriUserがセットされていません");
         }
         Log.v(name, "crate");
@@ -61,7 +63,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         }
         timelineListView.onTouchItemEnabled(getNumeriUser(), getActivity());
         timelineListView.startObserveFavorite(getNumeriUser());
-        timelineListView.startObserveDestroyTweet(getNumeriUser());
+        //timelineListView.startObserveDestroyTweet(getNumeriUser());
         return rootView;
     }
 
@@ -86,11 +88,12 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
     }
 
     public void setNumeriUser(NumeriUser numeriUser) {
-        this.numeriUser = numeriUser;
+        ownerScreenName = numeriUser.getScreenName();
+        Application.getInstance().getFragmentOwnerRegister().put(getFragmentName(), ownerScreenName);
     }
 
     protected NumeriUser getNumeriUser() {
-        return numeriUser;
+        return Application.getInstance().getFragmentOwnerRegister().get(getFragmentName());
     }
 
     /**

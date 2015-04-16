@@ -124,10 +124,7 @@ public class TwitterActions {
 
     private void reply(int position) {
         SimpleTweetStatus item = adapter.getItem(position);
-        TweetActivity.setDestination(item.getStatusId(), item.getDestinationUserNames());
-        TweetActivity.setTweetNumeriUser(numeriUser);
-        Intent intent = new Intent(context, TweetActivity.class);
-        context.startActivity(intent);
+        TweetActivity.replyTweet(context, numeriUser, item);
     }
 
     private void showConversation(int position) {
@@ -232,12 +229,7 @@ public class TwitterActions {
             ToastSender.sendToast("非公開ユーザーのツイートは引用RTできません");
             return;
         }
-        TweetActivity.setDestination(item.getStatusId(), item.getDestinationUserNames());
-        TweetActivity.setTweetNumeriUser(numeriUser);
-        String qtText = "QT @" + item.getScreenName() + " > " + item.getMainText() + " : ";
-        TweetActivity.setTweetText(qtText);
-        Intent intent = new Intent(context, TweetActivity.class);
-        context.startActivity(intent);
+        TweetActivity.quoteRetweet(context, numeriUser, item);
     }
 
     private static class MenuItem {
