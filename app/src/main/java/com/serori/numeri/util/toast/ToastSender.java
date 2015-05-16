@@ -2,17 +2,17 @@ package com.serori.numeri.util.toast;
 
 import android.widget.Toast;
 
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 
 /**
  * MainActivityのUIThread上でToastするクラス
  */
 public class ToastSender {
     public static void sendToast(String text) {
-        Application.getInstance().runOnUiThread(() -> Toast.makeText(Application.getInstance().getApplicationContext(), text, android.widget.Toast.LENGTH_SHORT).show());
+        Global.getInstance().runOnUiThread(() -> Toast.makeText(Global.getInstance().getApplicationContext(), text, android.widget.Toast.LENGTH_SHORT).show());
     }
 
     public static void sendToast(String text, int length) {
-        Application.getInstance().runOnUiThread(() -> Toast.makeText(Application.getInstance().getApplicationContext(), text, length).show());
+        Global.getInstance().runOnUiThread(() -> Toast.makeText(Global.getInstance().getApplicationContext(), text, length).show());
     }
 }

@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.serori.numeri.R;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;
 import com.serori.numeri.stream.StreamSwitcher;
@@ -40,8 +40,8 @@ public class NumeriUser {
 
     private void auth() {
         ConfigurationBuilder builder = new ConfigurationBuilder()
-                .setOAuthConsumerKey(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key))
-                .setOAuthConsumerSecret(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret))
+                .setOAuthConsumerKey(Global.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key))
+                .setOAuthConsumerSecret(Global.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret))
                 .setOAuthAccessToken(table.getAccessToken()).setOAuthAccessTokenSecret(table.getAccessTokenSecret());
         twitter = new TwitterFactory(builder.build()).getInstance();
         try {
@@ -57,8 +57,8 @@ public class NumeriUser {
         }
         Log.v("user", "getScreenName");
         TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
-        twitterStream.setOAuthConsumer(Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key),
-                Application.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
+        twitterStream.setOAuthConsumer(Global.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key),
+                Global.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
         twitterStream.setOAuthAccessToken(new AccessToken(table.getAccessToken(), table.getAccessTokenSecret()));
         streamEvent = new StreamEvent(twitterStream);
     }

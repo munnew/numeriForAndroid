@@ -4,20 +4,28 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Window;
 import android.view.WindowManager;
 
 import com.serori.numeri.R;
 import com.serori.numeri.config.ConfigurationStorager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Activityが継承すべきクラス
  */
-public class NumeriActivity extends ActionBarActivity {
+public class NumeriActivity extends AppCompatActivity {
     private AlertDialog currentShowDialog = null;
+    private List<OnFinishListener> onFinishListeners = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
             setTheme(R.style.AppTheme_Dark);
         }
@@ -29,23 +37,24 @@ public class NumeriActivity extends ActionBarActivity {
 
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
+    protected void onStop() {
         if (currentShowDialog != null) {
             if (currentShowDialog.isShowing()) {
                 currentShowDialog.hide();
+            } else {
+                currentShowDialog = null;
             }
         }
-        super.onSaveInstanceState(outState);
+        super.onStop();
     }
 
     @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+    protected void onRestart() {
         if (currentShowDialog != null) {
             currentShowDialog.show();
         }
-        super.onRestoreInstanceState(savedInstanceState);
+        super.onRestart();
     }
-
 
     /**
      * Dialogをセットすると同時に表示します<br>
@@ -68,6 +77,18 @@ public class NumeriActivity extends ActionBarActivity {
         }
         currentShowDialog = null;
         super.onDestroy();
+    }
+
+    public void addOnFinishListener(OnFinishListener listener) {
+        onFinishListeners.add(listener);
+    }
+
+    @Override
+    public void finish() {
+        for (OnFinishListener onFinishListener : onFinishListeners) {
+            onFinishListener.onFinish();
+        }
+        super.finish();
     }
 
     /**

@@ -1,15 +1,13 @@
-package com.serori.numeri.userprofile;
+package com.serori.numeri.fragment;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by serioriKETC on 2015/02/01.
  */
 public class UserInfoPagerAdapter extends FragmentPagerAdapter {
     List<Fragment> fragments = new ArrayList<>();
@@ -30,16 +28,29 @@ public class UserInfoPagerAdapter extends FragmentPagerAdapter {
     }
 
     public void add(Fragment fragment) {
-        fragments.add(fragment);
+        if ((fragment instanceof UserListFragment) || ((fragment instanceof NumeriFragment))) {
+            fragments.add(fragment);
+        } else {
+            throw new IllegalArgumentException("fragmentがNumeriFragmentかUserListFragmentのどちらかを継承している必要があります");
+        }
+
     }
 
     public void addAll(List<Fragment> fragments) {
-        fragments.addAll(fragments);
+        for (Fragment fragment : fragments) {
+            add(fragment);
+        }
     }
-
 
     @Override
-    public boolean isViewFromObject(View view, Object object) {
-        return false;
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
     }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return "fragment";
+    }
+
+
 }

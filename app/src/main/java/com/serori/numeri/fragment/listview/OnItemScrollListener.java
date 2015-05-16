@@ -1,4 +1,4 @@
-package com.serori.numeri.listview;
+package com.serori.numeri.fragment.listview;
 
 import android.widget.AbsListView;
 

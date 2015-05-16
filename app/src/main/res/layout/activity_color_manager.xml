@@ -16,7 +16,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:text="保存" />
+        android:text="@string/text_save_button" />
 
 
 </LinearLayout>

@@ -1,8 +1,11 @@
 package com.serori.numeri.main;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -10,19 +13,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.serori.numeri.Notification.NotificationSender;
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.color.ColorManagerActivity;
-import com.serori.numeri.color.ColorStorager;
 import com.serori.numeri.config.ConfigActivity;
-import com.serori.numeri.config.ConfigurationStorager;
+import com.serori.numeri.exceptionreport.ExceptionReportStorager;
 import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.fragment.SectionsPagerAdapter;
-import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.main.manager.FragmentManagerActivity;
 import com.serori.numeri.main.manager.FragmentStorager;
 import com.serori.numeri.oauth.OAuthActivity;
@@ -30,6 +31,7 @@ import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
+import com.serori.numeri.fragment.listview.item.UserListItem;
 import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 
@@ -46,17 +48,14 @@ import twitter4j.TwitterException;
 public class MainActivity extends NumeriActivity {
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ViewPager viewPager;
-    private List<NumeriFragment> temporaryNumeriFragments = new ArrayList<>();
     private TextView infoTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Application.getInstance().setApplicationContext(getApplicationContext());
-        Application.getInstance().setMainActivityContext(this);
-        loadConfigurations();
+        Global.getInstance().setMainActivityContext(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        addMenuButton();
+        sendReport();
         infoTextView = (TextView) findViewById(R.id.infoText);
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -66,21 +65,18 @@ public class MainActivity extends NumeriActivity {
             if (!NumeriUsers.getInstance().getNumeriUsers().isEmpty())
                 startActivity(TweetActivity.class, false);
         });
-
         if (savedInstanceState == null) {
             init();
         } else {
-            for (NumeriFragment numeriFragment : NumeriFragmentManager.getInstance().getNumeriFragments()) {
-                sectionsPagerAdapter.add(numeriFragment);
+            if (!Global.getInstance().getNumeriUsers().getNumeriUsers().isEmpty()) {
+                viewPager.setAdapter(sectionsPagerAdapter);
+            } else if (!NumeriUserStorager.getInstance().loadNumeriUserTables().isEmpty()) {
+                startActivity(getClass(), true);
+            } else {
+                startActivity(OAuthActivity.class, true);
             }
-            viewPager.setAdapter(sectionsPagerAdapter);
         }
-    }
 
-    private void loadConfigurations() {
-        ConfigurationStorager.getInstance().loadConfigurations();
-        ActionStorager.getInstance().initializeActions();
-        ColorStorager.getInstance().loadColor();
     }
 
     @SuppressWarnings("unchecked")
@@ -100,20 +96,21 @@ public class MainActivity extends NumeriActivity {
                         infoTextView.setVisibility(View.VISIBLE);
                         infoTextView.setText("ユーザー情報を取得中...");
                     });
-                    Application.getInstance().getNumeriUsers().clear();
+                    Global.getInstance().getNumeriUsers().clear();
                     for (NumeriUserStorager.NumeriUserTable table : numeriUserTables) {
-                        Application.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
+                        Global.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
                     }
-                    for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+                    for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
                         numeriUser.getStreamSwitcher().startStream();
                         runOnUiThread(() -> infoTextView.setText(numeriUser.getScreenName() + " : startStream"));
                     }
+                    NotificationSender.getInstance().sendStart();
                     List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
                     List<NumeriFragment> numeriFragments = new ArrayList<>();
                     if (!numeriUsers.isEmpty()) {
                         SimpleTweetStatus.startObserveFavorite();
                         //SimpleTweetStatus.startObserveDestroyTweet();
-
+                        UserListItem.startObserveRelation();
                         numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
                     }
                     return numeriFragments;
@@ -121,9 +118,7 @@ public class MainActivity extends NumeriActivity {
 
                 @Override
                 protected void onPostExecute(List<NumeriFragment> numeriFragments) {
-                    temporaryNumeriFragments.clear();
                     if (!numeriFragments.isEmpty()) {
-                        temporaryNumeriFragments.addAll(numeriFragments);
                         infoTextView.setText("フラグメントを生成しています...");
                         for (NumeriFragment numeriFragment : numeriFragments) {
                             sectionsPagerAdapter.add(numeriFragment);
@@ -140,27 +135,11 @@ public class MainActivity extends NumeriActivity {
 
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (!temporaryNumeriFragments.isEmpty()) {
-            NumeriFragmentManager.getInstance().putFragments(temporaryNumeriFragments);
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        temporaryNumeriFragments.clear();
-        if (!NumeriFragmentManager.getInstance().getNumeriFragments().isEmpty()) {
-            temporaryNumeriFragments.addAll(NumeriFragmentManager.getInstance().getNumeriFragments());
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -169,7 +148,7 @@ public class MainActivity extends NumeriActivity {
             case R.id.action_settings:
                 startActivity(ConfigActivity.class, false);
                 break;
-            case R.id.action_acount:
+            case R.id.action_account:
                 if (!NumeriUsers.getInstance().getNumeriUsers().isEmpty())
                     startActivity(OAuthActivity.class, false);
                 break;
@@ -191,32 +170,28 @@ public class MainActivity extends NumeriActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            moveTaskToBack(true);
-            return true;
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                moveTaskToBack(true);
+                return true;
+            case KeyEvent.KEYCODE_HOME:
+                moveTaskToBack(true);
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
-
-
-    public void addMenuButton() {
-        LinearLayout menuButton = (LinearLayout) findViewById(R.id.menuButton);
-        menuButton.setVisibility(View.VISIBLE);
-        menuButton.setOnClickListener(v -> openOptionsMenu());
-        menuButton.getChildAt(0).setOnClickListener(v -> openOptionsMenu());
-    }
-
 
     private void useApiFrequencyConfirmation() {
 
-        CharSequence[] names = new CharSequence[Application.getInstance().getNumeriUsers().getNumeriUsers().size()];
+        CharSequence[] names = new CharSequence[Global.getInstance().getNumeriUsers().getNumeriUsers().size()];
         for (int i = 0; i < names.length; i++) {
-            names[i] = Application.getInstance().getNumeriUsers().getNumeriUsers().get(i).getScreenName();
+            names[i] = Global.getInstance().getNumeriUsers().getNumeriUsers().get(i).getScreenName();
         }
         AlertDialog alertDialog = new AlertDialog.Builder(this).setTitle("ユーザーを選択").setItems(names, (dialog, witch) -> {
             SimpleAsyncTask.backgroundExecute(() -> {
                 try {
-                    Map<String, RateLimitStatus> rateLimitStatus = Application.getInstance().getNumeriUsers().getNumeriUsers().get(witch)
+                    Map<String, RateLimitStatus> rateLimitStatus = Global.getInstance().getNumeriUsers().getNumeriUsers().get(witch)
                             .getTwitter().getRateLimitStatus("statuses");
                     String apiConfirmation = "get home_timeline API: remaining: " + rateLimitStatus.get("/statuses/home_timeline").getRemaining() + "\n";
                     apiConfirmation += "get mentions_timeline API: remaining: " + rateLimitStatus.get("/statuses/mentions_timeline").getRemaining() + "\n";
@@ -229,9 +204,29 @@ public class MainActivity extends NumeriActivity {
         setCurrentShowDialog(alertDialog);
     }
 
+    private void sendReport() {
+        String exceptionReport = ExceptionReportStorager.getInstance().loadExceptionReport();
+        if (!(exceptionReport == null)) {
+            AlertDialog alertDialog = new AlertDialog.Builder(this).setMessage("前回の起動で予期しないエラーが発生しました。\nバグレポートを送信しますか？")
+                    .setPositiveButton("はい", (dialog, which) -> {
+                        String info = "ブランド名 : " + Build.BRAND;
+                        info += "\n" + "デバイス : " + Build.DEVICE;
+                        info += "\n" + "プロダクト名 : " + Build.PRODUCT;
+                        info += "\n" + "APIバージョン : " + Build.VERSION.SDK_INT + " : " + Build.VERSION.CODENAME + "\n";
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_SENDTO);
+                        intent.setData(Uri.parse("mailto:" + "numerical.developer@gmail.com"));
+                        intent.putExtra(Intent.EXTRA_SUBJECT, "【report】");
+                        intent.putExtra(Intent.EXTRA_TEXT, info + exceptionReport);
+                        startActivity(intent);
+                    }).setNegativeButton("いいえ", null).create();
+            setCurrentShowDialog(alertDialog);
+        }
+    }
+
     @Override
     public void finish() {
-        Application.getInstance().restartMainActivityCallBack();
+        Global.getInstance().restartMainActivityCallBack();
         super.finish();
     }
 }

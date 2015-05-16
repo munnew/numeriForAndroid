@@ -5,7 +5,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
@@ -24,10 +24,10 @@ public class ConfigurationStorager {
      *
      * @param numericalConfiguration numericalConfiguration
      */
-    public void saveNumercalConfigTable(NumericalConfiguration numericalConfiguration) {
+    public void saveNumericalConfigTable(NumericalConfiguration numericalConfiguration) {
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, NumericalConfigTable.class);
             Dao<NumericalConfigTable, String> dao = helper.getDao(NumericalConfigTable.class);
@@ -55,7 +55,7 @@ public class ConfigurationStorager {
     public void saveEitherConfigTable(EitherConfiguration eitherConfiguration) {
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, EitherConfigTable.class);
             Dao<EitherConfigTable, String> dao = helper.getDao(EitherConfigTable.class);
@@ -82,7 +82,7 @@ public class ConfigurationStorager {
     public void loadConfigurations() {
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, EitherConfigTable.class);
             TableUtils.createTableIfNotExists(connectionSource, NumericalConfigTable.class);
@@ -182,16 +182,17 @@ public class ConfigurationStorager {
     /**
      * どちらかを選択するような設定の情報を保持する列挙型
      */
-    public static enum EitherConfigurations implements EitherConfiguration {
+    public enum EitherConfigurations implements EitherConfiguration {
         DARK_THEME("DARK_THEME"),
         SLEEPLESS("SLEEPLESS"),
-        CONFIRMATION_LESS_GET_TWEET("CONFIRMATION_LESS_GET_TWEET");
+        CONFIRMATION_LESS_GET_TWEET("CONFIRMATION_LESS_GET_TWEET"),
+        USE_HIGH_RESOLUTION_ICON("USE_HIGH_RESOLUTION_ICON");
 
 
         private String id;
         private boolean enabled = false;
 
-        private EitherConfigurations(String id) {
+        EitherConfigurations(String id) {
             this.id = id;
         }
 
@@ -214,13 +215,13 @@ public class ConfigurationStorager {
     /**
      * 数値的な値を持つ設定を保持する列挙型
      */
-    public static enum NumericalConfigurations implements NumericalConfiguration {
+    public enum NumericalConfigurations implements NumericalConfiguration {
         CHARACTER_SIZE("CHARACTER_SIZE");
 
         private String id;
         private int numericValue = 0;
 
-        private NumericalConfigurations(String id) {
+        NumericalConfigurations(String id) {
             this.id = id;
         }
 

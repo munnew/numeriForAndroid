@@ -1,4 +1,4 @@
-package com.serori.numeri.listview;
+package com.serori.numeri.fragment.listview;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,10 +9,10 @@ import android.view.MotionEvent;
 import android.widget.ListAdapter;
 
 import com.serori.numeri.R;
-import com.serori.numeri.listview.action.ActionStorager;
-import com.serori.numeri.listview.action.TwitterActions;
-import com.serori.numeri.listview.item.TimeLineItemAdapter;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.fragment.listview.action.ActionStorager;
+import com.serori.numeri.fragment.listview.action.TwitterActions;
+import com.serori.numeri.fragment.listview.item.TimeLineItemAdapter;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.user.NumeriUser;
 
@@ -65,7 +65,7 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
 
 
     private int getTouchedCoordinates() {
-        float windowX = Application.getInstance().getWindowSize().x;
+        float windowX = Global.getInstance().getWindowSize().x;
         if (windowX / 3 > touchedCoordinatesX)
             return LEFT;
         if (windowX / 3 * 2 > touchedCoordinatesX)
@@ -163,10 +163,8 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
             if (simpleTweetStatus.equals(simpleTweetStatus1)) {
                 if (enabled) {
                     getChildAt(i).findViewById(R.id.favoriteStar).setVisibility(VISIBLE);
-                    Log.v(getClass().toString(), "favorite");
                 } else {
                     getChildAt(i).findViewById(R.id.favoriteStar).setVisibility(GONE);
-                    Log.v(getClass().toString(), "unFavorite");
                 }
             }
         }
@@ -195,7 +193,7 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
 
     public void insertItem(SimpleTweetStatus item) {
         if (getFirstVisiblePosition() == 0 && insertItemEnable) {
-            Application.getInstance().runOnUiThread(() -> ((TimeLineItemAdapter) getAdapter()).insert(item, 0));
+            Global.getInstance().runOnUiThread(() -> ((TimeLineItemAdapter) getAdapter()).insert(item, 0));
         } else {
             storedItems.add(item);
         }

@@ -14,10 +14,12 @@ import android.widget.Toast;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.listview.action.ActionStorager;
-import com.serori.numeri.listview.action.TwitterActions;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.license.LicenseActivity;
+import com.serori.numeri.fragment.listview.action.ActionStorager;
+import com.serori.numeri.fragment.listview.action.TwitterActions;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.main.MainActivity;
+import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import java.util.List;
  */
 public class ConfigActivity extends NumeriActivity {
     private boolean previousTheme;
+    private String textColor = "#000000";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +38,12 @@ public class ConfigActivity extends NumeriActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
         if (savedInstanceState == null) {
+            if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
+                textColor = "#FFFFFF";
+            }
             initActionConfComponent();
             initLayoutConfComponent();
+            initLicenseComponent();
         }
     }
 
@@ -44,14 +51,14 @@ public class ConfigActivity extends NumeriActivity {
         LinearLayout actionMenu = (LinearLayout) findViewById(R.id.actionMenu);
         Button openMenuButton = (Button) findViewById(R.id.openActionMenuButton);
         TextView tweetAdditionalAcquisitionFlagText = ((TextView) findViewById(R.id.tweetAdditionalAcquisitionFlagText));
-        TextView sleeplessText = ((TextView) findViewById(R.id.sleeplessText));
-        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
-            openMenuButton.setTextColor(Color.parseColor("#FFFFFF"));
-            tweetAdditionalAcquisitionFlagText.setTextColor(Color.parseColor("#FFFFFF"));
-            sleeplessText.setTextColor(Color.parseColor("#FFFFFF"));
-            for (int i = 0; i < actionMenu.getChildCount(); i++) {
-                ((Button) actionMenu.getChildAt(i)).setTextColor(Color.parseColor("#FFFFFF"));
-            }
+        TextView sleeplessText = (TextView) findViewById(R.id.sleeplessText);
+        TextView useHighResolutionIconText = (TextView) findViewById(R.id.useHighResolutionIconText);
+        openMenuButton.setTextColor(Color.parseColor(textColor));
+        tweetAdditionalAcquisitionFlagText.setTextColor(Color.parseColor(textColor));
+        sleeplessText.setTextColor(Color.parseColor(textColor));
+        useHighResolutionIconText.setTextColor(Color.parseColor(textColor));
+        for (int i = 0; i < actionMenu.getChildCount(); i++) {
+            ((Button) actionMenu.getChildAt(i)).setTextColor(Color.parseColor(textColor));
         }
 
         Button rightTapConfButton = (Button) findViewById(R.id.rightTapConfButton);
@@ -69,29 +76,32 @@ public class ConfigActivity extends NumeriActivity {
             }
         });
 
-        rightTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.RIGHT));
-        centerTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.CENTER));
-        leftTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LEFT));
-        rightLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_RIGHT));
-        centerLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_CENTER));
-        leftLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_LEFT));
+        rightTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.RIGHT, ((Button) v).getText()));
+        centerTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.CENTER, ((Button) v).getText()));
+        leftTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LEFT, ((Button) v).getText()));
+        rightLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_RIGHT, ((Button) v).getText()));
+        centerLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_CENTER, ((Button) v).getText()));
+        leftLongTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LONG_LEFT, ((Button) v).getText()));
 
         CheckBox isSleeplessCheckBox = (CheckBox) findViewById(R.id.isSleeplessCheckBox);
-        isSleeplessCheckBox.setChecked(ConfigurationStorager.EitherConfigurations.SLEEPLESS.isEnabled());
-        isSleeplessCheckBox.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.SLEEPLESS, (CheckBox) v));
-        sleeplessText.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.SLEEPLESS, isSleeplessCheckBox));
+        initChooseEitherAction(sleeplessText, isSleeplessCheckBox, ConfigurationStorager.EitherConfigurations.SLEEPLESS);
 
         CheckBox isConfirmationLessGetTweetCheckBox = (CheckBox) findViewById(R.id.confirmationLessGetTweetCheckBox);
-        isConfirmationLessGetTweetCheckBox.setChecked(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET.isEnabled());
-        isConfirmationLessGetTweetCheckBox.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET, (CheckBox) v));
-        tweetAdditionalAcquisitionFlagText.setOnClickListener(v -> chooseEither(ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET, isConfirmationLessGetTweetCheckBox));
+        initChooseEitherAction(tweetAdditionalAcquisitionFlagText, isConfirmationLessGetTweetCheckBox,
+                ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET);
+
+        CheckBox useHighResolutionIconCheckBox = (CheckBox) findViewById(R.id.useHighResolutionIconCheckBox);
+        initChooseEitherAction(useHighResolutionIconText, useHighResolutionIconCheckBox,
+                ConfigurationStorager.EitherConfigurations.USE_HIGH_RESOLUTION_ICON);
+    }
+
+    private void initChooseEitherAction(TextView textView, CheckBox checkBox, ConfigurationStorager.EitherConfigurations eitherConfiguration) {
+        checkBox.setChecked(eitherConfiguration.isEnabled());
+        checkBox.setOnClickListener(v -> chooseEither(eitherConfiguration, (CheckBox) v));
+        textView.setOnClickListener(v -> chooseEither(eitherConfiguration, checkBox));
     }
 
     private void initLayoutConfComponent() {
-        String textColor = "#000000";
-        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
-            textColor = "#FFFFFF";
-        }
         Button chooseThemeButton = (Button) findViewById(R.id.chooseThemeButton);
         chooseThemeButton.setTextColor(Color.parseColor(textColor));
         Button chooseTextSizeButton = (Button) findViewById(R.id.chooseCharSizeButton);
@@ -99,6 +109,17 @@ public class ConfigActivity extends NumeriActivity {
         //onCLick
         chooseThemeButton.setOnClickListener(v -> chooseTheme());
         chooseTextSizeButton.setOnClickListener(v -> chooseTextSize());
+    }
+
+    private void initLicenseComponent() {
+        Button showTwitter4JLicenseButton = (Button) findViewById(R.id.showTwitter4j_license);
+        showTwitter4JLicenseButton.setTextColor(Color.parseColor(textColor));
+        Button showOrmLiteLicenseButton = (Button) findViewById(R.id.showOrmLiteL_license);
+        showOrmLiteLicenseButton.setTextColor(Color.parseColor(textColor));
+
+        showTwitter4JLicenseButton.setOnClickListener(v -> LicenseActivity.show(this, LicenseActivity.twitter4JLicense));
+        showOrmLiteLicenseButton.setOnClickListener(v -> LicenseActivity.show(this, LicenseActivity.ormLiteLicense));
+
     }
 
     private void chooseTheme() {
@@ -134,7 +155,7 @@ public class ConfigActivity extends NumeriActivity {
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setSingleChoiceItems(textSizes, checkedItem, (dialog, witch) -> {
                     ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE.setNumericValue(witch);
-                    ConfigurationStorager.getInstance().saveNumercalConfigTable(ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE);
+                    ConfigurationStorager.getInstance().saveNumericalConfigTable(ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE);
                     ((AlertDialog) dialog).hide();
                     dialog.dismiss();
                 })
@@ -142,22 +163,30 @@ public class ConfigActivity extends NumeriActivity {
         setCurrentShowDialog(alertDialog);
     }
 
-    private void chooseAction(ActionStorager.RespectTapPositionActions respectTapPositionActions) {
+    private void chooseAction(ActionStorager.RespectTapPositionActions respectTapPositionActions, CharSequence title) {
         List<CharSequence> actionTexts = new ArrayList<>();
-        List<TwitterActions.Actions> canSetActions = new ArrayList<>();
+        List<TwitterActions.Actions> actions = new ArrayList<>();
         for (TwitterActions.Actions action : TwitterActions.Actions.values()) {
             if (TwitterActions.Actions.OPEN_URI != action) {
                 actionTexts.add(action.getName());
-                canSetActions.add(action);
+                actions.add(action);
             }
         }
-        AlertDialog alertDialog = new AlertDialog.Builder(this).setSingleChoiceItems(actionTexts.toArray(new CharSequence[actionTexts.size()]),
-                respectTapPositionActions.getTwitterAction().getId(), (dialog, which) -> {
-                    respectTapPositionActions.setTwitterAction(canSetActions.get(which));
-                    ActionStorager.getInstance().saveActions();
-                    ((AlertDialog) dialog).hide();
-                    dialog.dismiss();
-                }).create();
+        int position = 0;
+        for (TwitterActions.Actions action : actions) {
+            if (action == respectTapPositionActions.getTwitterAction()) {
+                break;
+            }
+            position++;
+        }
+        AlertDialog alertDialog = new AlertDialog.Builder(this).setTitle(title)
+                .setSingleChoiceItems(actionTexts.toArray(new CharSequence[actionTexts.size()]),
+                        position, (dialog, which) -> {
+                            respectTapPositionActions.setTwitterAction(actions.get(which));
+                            SimpleAsyncTask.execute(() -> ActionStorager.getInstance().saveActions());
+                            ((AlertDialog) dialog).hide();
+                            dialog.dismiss();
+                        }).create();
         setCurrentShowDialog(alertDialog);
     }
 
@@ -173,10 +202,10 @@ public class ConfigActivity extends NumeriActivity {
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (previousTheme != ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled()) {
-                Application.getInstance().destroyMainActivity();
+                Global.getInstance().destroyMainActivity();
                 Toast.makeText(this, "テーマが変更されました。アプリケーションを再起動します。", Toast.LENGTH_SHORT).show();
             }
-            if (Application.getInstance().isDestroyMainActivity()) {
+            if (Global.getInstance().isDestroyMainActivity()) {
                 startActivity(MainActivity.class, true);
             } else {
                 finish();

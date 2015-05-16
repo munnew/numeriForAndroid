@@ -1,6 +1,5 @@
-package com.serori.numeri.fragment;
+package com.serori.numeri.fragment.listview;
 
-import com.serori.numeri.twitter.SimpleTweetStatus;
 
 /**
  * AttachedBottomListener
@@ -8,8 +7,6 @@ import com.serori.numeri.twitter.SimpleTweetStatus;
 public interface AttachedBottomListener {
     /**
      * リストビューの一番下までスクロールした際のイベントハンドラ
-     *
-     * @param item 一番下のアイテム
      */
-    void attachedBottom(SimpleTweetStatus item);
+    void attachedBottom();
 }

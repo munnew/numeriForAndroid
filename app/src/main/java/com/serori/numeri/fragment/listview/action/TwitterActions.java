@@ -1,4 +1,4 @@
-package com.serori.numeri.listview.action;
+package com.serori.numeri.fragment.listview.action;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.listview.item.TimeLineItemAdapter;
+import com.serori.numeri.fragment.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.media.MediaActivity;
 import com.serori.numeri.twitter.ConversationActivity;
 import com.serori.numeri.twitter.SimpleTweetStatus;
@@ -61,8 +61,12 @@ public class TwitterActions {
                 break;
             case SHOW_MEDIA:
                 showMedia(adapter.getItem(position).getMediaUris());
+                break;
             case OPEN_USER_PROFILE:
                 openUserProfile(position);
+                break;
+            case ACTION_NONE:
+                break;
             default:
                 break;
         }
@@ -105,7 +109,6 @@ public class TwitterActions {
             AsyncTask.execute(() -> {
                 try {
                     numeriUser.getTwitter().createFavorite(statusId);
-                    ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入り登録しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -114,7 +117,6 @@ public class TwitterActions {
             AsyncTask.execute(() -> {
                 try {
                     numeriUser.getTwitter().destroyFavorite(statusId);
-                    ToastSender.sendToast(item.getScreenName() + "さんのツイートをお気に入りから解除しました。");
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -169,7 +171,6 @@ public class TwitterActions {
             } else {
                 menuItemText.add(menuItem.getUrl());
             }
-
         }
         AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setTitle(item.getScreenName() + "\n" + item.getName())
@@ -198,9 +199,11 @@ public class TwitterActions {
                             break;
                         case OPEN_USER_PROFILE:
                             openUserProfile(position);
+                            break;
                         default:
                             break;
                     }
+                    dialog.dismiss();
                 }).create();
         ((NumeriActivity) context).setCurrentShowDialog(alertDialog);
     }
@@ -217,10 +220,7 @@ public class TwitterActions {
     }
 
     private void openUserProfile(int position) {
-        UserInformationActivity.setUserId(adapter.getItem(position).getUserId());
-        UserInformationActivity.setNumeriUser(numeriUser);
-        Intent intent = new Intent(context, UserInformationActivity.class);
-        context.startActivity(intent);
+        UserInformationActivity.show(context, adapter.getItem(position).getUserId(), numeriUser);
     }
 
     private void quoteRetweet(int position) {
@@ -259,21 +259,23 @@ public class TwitterActions {
     /**
      * アクションのidと名前を保持する列挙型
      */
-    public static enum Actions {
-        REPLY("リプライ", 0),
-        RT("リツイート", 1),
-        FAVORITE("お気に入り", 2),
-        MENU("メニュー", 3),
-        QT("引用リツイート", 4),
-        OPEN_USER_PROFILE("ユーザー情報", 5),
-        SHOW_CONVERSATION("会話を表示", 6),
-        SHOW_MEDIA("画像を表示", 7),
-        OPEN_URI("", 8);
+    public enum Actions {
+        REPLY("リプライ", "REPLY"),
+        RT("リツイート", "RT"),
+        FAVORITE("お気に入り", "FAVORITE"),
+        MENU("メニュー", "MENU"),
+        QT("引用リツイート", "QT"),
+        OPEN_USER_PROFILE("ユーザー情報", "OPEN_USER_PROFILE"),
+        SHOW_CONVERSATION("会話を表示", "SHOW_CONVERSATION"),
+        SHOW_MEDIA("画像を表示", "SHOW_MEDIA"),
+        ACTION_NONE("何もしない", "ACTION_NONE"),
+        OPEN_URI("", "OPEN_URI");
 
-        private final int id;
+
+        private String id;
         private String name = null;
 
-        private Actions(String name, int id) {
+        Actions(String name, String id) {
             this.name = name;
             this.id = id;
         }
@@ -282,8 +284,9 @@ public class TwitterActions {
             return name;
         }
 
-        public int getId() {
+        public String getId() {
             return id;
         }
+
     }
 }

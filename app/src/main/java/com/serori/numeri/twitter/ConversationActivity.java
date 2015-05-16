@@ -6,8 +6,8 @@ import android.view.KeyEvent;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.listview.TimeLineListView;
-import com.serori.numeri.listview.item.TimeLineItemAdapter;
+import com.serori.numeri.fragment.listview.TimeLineListView;
+import com.serori.numeri.fragment.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
@@ -41,10 +41,17 @@ public class ConversationActivity extends NumeriActivity {
 
             NumeriUser user = numeriUser;
             conversationListView.setAdapter(adapter);
+
             AsyncTask.execute(() -> {
+                boolean successfulCompletion = true;
                 while (nextStatusId != -1) {
                     try {
                         SimpleTweetStatus status = SimpleTweetStatus.showStatus(nextStatusId, numeriUser);
+
+                        if (status == null || adapter == null) {
+                            successfulCompletion = false;
+                            break;
+                        }
                         runOnUiThread(() -> adapter.add(status));
                         nextStatusId = status.getInReplyToStatusId();
                     } catch (TwitterException e) {
@@ -53,8 +60,11 @@ public class ConversationActivity extends NumeriActivity {
                         break;
                     }
                 }
-                conversationListView.onTouchItemEnabled(user, this);
-                conversationListView.startObserveFavorite(user);
+                if (successfulCompletion) {
+                    conversationListView.onTouchItemEnabled(user, this);
+                    conversationListView.startObserveFavorite(user);
+                }
+
             });
         }
 
@@ -63,7 +73,7 @@ public class ConversationActivity extends NumeriActivity {
     /**
      * 会話を表示するためのstatusIdをセットします。
      *
-     * @param statusId
+     * @param statusId statusId
      */
     public static void setConversationStatusId(long statusId) {
         nextStatusId = statusId;
@@ -73,7 +83,7 @@ public class ConversationActivity extends NumeriActivity {
      * ユーザーをセットします。
      * このActivityに遷移する前に必ずセットしてください。
      *
-     * @param user
+     * @param user NumeriUser
      */
     public static void setNumeriUser(NumeriUser user) {
         numeriUser = user;

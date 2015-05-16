@@ -6,10 +6,10 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
 import com.serori.numeri.fragment.ListFragment;
-import com.serori.numeri.fragment.MentionsFlagment;
+import com.serori.numeri.fragment.MentionsFragment;
 import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.fragment.TimeLineFragment;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.database.DataBaseHelper;
 
@@ -29,12 +29,12 @@ public class FragmentStorager {
     public void saveFragmentData(FragmentsTable table) {
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
             Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
             dao.createOrUpdate(table);
-            Application.getInstance().destroyMainActivity();
+            Global.getInstance().destroyMainActivity();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -57,12 +57,12 @@ public class FragmentStorager {
     public void deleteFragmentData(String fragmentKey) {
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
             Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
             dao.deleteById(fragmentKey);
-            Application.getInstance().destroyMainActivity();
+            Global.getInstance().destroyMainActivity();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -86,7 +86,7 @@ public class FragmentStorager {
         ConnectionSource connectionSource = null;
         List<FragmentsTable> fragmentsData = new ArrayList<>();
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
             Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
@@ -120,7 +120,7 @@ public class FragmentStorager {
         ConnectionSource connectionSource = null;
         List<NumeriFragment> fragments = new ArrayList<>();
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, FragmentsTable.class);
             Dao<FragmentsTable, String> dao = helper.getDao(FragmentsTable.class);
@@ -135,7 +135,7 @@ public class FragmentStorager {
                 } else if (table.getFragmentType().equals(FragmentType.MENTIONS.getId())) {
                     for (NumeriUser numeriUser : numeriUsers) {
                         if (numeriUser.getAccessToken().getToken().equals(table.getUserToken())) {
-                            fragments.add(initNumeriFragment(numeriUser, new MentionsFlagment()));
+                            fragments.add(initNumeriFragment(numeriUser, new MentionsFragment()));
                         }
                     }
                 } else if (table.getFragmentType().equals(FragmentType.LIST.getId())) {

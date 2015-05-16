@@ -1,12 +1,9 @@
-package com.serori.numeri.listview;
+package com.serori.numeri.fragment.listview;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.AbsListView;
 import android.widget.ListView;
-
-import com.serori.numeri.fragment.AttachedBottomListener;
-import com.serori.numeri.twitter.SimpleTweetStatus;
 
 /**
  * 一番下まで見るとそれをコールバックしてくれる抽象クラスなListView
@@ -16,7 +13,8 @@ public abstract class AttachedBottomCallBackListView extends ListView {
     private boolean onAttachedBottom = false;
     private boolean onAttachedBottomCallbackEnabled = true;
     private OnItemScrollListener onItemScrollListener;
-
+    private int _visibleItemCount = 0;
+    private int _totalItemCount = 0;
 
     public AttachedBottomCallBackListView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -28,6 +26,8 @@ public abstract class AttachedBottomCallBackListView extends ListView {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItemPosition, int visibleItemCount, int totalItemCount) {
+                _visibleItemCount = visibleItemCount;
+                _totalItemCount = totalItemCount;
                 if (onItemScrollListener != null) {
                     onItemScrollListener.onItemScroll(view, firstVisibleItemPosition, visibleItemCount, totalItemCount);
                 }
@@ -37,7 +37,7 @@ public abstract class AttachedBottomCallBackListView extends ListView {
                     int lastItemPositionY = getChildAt(getChildCount() - 1).getTop();
                     int itemPositionTargetLine = getHeight() - lastItemY;
                     if (lastItemPositionY <= itemPositionTargetLine) {
-                        attachedBottomListener.attachedBottom((SimpleTweetStatus) getAdapter().getItem(totalItemCount - 1));
+                        attachedBottomListener.attachedBottom();
                         onAttachedBottom = true;
                     }
                 } else if (firstVisibleItemPosition + visibleItemCount <= totalItemCount - 1) {
@@ -51,6 +51,9 @@ public abstract class AttachedBottomCallBackListView extends ListView {
         attachedBottomListener = listener;
     }
 
+    protected int getVisibleItemCount() {
+        return _visibleItemCount;
+    }
 
     public void setOnItemScrollListener(OnItemScrollListener onItemScrollListener) {
         this.onItemScrollListener = onItemScrollListener;
@@ -63,5 +66,9 @@ public abstract class AttachedBottomCallBackListView extends ListView {
      */
     public void onAttachedBottomCallbackEnabled(boolean onAttachedBottomCallbackEnabled) {
         this.onAttachedBottomCallbackEnabled = onAttachedBottomCallbackEnabled;
+    }
+
+    public int getTotalItemCount() {
+        return _totalItemCount;
     }
 }

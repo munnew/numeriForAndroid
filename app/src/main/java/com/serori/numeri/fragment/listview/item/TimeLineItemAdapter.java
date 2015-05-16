@@ -1,8 +1,7 @@
-package com.serori.numeri.listview.item;
+package com.serori.numeri.fragment.listview.item;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.imageview.NumeriImageView;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,7 +36,6 @@ public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
         SimpleTweetStatus simpleTweetStatus = getItem(position);
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.item_timeline, null);
-            Log.v(getClass().toString(), "new convertView");
         }
 
         float textSize = ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE.getNumericValue() + 8;
@@ -46,11 +43,11 @@ public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
 
         TextView screenNameTextView = (TextView) convertView.findViewById(R.id.timeLine_screenName);
         screenNameTextView.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
-        screenNameTextView.setTextSize(textSize * (float) 0.8);
+        screenNameTextView.setTextSize(textSize * (float) 0.86);
 
         TextView nameTextView = (TextView) convertView.findViewById(R.id.timeLine_name);
         nameTextView.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
-        nameTextView.setTextSize(textSize * (float) 0.8);
+        nameTextView.setTextSize(textSize * (float) 0.86);
 
         TextView mainTextView = (TextView) convertView.findViewById(R.id.timeLine_maintext);
         mainTextView.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
@@ -74,7 +71,9 @@ public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
             isProtectedUser.setVisibility(View.GONE);
         }
 
-        iconImageView.startLoadImage(NumeriImageView.ProgressType.LOAD_ICON, simpleTweetStatus.getIconImageUrl());
+        boolean useHighResolution = ConfigurationStorager.EitherConfigurations.USE_HIGH_RESOLUTION_ICON.isEnabled();
+        String iconUrl = useHighResolution ? simpleTweetStatus.getBiggerIconImageUrl() : simpleTweetStatus.getIconImageUrl();
+        iconImageView.startLoadImage(true, NumeriImageView.ProgressType.LOAD_ICON, iconUrl);
 
         screenNameTextView.setText(simpleTweetStatus.getScreenName());
         nameTextView.setText(simpleTweetStatus.getName());

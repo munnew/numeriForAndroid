@@ -12,7 +12,7 @@ import android.widget.ListView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;
 
@@ -97,7 +97,7 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
     private void createTimeLineFragmentsListDialog() {
         List<CharSequence> timeLineNames = new ArrayList<>();
         List<String> userTokens = new ArrayList<>();
-        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+        for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
             timeLineNames.add(numeriUser.getScreenName());
             userTokens.add(numeriUser.getAccessToken().getToken());
         }
@@ -128,7 +128,7 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
     private void createMentionsFragmentsListDialog() {
         List<CharSequence> mentionsNames = new ArrayList<>();
         List<String> userTokens = new ArrayList<>();
-        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+        for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
             mentionsNames.add(numeriUser.getScreenName());
             userTokens.add(numeriUser.getAccessToken().getToken());
         }
@@ -159,7 +159,7 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
     private void createListFragmentsListDialog() {
         List<CharSequence> userNames = new ArrayList<>();
         List<NumeriUser> users = new ArrayList<>();
-        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+        for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
             userNames.add(numeriUser.getScreenName());
             users.add(numeriUser);
         }
@@ -212,7 +212,7 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (Application.getInstance().isDestroyMainActivity()) {
+            if (Global.getInstance().isDestroyMainActivity()) {
                 startActivity(MainActivity.class, true);
             } else {
                 finish();

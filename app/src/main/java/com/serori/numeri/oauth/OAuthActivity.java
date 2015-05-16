@@ -13,7 +13,7 @@ import android.widget.ListView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
@@ -137,8 +137,8 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
                     ToastSender.sendToast(token.getScreenName() + "認証");
                     NumeriUserStorager.NumeriUserTable userTable = new NumeriUserStorager.NumeriUserTable(token.getToken(), token.getTokenSecret(), token.getScreenName());
                     NumeriUserStorager.getInstance().saveNumeriUser(userTable);
-                    if (!Application.getInstance().isDestroyMainActivity()) {
-                        Application.getInstance().destroyMainActivity();
+                    if (!Global.getInstance().isDestroyMainActivity()) {
+                        Global.getInstance().destroyMainActivity();
                     }
                     startActivity(MainActivity.class, true);
                 } else {
@@ -153,10 +153,8 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
     private void init() {
         AsyncTask.execute(() -> {
             adapter.clear();
-            List<NumeriUser> numeriUsers = new ArrayList<>();
-            for (NumeriUserStorager.NumeriUserTable table : NumeriUserStorager.getInstance().loadNumeriUserTables()) {
-                numeriUsers.add(new NumeriUser(table));
-            }
+            List<NumeriUser> numeriUsers;
+            numeriUsers = Global.getInstance().getNumeriUsers().getNumeriUsers();
             Log.v("numeriUsersSize", "" + numeriUsers.size());
             if (!numeriUsers.isEmpty()) {
                 List<NumeriUserListItem> listItems = new ArrayList<>();
@@ -174,7 +172,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (Application.getInstance().isDestroyMainActivity()) {
+            if (Global.getInstance().isDestroyMainActivity()) {
                 startActivity(MainActivity.class, true);
             } else {
                 finish();
@@ -186,7 +184,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
 
     @Override
     public void onUserDelete(int position) {
-        Application.getInstance().destroyMainActivity();
+        Global.getInstance().destroyMainActivity();
         adapter.remove(adapter.getItem(position));
     }
 }

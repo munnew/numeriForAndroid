@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ConfigComponent_Dark">#10616161</color>
+    <color name="ConfigComponent_Light">#10F5F5F5</color>
+    <color name="TextColor_Dark">#000000</color>
+    <color name="TextColor_Light">#FFFFFF</color>
+    <color name="follow_color">#407AF1</color>
+    <color name="un_follow_color">#DA3015</color>
+    <color name="not_selected_color">#50707070</color>
+    <color name="selected_color">#50909090</color>
+    <color name="imageView_BackGround">#56A0A0A0</color>
+</resources>

@@ -4,12 +4,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.imageview.cache.ImageCache;
+import com.serori.numeri.imageview.cache.ImageDownloader;
+import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.io.File;
@@ -21,7 +24,7 @@ import java.io.IOException;
  */
 public class NumeriImageView extends ImageView {
     private OnLoadCompletedListener onLoadCompletedListener;
-    private ImageCache.ImageData imageData = null;
+    private ImageDownloader.ImageData imageData = null;
     private String imageName = "";
     private String imageExtension = "";
     private String imageKey = "";
@@ -38,6 +41,14 @@ public class NumeriImageView extends ImageView {
         super(context, attrs, defStyleAttr);
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        Context context = getContext();
+        if (context instanceof NumeriActivity)
+            ((NumeriActivity) context).addOnFinishListener(this::releaseImage);
+        super.onAttachedToWindow();
+    }
+
     /**
      * 画像のロードが終了した際のリスナをセットする
      *
@@ -48,13 +59,12 @@ public class NumeriImageView extends ImageView {
     }
 
     /**
-     * 画像のロードをスタートする
-     *
-     * @param type その画像の種類
-     * @param url  ロードしたい画像のurl
+     * @param cache falseを指定するとキャッシュされません、またキャッシュから読み込むこともありません
+     * @param type  ProgressType
+     * @param url   ロードする画像のurl
      */
-    public void startLoadImage(ProgressType type, String url) {
-        ImageCache imageCache = new ImageCache();
+    public void startLoadImage(boolean cache, ProgressType type, String url) {
+        ImageDownloader imageDownloader = new ImageDownloader();
         imageName = Uri.parse(url).getLastPathSegment();
         imageKey = url;
         imageExtension = "";
@@ -66,7 +76,7 @@ public class NumeriImageView extends ImageView {
             imageExtension = String.valueOf(charArray[length]) + imageExtension;
         }
 
-        imageCache.setOnStartDownLoadListener(key -> {
+        imageDownloader.setOnStartDownLoadListener(key -> {
             if (key.equals(imageKey)) {
                 switch (type) {
                     case LOAD_ICON:
@@ -77,9 +87,9 @@ public class NumeriImageView extends ImageView {
                         break;
                 }
             }
-        }).loadImage(url, (imageData, key) -> {
+        }).loadImage(cache, url, (imageData, key) -> {
             if ((imageData != null && !imageData.getImage().isRecycled()) && imageKey.equals(key) && !imageData.equals(this.imageData)) {
-                ImageCache.ImageData previousImageData = this.imageData;
+                ImageDownloader.ImageData previousImageData = this.imageData;
                 if (previousImageData != null) previousImageData.setQuantity(false);
                 this.imageData = imageData;
                 imageData.setQuantity(true);
@@ -103,12 +113,14 @@ public class NumeriImageView extends ImageView {
             setOnLongClickListener(v -> {
                 AlertDialog alertDialog = new AlertDialog.Builder(getContext()).setMessage("画像を保存しますか？")
                         .setPositiveButton("はい", (dialog, which) -> {
-                            boolean success = saveImage();
-                            if (success) {
-                                ToastSender.sendToast(imageName + "を保存しました");
-                            } else {
-                                ToastSender.sendToast("保存に失敗しました");
-                            }
+                            SimpleAsyncTask.execute(() -> {
+                                boolean success = saveImage();
+                                if (success) {
+                                    ToastSender.sendToast(imageName + "を保存しました");
+                                } else {
+                                    ToastSender.sendToast("保存に失敗しました");
+                                }
+                            });
                         })
                         .setNegativeButton("いいえ", (dialog, which) -> {
                         })
@@ -150,17 +162,26 @@ public class NumeriImageView extends ImageView {
         return false;
     }
 
+
     @Override
     protected void onDetachedFromWindow() {
-        if (imageData != null) imageData.setQuantity(false);
+        releaseImage();
         super.onDetachedFromWindow();
     }
 
-    public static enum ProgressType {
+    private void releaseImage() {
+        if (imageData != null) {
+            imageData.setQuantity(false);
+            imageData.recycle();
+            imageData = null;
+        }
+    }
+
+    public enum ProgressType {
         LOAD_ICON,
         LOAD_MEDIA;
 
-        private ProgressType() {
+        ProgressType() {
 
         }
     }

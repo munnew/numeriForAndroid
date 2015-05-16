@@ -1,0 +1,113 @@
+package com.serori.numeri.main;
+
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Point;
+import android.view.WindowManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Applicationのフィールド的な役割を持つクラス
+ */
+public class Global {
+    private Global() {
+    }
+
+    public static Global getInstance() {
+        return GlobalHolder.instance;
+    }
+
+    private List<OnFinishMainActivityListener> onFinishMainActivityListeners = new ArrayList<>();
+    private Context applicationContext;
+    private Context mainActivityContext;
+
+    public Context getApplicationContext() {
+        return applicationContext;
+    }
+
+    public void setApplicationContext(Context applicationContext) {
+        if (applicationContext instanceof android.app.Application) {
+            this.applicationContext = applicationContext;
+
+        } else {
+            throw new IllegalArgumentException("Applicationを継承していないインスタンスを保存しようとしています");
+        }
+    }
+
+    public Context getMainActivityContext() {
+        return mainActivityContext;
+    }
+
+    public void setMainActivityContext(Context mainActivityContext) {
+        if (mainActivityContext instanceof MainActivity) {
+            this.mainActivityContext = mainActivityContext;
+        } else {
+            throw new IllegalArgumentException("MainActivityでないインスタンスを保存しようとしています");
+        }
+    }
+
+    /**
+     * 現在のMainActivityを殺す
+     */
+    public void destroyMainActivity() {
+        if (mainActivityContext != null) {
+            if (!isDestroyMainActivity()) {
+                ((Activity) mainActivityContext).finish();
+            }
+        }
+    }
+
+    public void addOnFinishMainActivityListener(OnFinishMainActivityListener listener) {
+        onFinishMainActivityListeners.add(listener);
+    }
+
+    void restartMainActivityCallBack() {
+        for (OnFinishMainActivityListener onFinishMainActivityListener : onFinishMainActivityListeners) {
+            onFinishMainActivityListener.finish();
+        }
+        onFinishMainActivityListeners.clear();
+    }
+
+
+    /**
+     * 生きているMainActivityのUIThreadで実行する
+     *
+     * @param runnable Runnable
+     */
+    public void runOnUiThread(Runnable runnable) {
+        if (!((Activity) mainActivityContext).isFinishing())
+            ((Activity) mainActivityContext).runOnUiThread(runnable);
+    }
+
+    /**
+     * 今のMainActivityが生きているかどうか
+     *
+     * @return true : 生きている false : 死んでいる
+     */
+    public boolean isDestroyMainActivity() {
+        return ((Activity) mainActivityContext).isFinishing();
+    }
+
+
+    public NumeriUsers getNumeriUsers() {
+        return NumeriUsers.getInstance();
+    }
+
+
+    public Point getWindowSize() {
+        WindowManager wm = (WindowManager) mainActivityContext.getSystemService(Application.WINDOW_SERVICE);
+        Point size = new Point();
+        wm.getDefaultDisplay().getSize(size);
+        return size;
+    }
+
+
+    private static class GlobalHolder {
+        private static final Global instance = new Global();
+    }
+
+}

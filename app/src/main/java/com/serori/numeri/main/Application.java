@@ -1,110 +1,51 @@
 package com.serori.numeri.main;
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Point;
-import android.view.WindowManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.util.Log;
+
+import com.serori.numeri.color.ColorStorager;
+import com.serori.numeri.config.ConfigurationStorager;
+import com.serori.numeri.exceptionreport.ExceptionReportStorager;
+import com.serori.numeri.fragment.listview.action.ActionStorager;
+import com.serori.numeri.util.toast.ToastSender;
 
 /**
- * Applicationのフィールド的な役割を持つクラス
  */
 public class Application extends android.app.Application {
-    private Application() {
+    public Application() {
+        super();
     }
 
-    public static Application getInstance() {
-        return ApplicationHolder.instance;
-    }
+    private volatile boolean clashing = false;
 
-    private List<OnFinishMainActivityListener> onFinishMainActivityListeners = new ArrayList<>();
-    private Context applicationContext;
-    private Context mainActivityContext;
+    @Override
+    public void onCreate() {
+        Global.getInstance().setApplicationContext(getApplicationContext());
+        ConfigurationStorager.getInstance().loadConfigurations();
+        ActionStorager.getInstance().initializeActions();
+        ColorStorager.getInstance().loadColor();
+        Thread.UncaughtExceptionHandler uncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
 
-    public Context getApplicationContext() {
-        return applicationContext;
-    }
-
-    public void setApplicationContext(Context applicationContext) {
-        if (applicationContext instanceof android.app.Application) {
-            this.applicationContext = applicationContext;
-
-        } else {
-            throw new IllegalArgumentException("Applicationを継承していないインスタンスを保存しようとしています");
-        }
-    }
-
-    public Context getMainActivityContext() {
-        return mainActivityContext;
-    }
-
-    public void setMainActivityContext(Context mainActivityContext) {
-        if (mainActivityContext instanceof MainActivity) {
-            this.mainActivityContext = mainActivityContext;
-        } else {
-            throw new IllegalArgumentException("MainActivityでないインスタンスを保存しようとしています");
-        }
-    }
-
-    /**
-     * 現在のMainActivityを殺す
-     */
-    public void destroyMainActivity() {
-        if (mainActivityContext != null) {
-            if (!isDestroyMainActivity()) {
-                ((Activity) mainActivityContext).finish();
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            try {
+                if (!clashing) {
+                    clashing = true;
+                    Log.v(toString(), "uncaughtException catch");
+                    ExceptionReportStorager.getInstance().savExceptionReportTableTable(new Exception(throwable));
+                }
+            } finally {
+                Log.v(toString(), "uncaughtException finally");
+                uncaughtExceptionHandler.uncaughtException(thread, throwable);
             }
-        }
+        });
+        super.onCreate();
     }
 
-    public void addOnFinishMainActivityListener(OnFinishMainActivityListener listener) {
-        onFinishMainActivityListeners.add(listener);
-    }
-
-    void restartMainActivityCallBack() {
-        for (OnFinishMainActivityListener onFinishMainActivityListener : onFinishMainActivityListeners) {
-            onFinishMainActivityListener.finish();
-        }
-        onFinishMainActivityListeners.clear();
-    }
-
-    /**
-     * 生きているMainActivityのUIThreadで実行する
-     *
-     * @param runnable Runnable
-     */
-    public void runOnUiThread(Runnable runnable) {
-        if (!((Activity) mainActivityContext).isFinishing())
-            ((Activity) mainActivityContext).runOnUiThread(runnable);
-    }
-
-    /**
-     * 今のMainActivityが生きているかどうか
-     *
-     * @return true : 生きている false : 死んでいる
-     */
-    public boolean isDestroyMainActivity() {
-        return ((Activity) mainActivityContext).isFinishing();
-    }
-
-
-    public NumeriUsers getNumeriUsers() {
-        return NumeriUsers.getInstance();
-    }
-
-
-    public Point getWindowSize() {
-        WindowManager wm = (WindowManager) mainActivityContext.getSystemService(WINDOW_SERVICE);
-        Point size = new Point();
-        wm.getDefaultDisplay().getSize(size);
-        return size;
-    }
-
-
-    private static class ApplicationHolder {
-        private static final Application instance = new Application();
+    @Override
+    public void onLowMemory() {
+        ToastSender.sendToast("onLowMemory");
+        super.onLowMemory();
     }
 
 }
+

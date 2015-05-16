@@ -8,7 +8,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.main.manager.FragmentStorager;
 import com.serori.numeri.util.database.DataBaseHelper;
 
@@ -31,7 +31,7 @@ public class NumeriUserStorager {
     public void saveNumeriUser(NumeriUserTable userTable) {
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, NumeriUserTable.class);
             Dao<NumeriUserTable, String> dao = helper.getDao(NumeriUserTable.class);
@@ -54,7 +54,7 @@ public class NumeriUserStorager {
         ConnectionSource connectionSource = null;
         List<NumeriUserTable> tables = new ArrayList<>();
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, NumeriUserTable.class);
             Dao<NumeriUserTable, String> dao = helper.getDao(NumeriUserTable.class);
@@ -78,7 +78,7 @@ public class NumeriUserStorager {
         Log.v("delete", "start");
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, NumeriUserTable.class);
             TableUtils.createTableIfNotExists(connectionSource, FragmentStorager.FragmentsTable.class);

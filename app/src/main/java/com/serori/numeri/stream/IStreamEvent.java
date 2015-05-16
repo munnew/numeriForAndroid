@@ -2,8 +2,12 @@ package com.serori.numeri.stream;
 
 import com.serori.numeri.stream.event.OnDeletionNoticeListener;
 import com.serori.numeri.stream.event.OnFavoriteListener;
+import com.serori.numeri.stream.event.OnFollowListener;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.stream.event.OnUnFavoriteListener;
+import com.serori.numeri.stream.event.OnUnFollowListener;
+
+import java.io.InputStream;
 
 /**
  * Streamのイベントを追加していくためのインターフェース
@@ -17,12 +21,6 @@ public interface IStreamEvent {
      */
     IStreamEvent addOnStatusListener(OnStatusListener listener);
 
-    /**
-     * onStatusイベントをリムーブする
-     *
-     * @param listener OnStatusListener
-     */
-    void removeOnStatusListener(OnStatusListener listener);
 
     /**
      * onFavoriteイベントを追加する
@@ -33,19 +31,50 @@ public interface IStreamEvent {
     IStreamEvent addOnFavoriteListener(OnFavoriteListener listener);
 
     /**
-     * onFavoriteイベントをリムーブする
-     *
-     * @param listener OnFavoriteListener
-     */
-    void removeOnFavoriteListener(OnFavoriteListener listener);
-
-    /**
      * onUnFavoriteイベントを追加する
      *
      * @param listener OnUnFavoriteListener
      * @return IStreamEvent
      */
     IStreamEvent addOnUnFavoriteListener(OnUnFavoriteListener listener);
+
+    /**
+     * onDeletionNoticeイベントを追加する
+     *
+     * @param listener OnDeletionNoticeListener
+     * @return IStreamEvent
+     */
+    IStreamEvent addOnDeletionNoticeListener(OnDeletionNoticeListener listener);
+
+    /**
+     * onFollowイベントを追加する
+     *
+     * @param listener OnFollowListener
+     * @return IStreamEvent
+     */
+    IStreamEvent addOnFollowListener(OnFollowListener listener);
+
+    /**
+     * onUnFollowイベントを追加する
+     *
+     * @param listener OnUnFollowListener
+     * @return IStreamEvent
+     */
+    IStreamEvent addOnUnFollowListener(OnUnFollowListener listener);
+
+    /**
+     * onStatusイベントをリムーブする
+     *
+     * @param listener OnStatusListener
+     */
+    void removeOnStatusListener(OnStatusListener listener);
+
+    /**
+     * onFavoriteイベントをリムーブする
+     *
+     * @param listener OnFavoriteListener
+     */
+    void removeOnFavoriteListener(OnFavoriteListener listener);
 
     /**
      * onUnFavoriteイベントをリムーブする
@@ -55,17 +84,23 @@ public interface IStreamEvent {
     void removeOnUnFavoriteListener(OnUnFavoriteListener listener);
 
     /**
-     * onDeletionNoticeイベントを追加する
-     *
-     * @param listener OnDeletionNoticeListener
-     */
-    void addOnDeletionNoticeListener(OnDeletionNoticeListener listener);
-
-    /**
      * onDeletionNoticeイベントをリムーブする
      *
      * @param listener OnDeletionNoticeListener
      */
     void removeOnDeletionNoticeListener(OnDeletionNoticeListener listener);
 
+    /**
+     * onFollowイベントをリムーブする
+     *
+     * @param listener OnFollowListener
+     */
+    void removeOnFollowListener(OnFollowListener listener);
+
+    /**
+     * onUnFollowイベントをリムーブする
+     *
+     * @param listener OnUnFollowListener
+     */
+    void removeOnUnFollowListener(OnUnFollowListener listener);
 }

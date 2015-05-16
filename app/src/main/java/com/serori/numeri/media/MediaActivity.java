@@ -1,7 +1,6 @@
 package com.serori.numeri.media;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
@@ -17,7 +16,7 @@ import java.util.List;
  */
 public class MediaActivity extends NumeriActivity {
     private static List<String> mediaUris = new ArrayList<>();
-    private static List<MediaFragment> mediaFragments = new ArrayList<>();
+    ViewPager pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,32 +30,15 @@ public class MediaActivity extends NumeriActivity {
                 MediaFragment mediaFragment = new MediaFragment();
                 mediaFragment.setMediaUri(mediaUris.get(i));
                 mediaPagerAdapter.add(mediaFragment);
-                mediaFragments.add(mediaFragment);
             }
         } else {
             for (Fragment fragment : getSupportFragmentManager().getFragments()) {
                 mediaPagerAdapter.add(fragment);
-                mediaFragments.add((MediaFragment) fragment);
             }
         }
         pager.setAdapter(mediaPagerAdapter);
     }
 
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        for (int i = 0; i < mediaFragments.size(); i++) {
-            if (mediaFragments.get(i).isAdded()) {
-                getSupportFragmentManager().putFragment(outState, "Fragment" + i, mediaFragments.get(i));
-            }
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
 
     public static void setMediaUris(List<String> uris) {
         if (!mediaUris.isEmpty()) {
@@ -68,7 +50,6 @@ public class MediaActivity extends NumeriActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            mediaFragments.clear();
             finish();
             return true;
         }

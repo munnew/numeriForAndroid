@@ -1,5 +1,7 @@
 package com.serori.numeri.twitter;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +9,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -22,7 +27,7 @@ import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.toast.ToastSender;
@@ -81,23 +86,24 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
         setContentView(R.layout.activity_tweet);
         if (savedInstanceState == null) {
             Button changeUserButton = (Button) findViewById(R.id.changeUser);
-            tweetEditText = (EditText) findViewById(R.id.tweeteditText);
+            tweetEditText = (EditText) findViewById(R.id.tweetEditText);
             remainingTextView = (TextView) findViewById(R.id.remaining);
+            remainingTextView.setText("140");
             tweetButton = (Button) findViewById(R.id.sendTweet);
-            Button addImageButton = (Button) findViewById(R.id.addImageButtoon);
+            Button addImageButton = (Button) findViewById(R.id.addImageButton);
             currentUserTextView = (TextView) findViewById(R.id.currentUser);
             backgroundTimeLine = (TextView) findViewById(R.id.backgroundTimeLine);
             appendedImageViews = (LinearLayout) findViewById(R.id.appendedImages);
 
-            NumeriUser defaultUser = Application.getInstance().getNumeriUsers().getNumeriUsers().get(0);
+            NumeriUser defaultUser = Global.getInstance().getNumeriUsers().getNumeriUsers().get(0);
             currentNumeriUser = currentNumeriUser == null ? defaultUser : currentNumeriUser;
-            String currentTweetUserName = currentNumeriUser == null ? Application.getInstance().getNumeriUsers().getNumeriUsers().get(0).getScreenName() : currentNumeriUser.getScreenName();
+            String currentTweetUserName = currentNumeriUser == null ? Global.getInstance().getNumeriUsers().getNumeriUsers().get(0).getScreenName() : currentNumeriUser.getScreenName();
 
             currentUserTextView.setText(currentTweetUserName);
             inputMethodManager = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
 
             //OnStatus
-            for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+            for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
                 onStatusListeners.put(numeriUser.getScreenName(), status -> {
                     String owner = status.getUser().getScreenName();
                     String text = status.getText();
@@ -181,70 +187,42 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     }
 
     private static final int GALLERY = 1;
+    private static final int KITCAT_GALLERY = 3;
     private static final int CAMERA = 2;
 
     private void appendedImage() {
         if (appendedImages.size() < 4) {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(intent, GALLERY);
+            if (Build.VERSION.SDK_INT < 19) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent, GALLERY);
+            } else {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.setType("image/*");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(intent, KITCAT_GALLERY);
+            }
         } else {
             ToastSender.sendToast("4つ以上は添付できません");
         }
     }
 
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            String path = null;
-            switch (requestCode) {
-                case GALLERY:
-                    try {
-                        InputStream inputStream = getContentResolver().openInputStream(data.getData());
-                        Cursor cursor = getContentResolver().query(data.getData(), null, null, null, null);
-                        cursor.moveToPosition(0);
-                        Log.v(toString(), cursor.getString(1));
-                        path = cursor.getString(1);
-                        File file = new File(path);
-                        cursor.close();
-                        inputStream.close();
-                        appendedImages.add(file);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        if (resultCode != Activity.RESULT_OK || data == null) return;
+        Uri uri = null;
+        if (requestCode == GALLERY) {
+            uri = data.getData();
+        } else if (requestCode == KITCAT_GALLERY) {
+            uri = data.getData();
+            final int takeFrags = data.getFlags() &
+                    (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            getContentResolver().takePersistableUriPermission(uri, takeFrags);
 
-                    break;
-                case CAMERA:
-
-                    break;
-                default:
-                    break;
-            }
-            if (path != null) {
-                Bitmap bitmap = BitmapFactory.decodeFile(path);
-                ImageView appendedImage = new ImageView(this);
-                Matrix matrix = new Matrix();
-                float y = Application.getInstance().getWindowSize().y / 9;
-                float magnification;
-                Log.v(toString(), "Height:" + bitmap.getHeight() + "width" + bitmap.getWidth());
-                if (bitmap.getHeight() > bitmap.getWidth()) {
-                    magnification = y / bitmap.getHeight();
-                } else {
-                    magnification = y / bitmap.getWidth();
-                }
-                float width = bitmap.getWidth() * magnification;
-                float height = bitmap.getHeight() * magnification;
-                bitmap = Bitmap.createScaledBitmap(bitmap, (int) width, (int) height, false);
-                Log.v(toString(), "magnification:" + magnification);
-                matrix.postTranslate(0, 0);
-                appendedImage.setImageMatrix(matrix);
-                appendedImage.setScaleType(ImageView.ScaleType.MATRIX);
-                appendedImage.setImageBitmap(bitmap);
-                appendedImageViews.addView(appendedImage);
-                appendedImage.setOnClickListener(this::removeAppendedImage);
-            }
         }
     }
 
@@ -281,7 +259,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     private void createChangeUserDialog() {
         List<CharSequence> numeriUsersName = new ArrayList<>();
         List<NumeriUser> numeriUsers = new ArrayList<>();
-        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+        for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
             numeriUsersName.add(numeriUser.getScreenName());
             numeriUsers.add(numeriUser);
         }
@@ -294,7 +272,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
 
     @Override
     public void finish() {
-        for (NumeriUser numeriUser : Application.getInstance().getNumeriUsers().getNumeriUsers()) {
+        for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
             numeriUser.getStreamEvent().removeOnStatusListener(onStatusListeners.get(numeriUser.getScreenName()));
         }
         tweetText = "";

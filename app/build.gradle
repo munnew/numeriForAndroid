@@ -11,8 +11,8 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '21.1.2'
+    compileSdkVersion 22
+    buildToolsVersion '22.0.1'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId "com.serori.numeri"
         minSdkVersion 15
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }
@@ -59,7 +59,7 @@ dependencies {
     compile 'org.twitter4j:twitter4j-stream:4.0.2'
     compile 'com.j256.ormlite:ormlite-core:4.48'
     compile 'com.j256.ormlite:ormlite-android:4.48'
-    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.android.support:appcompat-v7:22.1.1'
     compile fileTree(include: ['*.jar'], dir: 'libs')
 }
 

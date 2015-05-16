@@ -9,22 +9,21 @@
     <item
         android:id="@+id/action_color_manager"
         android:orderInCategory="100"
-        android:title="色設定" />
+        android:title="@string/setting_color" />
 
     <item
-        android:id="@+id/action_acount"
+        android:id="@+id/action_account"
         android:orderInCategory="100"
-        android:title="アカウント" />
+        android:title="@string/account" />
 
     <item
         android:id="@+id/action_fragment_manager"
         android:orderInCategory="100"
-        android:title="フラグメント管理" />
+        android:title="@string/fragment_manage" />
 
     <item
         android:id="@+id/action_api_confirmation"
         android:orderInCategory="100"
-        android:title="APIの確認" />
-
+        android:title="@string/api_confirmation" />
 
 </menu>

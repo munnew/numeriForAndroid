@@ -20,7 +20,7 @@ import twitter4j.UserMentionEntity;
 /**
  * ユーザーへのリプライを表示するFragment
  */
-public class MentionsFlagment extends NumeriFragment implements OnStatusListener {
+public class MentionsFragment extends NumeriFragment implements OnStatusListener {
 
     @Override
     public void setFragmentName(String name) {
@@ -74,9 +74,10 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
             Paging pages = new Paging();
             pages.setMaxId(statusId);
             pages.count(31);
-            ResponseList<Status> responceStatuses = twitter.getMentionsTimeline(pages);
-            responceStatuses.remove(0);
-            return responceStatuses;
+            ResponseList<Status> responseStatuses = twitter.getMentionsTimeline(pages);
+            if (!responseStatuses.isEmpty())
+                responseStatuses.remove(0);
+            return responseStatuses;
         } catch (TwitterException e) {
             TwitterExceptionDisplay.show(e);
             e.printStackTrace();
@@ -85,10 +86,10 @@ public class MentionsFlagment extends NumeriFragment implements OnStatusListener
     }
 
     @Override
-    protected void onAttachedBottom(SimpleTweetStatus item) {
+    protected void onAttachedBottom() {
         getTimelineListView().onAttachedBottomCallbackEnabled(false);
         SimpleAsyncTask.backgroundExecute(() -> {
-            ResponseList<Status> previousTimeLine = loadPreviousMentionsTimeLine(getNumeriUser().getTwitter(), item.getStatusId());
+            ResponseList<Status> previousTimeLine = loadPreviousMentionsTimeLine(getNumeriUser().getTwitter(), getAdapter().getItem(getAdapter().getCount() - 1).getStatusId());
             if (previousTimeLine != null) {
                 List<SimpleTweetStatus> items = new ArrayList<>();
                 for (Status status : previousTimeLine) {

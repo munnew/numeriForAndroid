@@ -6,13 +6,11 @@ import android.util.Log;
 
 import com.serori.numeri.util.async.SimpleAsyncTask;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,8 +20,8 @@ import java.util.Map;
  * 画像をキャッシュするクラス
  * 生成されたインスタンスを使いまわすことは出来ません
  */
-public class ImageCache {
-    private static final int maxCacheSize = 1 * 1024 * 1024 / 10;
+public class ImageDownloader {
+    private static final int maxCacheSize = 8 * 1024 * 1024;
     private static int currentCacheSize = 0;
     private OnStartDownLoadListener onStartDownLoadListener = null;
     private static volatile Map<String, ImageData> imageCache = new LinkedHashMap<>();
@@ -37,17 +35,19 @@ public class ImageCache {
             if (imageCache.isEmpty() && urls.size() <= index) {
                 return;
             }
+
             ImageData removeImage = imageCache.get(urls.get(index));
+            int removeImageByteSize = removeImage.getImage().getByteCount();
+
             if (removeImage.delete()) {
-                currentCacheSize -= removeImage.getImage().getByteCount() / 1024;
+                currentCacheSize -= removeImageByteSize;
                 imageCache.remove(urls.get(index));
-                urls.remove(index);
+                String url = urls.remove(index);
+                Log.v("ImageDownloader", "remove : " + url);
             } else {
                 index++;
             }
-            Log.v(getClass().toString(), "remove");
         }
-        Log.v(getClass().toString(), "onDownload-currentCacheSize: " + (currentCacheSize / 1024.0) + "KB / " + (maxCacheSize / 1024 / 1024.0) + "MB");
     }
 
     /**
@@ -57,7 +57,7 @@ public class ImageCache {
      * @param listener OnDownLoadStartListener
      * @return 自身のインスタンス
      */
-    public ImageCache setOnStartDownLoadListener(OnStartDownLoadListener listener) {
+    public ImageDownloader setOnStartDownLoadListener(OnStartDownLoadListener listener) {
         if (loadImageAlreadyCalled) {
             throw new IllegalStateException("loadImageが呼び出された後に呼び出されました。");
         }
@@ -67,9 +67,11 @@ public class ImageCache {
 
 
     /**
-     * 画像をダウンロードドする<br>
+     * 画像をダウンロードする<br>
      * ダウンロード済みの画像が場合はそれをロードする
      * おなじインスタンスから２度呼ぶことは出来ません
+     * 既にダウンロードを開始している画像のurlを指定した場合はそのOnLoadImageCompletedListenerはキューに入り、
+     * ダウンロードを完了すると順次OnLoadImageCompletedListener#onLoadImageCompleted(ImageData, String)が呼ばれます。
      *
      * @param url                 ロードしたい画像のurl
      * @param onCompletedListener 画像のロードが終了した際のリスナ
@@ -111,26 +113,13 @@ public class ImageCache {
             new SimpleAsyncTask<String, ImageData>() {
                 @Override
                 protected ImageData doInBackground(String s) {
-                    try {
-                        HttpGet httpGet = new HttpGet();
-                        httpGet.setURI(URI.create(url));
-                        HttpResponse response = new DefaultHttpClient().execute(httpGet);
-                        if (response.getStatusLine().getStatusCode() < 400) {
-                            Bitmap image;
-                            InputStream inputStream = response.getEntity().getContent();
-                            image = BitmapFactory.decodeStream(inputStream);
-                            inputStream.close();
-                            if (image != null) {
-                                ImageData imageData = new ImageData(image);
-                                imageCache.put(url, imageData);
-                                currentCacheSize += image.getByteCount() / 1024;
-                                entryRemoved();
-                                return imageData;
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return null;
+                    Bitmap image = downloadImage(s);
+                    if (image != null) {
+                        ImageData imageData = new ImageData(image, s);
+                        imageCache.put(s, imageData);
+                        currentCacheSize += image.getByteCount();
+                        entryRemoved();
+                        return imageData;
                     }
                     return null;
                 }
@@ -155,26 +144,114 @@ public class ImageCache {
     }
 
     /**
-     * キャッシュされた画像を表すクラス
-     * 必ずsetQuantityを使用
+     * /**
+     * 画像をダウンロードする<br>
+     * おなじインスタンスから２度呼ぶことは出来ません
+     *
+     * @param cache               キャッシュするか否か true:キャシュする false : キャッシュしない<br>
+     *                            falseを指定した場合は既にダウンロードを開始した画像のurlを指定しても
+     *                            複数のonCompletedListenerはキューに入れられることはなく、
+     *                            またキャッシュされた画像から読み込むこともありません。
+     * @param url                 ダウンロードする画像のurl
+     * @param onCompletedListener OnLoadImageCompletedListener
+     */
+    public void loadImage(boolean cache, String url, OnLoadImageCompletedListener onCompletedListener) {
+        if (cache) {
+            loadImage(url, onCompletedListener);
+        } else {
+            if (loadImageAlreadyCalled) {
+                throw new IllegalStateException("loadImageが二度呼ばれました");
+            }
+            loadImageAlreadyCalled = true;
+
+            new SimpleAsyncTask<String, ImageData>() {
+
+                @Override
+                protected ImageData doInBackground(String s) {
+                    Bitmap image = downloadImage(s);
+                    if (image != null) {
+                        return new ImageData(image, s);
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(ImageData imageData) {
+                    if (imageData != null) {
+                        onCompletedListener.onLoadImageCompleted(imageData, url);
+                    }
+                }
+            }.execute(url);
+        }
+    }
+
+    private Bitmap downloadImage(String urlString) {
+        InputStream inputStream = null;
+        HttpURLConnection httpURLConnection = null;
+        Bitmap image = null;
+        try {
+            URL url = new URL(urlString);
+            httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setAllowUserInteraction(false);
+            httpURLConnection.setInstanceFollowRedirects(true);
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.connect();
+
+            if (httpURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                inputStream = httpURLConnection.getInputStream();
+                image = BitmapFactory.decodeStream(inputStream);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (inputStream != null) inputStream.close();
+                if (httpURLConnection != null) httpURLConnection.disconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return image;
+    }
+
+    /**
+     * 画像を表すクラス
      */
     public class ImageData {
         //TODO かなりダサい
         private Bitmap image;
         private int usedQuantity = 0;
+        private String key = "";
 
-        ImageData(Bitmap image) {
+        ImageData(Bitmap image, String key) {
             this.image = image;
+            this.key = key;
         }
 
         /**
          * Bitmapが使われていない場合それを開放します
          *
-         * @return 開放したか否か true : 開放した false : 開放出来なかった
+         * @return true : 開放した false : 開放出来なかった
          */
         boolean delete() {
             if (usedQuantity == 0) {
                 image.recycle();
+                image = null;
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Bitmapがキャッシュされていない場合それを開放します
+         *
+         * @return true : 開放した false : 開放出来なかった
+         */
+        public boolean recycle() {
+            if (imageCache.get(key) == null && image != null) {
+                Log.v(toString(), "recycle");
+                image.recycle();
+                image = null;
                 return true;
             }
             return false;
@@ -193,7 +270,6 @@ public class ImageCache {
         /**
          * このデータをViewが使用しているか否かを設定します。<br>
          * 使用している場合はtrueを、しなくなった場合はfalseを必ずセットしてください<b>
-         * 不適切に使用された場合はIllegalStateExceptionを投げます。
          *
          * @param practicableDelete true : 使われている false : 使われなくなった。
          */
@@ -203,10 +279,10 @@ public class ImageCache {
             } else {
                 usedQuantity--;
                 if (usedQuantity < 0) {
-                    throw new IllegalStateException("一度もtrueを与えられずにfalseを与えられました。");
+                    usedQuantity = 0;
                 }
             }
-            // Log.v(getClass().toString(), image.toString() + " usedQuantity = " + usedQuantity);
         }
+
     }
 }

@@ -5,6 +5,6 @@
     <item
         android:id="@+id/action_addfragment"
         android:orderInCategory="100"
-        android:title="追加" />
+        android:title="@string/text_add_button1" />
 
 </menu>

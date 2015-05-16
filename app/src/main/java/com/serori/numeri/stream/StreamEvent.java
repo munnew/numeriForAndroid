@@ -4,8 +4,10 @@ import android.util.Log;
 
 import com.serori.numeri.stream.event.OnDeletionNoticeListener;
 import com.serori.numeri.stream.event.OnFavoriteListener;
+import com.serori.numeri.stream.event.OnFollowListener;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.stream.event.OnUnFavoriteListener;
+import com.serori.numeri.stream.event.OnUnFollowListener;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
@@ -31,6 +33,8 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
     private List<OnFavoriteListener> onFavoriteListeners = new ArrayList<>();
     private List<OnUnFavoriteListener> onUnFavoriteListeners = new ArrayList<>();
     private List<OnDeletionNoticeListener> onDeletionNoticeListeners = new ArrayList<>();
+    private List<OnFollowListener> onFollowListeners = new ArrayList<>();
+    private List<OnUnFollowListener> onUnFollowListeners = new ArrayList<>();
 
     public StreamEvent(TwitterStream stream) {
         stream.addListener(this);
@@ -55,8 +59,21 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
     }
 
     @Override
-    public void removeOnStatusListener(OnStatusListener listener) {
-        onStatusListeners.remove(listener);
+    public IStreamEvent addOnDeletionNoticeListener(OnDeletionNoticeListener listener) {
+        onDeletionNoticeListeners.add(listener);
+        return this;
+    }
+
+    @Override
+    public IStreamEvent addOnFollowListener(OnFollowListener listener) {
+        onFollowListeners.add(listener);
+        return this;
+    }
+
+    @Override
+    public IStreamEvent addOnUnFollowListener(OnUnFollowListener listener) {
+        onUnFollowListeners.add(listener);
+        return this;
     }
 
     @Override
@@ -65,10 +82,6 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
         return this;
     }
 
-    @Override
-    public void removeOnFavoriteListener(OnFavoriteListener listener) {
-        onFavoriteListeners.remove(listener);
-    }
 
     @Override
     public IStreamEvent addOnUnFavoriteListener(OnUnFavoriteListener listener) {
@@ -77,18 +90,33 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
     }
 
     @Override
+    public void removeOnStatusListener(OnStatusListener listener) {
+        onStatusListeners.remove(listener);
+    }
+
+    @Override
+    public void removeOnFavoriteListener(OnFavoriteListener listener) {
+        onFavoriteListeners.remove(listener);
+    }
+
+    @Override
     public void removeOnUnFavoriteListener(OnUnFavoriteListener listener) {
         onUnFavoriteListeners.remove(listener);
     }
 
     @Override
-    public void addOnDeletionNoticeListener(OnDeletionNoticeListener listener) {
-        onDeletionNoticeListeners.add(listener);
+    public void removeOnDeletionNoticeListener(OnDeletionNoticeListener listener) {
+        onDeletionNoticeListeners.remove(listener);
     }
 
     @Override
-    public void removeOnDeletionNoticeListener(OnDeletionNoticeListener listener) {
-        onDeletionNoticeListeners.remove(listener);
+    public void removeOnFollowListener(OnFollowListener listener) {
+        onFollowListeners.remove(listener);
+    }
+
+    @Override
+    public void removeOnUnFollowListener(OnUnFollowListener listener) {
+        onUnFollowListeners.remove(listener);
     }
 
     //以下Streamイベント
@@ -118,12 +146,16 @@ public class StreamEvent implements UserStreamListener, IStreamEvent, StreamSwit
 
     @Override
     public void onFollow(User source, User followedUser) {
-
+        for (OnFollowListener onFollowListener : onFollowListeners) {
+            onFollowListener.onFollow(source, followedUser);
+        }
     }
 
     @Override
     public void onUnfollow(User source, User unfollowedUser) {
-
+        for (OnUnFollowListener onUnFollowListener : onUnFollowListeners) {
+            onUnFollowListener.onUnFollow(source, unfollowedUser);
+        }
     }
 
     @Override

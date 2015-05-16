@@ -69,7 +69,9 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
             pages.setMaxId(statusId);
             pages.count(31);
             ResponseList<Status> responseStatuses = twitter.getHomeTimeline(pages);
-            responseStatuses.remove(0);
+            if (!responseStatuses.isEmpty())
+
+                responseStatuses.remove(0);
             return responseStatuses;
         } catch (TwitterException e) {
             e.printStackTrace();
@@ -79,10 +81,10 @@ public class TimeLineFragment extends NumeriFragment implements OnStatusListener
     }
 
     @Override
-    protected void onAttachedBottom(SimpleTweetStatus item) {
+    protected void onAttachedBottom() {
         getTimelineListView().onAttachedBottomCallbackEnabled(false);
         SimpleAsyncTask.backgroundExecute(() -> {
-            ResponseList<Status> previousTimeLine = loadPreviousTimeLine(getNumeriUser().getTwitter(), item.getStatusId());
+            ResponseList<Status> previousTimeLine = loadPreviousTimeLine(getNumeriUser().getTwitter(), getAdapter().getItem(getAdapter().getCount() - 1).getStatusId());
             if (previousTimeLine != null) {
                 List<SimpleTweetStatus> items = new ArrayList<>();
                 for (Status status : previousTimeLine) {

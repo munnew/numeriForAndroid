@@ -3,7 +3,7 @@ package com.serori.numeri.twitter;
 import android.text.Html;
 import android.util.Log;
 
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.user.NumeriUser;
 
 import java.text.SimpleDateFormat;
@@ -22,6 +22,7 @@ import twitter4j.UserMentionEntity;
  * Statusから生成される軽量化されたStatus
  */
 public class SimpleTweetStatus {
+    private String biggerIconImageUrl;
     private String iconImageUrl;
     private String name, mainText, via;
     private long statusId, userId, retweetedStatusId = -1;
@@ -53,10 +54,9 @@ public class SimpleTweetStatus {
         if (simpleTweetStatus == null) {
             simpleTweetStatus = new SimpleTweetStatus(status, numeriUser);
             simpleTweetStatusMap.put(key, simpleTweetStatus);
-            Log.v("SimpleTweetStatus", "new " + key + " : " + status.getText());
             return simpleTweetStatus;
         }
-        Log.v("SimpleTweetStatus", key + " : " + status.getText());
+        Log.v("SimpleTweetStatus", simpleTweetStatus.getScreenName());
         return simpleTweetStatus;
     }
 
@@ -87,7 +87,7 @@ public class SimpleTweetStatus {
      * このメソッドはアプリケーションが生きている間一度しか実行することが出来ない
      */
     public static void startObserveFavorite() {
-        List<NumeriUser> numeriUsers = Application.getInstance().getNumeriUsers().getNumeriUsers();
+        List<NumeriUser> numeriUsers = Global.getInstance().getNumeriUsers().getNumeriUsers();
         if (observeFavoriteStarted || numeriUsers.isEmpty()) return;
         observeFavoriteStarted = true;
 
@@ -113,7 +113,7 @@ public class SimpleTweetStatus {
                 }
             });
         }
-        Application.getInstance().addOnFinishMainActivityListener(() -> observeFavoriteStarted = false);
+        Global.getInstance().addOnFinishMainActivityListener(() -> observeFavoriteStarted = false);
     }
 
     /**
@@ -121,7 +121,7 @@ public class SimpleTweetStatus {
      * このメソッドはアプリケーションが生きている間一度しか実行することが出来ない
      */
     public static void startObserveDestroyTweet() {
-        List<NumeriUser> numeriUsers = Application.getInstance().getNumeriUsers().getNumeriUsers();
+        List<NumeriUser> numeriUsers = Global.getInstance().getNumeriUsers().getNumeriUsers();
         if (observeDestroyTweetStarted || numeriUsers.isEmpty()) return;
 
         for (NumeriUser numeriUser : numeriUsers) {
@@ -142,7 +142,8 @@ public class SimpleTweetStatus {
         statusId = status.getId();
         if (status.isRetweet()) { //RT
             isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
-            iconImageUrl = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
+            biggerIconImageUrl = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
+            iconImageUrl = status.getRetweetedStatus().getUser().getProfileImageURL();
             mainText = status.getRetweetedStatus().getText();
             name = status.getRetweetedStatus().getUser().getName();
             via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName() + "\n RT count : " + status.getRetweetedStatus().getRetweetCount();
@@ -154,7 +155,8 @@ public class SimpleTweetStatus {
             retweetedStatusId = status.getRetweetedStatus().getId();
         } else {//!RT
             isProtectedUser = status.getUser().isProtected();
-            iconImageUrl = status.getUser().getBiggerProfileImageURL();
+            biggerIconImageUrl = status.getUser().getBiggerProfileImageURL();
+            iconImageUrl = status.getUser().getProfileImageURL();
             mainText = status.getText();
             name = status.getUser().getName();
             via = "via " + Html.fromHtml(status.getSource()).toString();
@@ -191,7 +193,16 @@ public class SimpleTweetStatus {
 
     }
 
+    //setter
+    public void setFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
+    }
 
+    public void setMyRT(boolean isRT) {
+        this.isMyRT = isRT;
+    }
+
+    //getter
     public String getName() {
         return name;
     }
@@ -200,10 +211,6 @@ public class SimpleTweetStatus {
         List<String> destinationUserNames = new ArrayList<>();
         destinationUserNames.addAll(this.destinationUserNames);
         return destinationUserNames;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getMainText() {
@@ -215,16 +222,7 @@ public class SimpleTweetStatus {
         return via;
     }
 
-    //setter
-    public void setFavorite(boolean isFavorite) {
-        this.isFavorite = isFavorite;
-    }
 
-    public void setMyRT(boolean isRT) {
-        this.isMyRT = isRT;
-    }
-
-    //getter
     public long getStatusId() {
         return statusId;
     }
@@ -251,6 +249,10 @@ public class SimpleTweetStatus {
 
     public String getCreatedTime() {
         return createdTime;
+    }
+
+    public String getBiggerIconImageUrl() {
+        return biggerIconImageUrl;
     }
 
     public String getIconImageUrl() {
@@ -304,4 +306,6 @@ public class SimpleTweetStatus {
 
         return isSameTweet && ((SimpleTweetStatus) o).statusAcquirerId == this.statusAcquirerId;
     }
+
+
 }

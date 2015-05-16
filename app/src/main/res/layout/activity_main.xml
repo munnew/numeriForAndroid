@@ -1,8 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/container"
     tools:context=".MainActivity">
 
     <TextView
@@ -40,42 +40,15 @@
         android:paddingRight="0dp"
         android:paddingTop="0dp">
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="37dp"
-            android:layout_weight="1"
-            android:gravity="left|bottom"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:id="@+id/menuButton"
-                android:layout_width="40dp"
-                android:layout_height="37dp"
-                android:gravity="center|bottom"
-                android:visibility="visible"
-                android:background="#00FFFFFF">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:clickable="true"
-                    android:scaleType="fitCenter"
-                    android:background="#00FFFFFF"
-                    android:paddingBottom="5dp"
-                    android:src="@drawable/button_menu2" />
-
-            </LinearLayout>
-
-        </LinearLayout>
 
         <ImageButton
             android:id="@+id/goTweetButton"
             android:layout_width="37dp"
             android:layout_height="37dp"
             android:layout_gravity="right"
-            android:clickable="true"
             android:background="#00FFFFFF"
-            android:layout_weight="0"
+            android:clickable="true"
+            android:contentDescription="@string/description_tweet_button"
             android:scaleType="centerCrop"
             android:src="@drawable/gotweet" />
     </LinearLayout>

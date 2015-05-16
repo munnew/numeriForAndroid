@@ -26,7 +26,7 @@ public class MediaFragment extends Fragment {
         setRetainInstance(true);
         NumeriImageView mediaImageView = (NumeriImageView) rootView.findViewById(R.id.mediaImageView);
         mediaImageView.setOnLoadCompletedListener(image -> mediaImageView.setSaveImageFunctionEnabled(true, (NumeriActivity) getActivity()));
-        mediaImageView.startLoadImage(NumeriImageView.ProgressType.LOAD_MEDIA, mediaUri);
+        mediaImageView.startLoadImage(false, NumeriImageView.ProgressType.LOAD_MEDIA, mediaUri);
         return rootView;
     }
 

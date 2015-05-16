@@ -6,11 +6,49 @@
     <string name="twitter_consumer_key">PcEyWY7jGYGGiOaIFg4tEg</string>
     <string name="twitter_consumer_secret">O5UC6aoaNUxMu8X1axfvf4sjHgBjVOs4g2vlgiQ</string>
     <string name="twitter_callback_url">serorigundam://twitter</string>
-
-    <string name="follow_color">#407AF1</string>
-    <string name="un_follow_color">#DA3015</string>
-    <string name="not_selected_color">#50707070</string>
-    <string name="selected_color">#50909090</string>
-
-
+    <string name="text_save_button">保存</string>
+    <string name="text_action_compo">動作</string>
+    <string name="text_action_conf_button">アクション</string>
+    <string name="text_tweet_additional_acquisition">確認なしに更にツイートを追加取得</string>
+    <string name="sleepless">スリープにしない</string>
+    <string name="text_layout_compo">レイアウト</string>
+    <string name="text_choose_theme_button">テーマ</string>
+    <string name="text_choose_char_size_button">文字の大きさ</string>
+    <string name="text_license_compo">ライセンス</string>
+    <string name="text_showTwitter4j_license">Twitter4J LICENSE</string>
+    <string name="text_showOrmLiteL_license">ORMLite LICENCE</string>
+    <string name="text_add_button1">追加</string>
+    <string name="text_add_button2">追加認証</string>
+    <string name="description_tweet_button">ツイートアクティビティに飛ぶ</string>
+    <string name="text_tweet_button">ツイート</string>
+    <string name="text_add_image_button">画像</string>
+    <string name="text_choose_user_button">ユーザー</string>
+    <string name="description_imageIcon">ユーザーのアイコン</string>
+    <string name="description_protected_image">鍵付きユーザーか否か</string>
+    <string name="bio">BIO</string>
+    <string name="location">location</string>
+    <string name="text_tweet_tab">ツイート</string>
+    <string name="text_favorite_tab">お気に入り</string>
+    <string name="text_follow_tab">フォロー</string>
+    <string name="text_follower_tab">フォロワー</string>
+    <string name="R">R</string>
+    <string name="G">G</string>
+    <string name="B">B</string>
+    <string name="text_button_delete">削除</string>
+    <string name="description_favorite">お気に入りか否か</string>
+    <string name="right_press">右押し</string>
+    <string name="center_press">中押し</string>
+    <string name="left_press">左押し</string>
+    <string name="right_press_long">右長押し</string>
+    <string name="center_press_long">中長押し</string>
+    <string name="left_press_long">左長押し</string>
+    <string name="use_high_resolution_icon">高解像度のアイコンを使う</string>
+    <string name="setting_color">色設定</string>
+    <string name="account">アカウント</string>
+    <string name="fragment_manage">フラグメント管理</string>
+    <string name="api_confirmation">APIの確認</string>
+    <string name="authentication">認証</string>
+    <string name="block">ブロック</string>
+    <string name="mute">ミュート</string>
+    <string name="report_spam">スパム報告</string>
 </resources>

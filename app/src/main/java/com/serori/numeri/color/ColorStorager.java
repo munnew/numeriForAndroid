@@ -7,7 +7,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.main.Application;
+import com.serori.numeri.main.Global;
 import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
@@ -28,7 +28,7 @@ public class ColorStorager {
     public void saveColorData() {
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, ColorData.class);
             Dao<ColorData, String> dao = helper.getDao(ColorData.class);
@@ -57,7 +57,7 @@ public class ColorStorager {
     public void loadColor() {
         ConnectionSource connectionSource = null;
         try {
-            DataBaseHelper helper = new DataBaseHelper(Application.getInstance().getApplicationContext());
+            DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
             connectionSource = helper.getConnectionSource();
             TableUtils.createTableIfNotExists(connectionSource, ColorData.class);
             Dao<ColorData, String> dao = helper.getDao(ColorData.class);
@@ -120,7 +120,7 @@ public class ColorStorager {
     /**
      * 色を保存する列挙型
      */
-    public static enum Colors implements Color {
+    public enum Colors implements Color {
 
         NORMAL_ITEM("NORMAL\nITEM"),
         RT_ITEM("RT\nITEM"),
@@ -131,7 +131,7 @@ public class ColorStorager {
         private String color;
         private String colorId;
 
-        private Colors(String id) {
+        Colors(String id) {
             colorId = id;
         }
 

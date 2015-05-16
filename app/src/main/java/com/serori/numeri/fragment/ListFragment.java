@@ -79,15 +79,16 @@ public class ListFragment extends NumeriFragment {
     }
 
     @Override
-    protected void onAttachedBottom(SimpleTweetStatus item) {
+    protected void onAttachedBottom() {
         getTimelineListView().onAttachedBottomCallbackEnabled(false);
         SimpleAsyncTask.backgroundExecute(() -> {
             Paging paging = new Paging();
-            paging.setMaxId(item.getStatusId());
+            paging.setMaxId(getAdapter().getItem(getAdapter().getCount() - 1).getStatusId());
             paging.count(31);
             try {
                 ResponseList<Status> statuses = getNumeriUser().getTwitter().getUserListStatuses(listId, paging);
-                if(!statuses.isEmpty())statuses.remove(0);
+                if (!statuses.isEmpty())
+                    statuses.remove(0);
                 getActivity().runOnUiThread(() -> {
                     for (Status status : statuses) {
                         getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));

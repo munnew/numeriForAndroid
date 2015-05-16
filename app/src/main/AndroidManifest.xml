@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".main.Application"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:theme="@style/AppTheme_Light">
@@ -24,8 +25,8 @@
         <activity
             android:name=".oauth.OAuthActivity"
             android:configChanges="orientation|screenSize"
-            android:launchMode="singleTask"
-            android:label="ユーザー管理">
+            android:label="ユーザー管理"
+            android:launchMode="singleTask">
             <intent-filter>
 
                 <action android:name="android.intent.action.VIEW" />
@@ -43,8 +44,8 @@
         <activity
             android:name="com.serori.numeri.twitter.TweetActivity"
             android:configChanges="orientation|screenSize"
-            android:windowSoftInputMode="adjustResize"
-            android:label="ツイート">
+            android:label="ツイート"
+            android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -58,8 +59,8 @@
 
         <activity
             android:name=".main.manager.FragmentManagerActivity"
-            android:label="フラグメント管理"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:label="フラグメント管理">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -111,6 +112,26 @@
             android:name="com.serori.numeri.userprofile.UserInformationActivity"
             android:configChanges="orientation|screenSize"
             android:label="ユーザー情報">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".license.LicenseActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="ライセンス情報">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".directmessage.DirectMessageActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="DM">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
