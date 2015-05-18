@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
@@ -35,7 +34,6 @@ import com.serori.numeri.util.twitter.TweetBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -187,7 +185,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     }
 
     private static final int GALLERY = 1;
-    private static final int KITCAT_GALLERY = 3;
+    private static final int KITKAT_GALLERY = 3;
     private static final int CAMERA = 2;
 
     private void appendedImage() {
@@ -201,7 +199,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.setType("image/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(intent, KITCAT_GALLERY);
+                startActivityForResult(intent, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             }
         } else {
             ToastSender.sendToast("4つ以上は添付できません");
@@ -214,15 +212,49 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK || data == null) return;
         Uri uri = null;
+        Bitmap bitmap = null;
         if (requestCode == GALLERY) {
             uri = data.getData();
-        } else if (requestCode == KITCAT_GALLERY) {
+            String[] datas ={ MediaStore.Images.Media.DATA};
+            Cursor c = getContentResolver().query(uri,datas,null,null,null);
+        } else if (requestCode == KITKAT_GALLERY) {
             uri = data.getData();
-            final int takeFrags = data.getFlags() &
-                    (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            getContentResolver().takePersistableUriPermission(uri, takeFrags);
-
+            final int frags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            getContentResolver().takePersistableUriPermission(uri, frags);
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+            } catch (IOException e) {
+                bitmap = null;
+            }
+        }
+        if (bitmap != null) {
+            try {
+                ImageView appendedImage = new ImageView(this);
+                Matrix matrix = new Matrix();
+                float y = Global.getInstance().getWindowSize().y / 9;
+                float magnification;
+                if (bitmap.getHeight() > bitmap.getWidth()) {
+                    magnification = y / bitmap.getHeight();
+                } else {
+                    magnification = y / bitmap.getWidth();
+                }
+                float width = bitmap.getWidth() * magnification;
+                float height = bitmap.getHeight() * magnification;
+                bitmap = Bitmap.createScaledBitmap(bitmap, (int) width, (int) height, false);
+                Log.v(toString(), "magnification:" + magnification);
+                matrix.postTranslate(0, 0);
+                appendedImage.setImageMatrix(matrix);
+                appendedImage.setScaleType(ImageView.ScaleType.MATRIX);
+                appendedImage.setImageBitmap(bitmap);
+                appendedImageViews.addView(appendedImage);
+                appendedImage.setOnClickListener(this::removeAppendedImage);
+            } catch (NullPointerException ne) {
+                ToastSender.sendToast("内部エラー");
+                ne.printStackTrace();
+            }
+        } else {
+            ToastSender.sendToast("画像を取得できませんでした。");
+            Log.v("TweetActivity", "Check path:" + uri);
         }
     }
 
