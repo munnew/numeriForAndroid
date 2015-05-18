@@ -3,6 +3,7 @@ package com.serori.numeri.fragment;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -116,6 +117,7 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         }
     }
 
+
     /**
      * 親のNumeriActivityを取得する
      *
@@ -124,4 +126,5 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
     protected NumeriActivity getNumeriActivity() {
         return (NumeriActivity) getActivity();
     }
+
 }

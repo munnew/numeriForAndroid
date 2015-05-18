@@ -2,6 +2,7 @@ package com.serori.numeri.config;
 
 import android.app.AlertDialog;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.KeyEvent;
@@ -19,7 +20,6 @@ import com.serori.numeri.fragment.listview.action.ActionStorager;
 import com.serori.numeri.fragment.listview.action.TwitterActions;
 import com.serori.numeri.main.Global;
 import com.serori.numeri.main.MainActivity;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
@@ -183,7 +183,7 @@ public class ConfigActivity extends NumeriActivity {
                 .setSingleChoiceItems(actionTexts.toArray(new CharSequence[actionTexts.size()]),
                         position, (dialog, which) -> {
                             respectTapPositionActions.setTwitterAction(actions.get(which));
-                            SimpleAsyncTask.execute(() -> ActionStorager.getInstance().saveActions());
+                            AsyncTask.execute(() -> ActionStorager.getInstance().saveActions());
                             ((AlertDialog) dialog).hide();
                             dialog.dismiss();
                         }).create();

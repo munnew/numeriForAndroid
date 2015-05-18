@@ -3,8 +3,10 @@ package com.serori.numeri.main;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -32,7 +34,6 @@ import com.serori.numeri.twitter.TweetActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
 import com.serori.numeri.fragment.listview.item.UserListItem;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
@@ -87,37 +88,30 @@ public class MainActivity extends NumeriActivity {
         if (tables.isEmpty()) {
             startActivity(OAuthActivity.class, true);
         } else {
-
-            new SimpleAsyncTask<List<NumeriUserStorager.NumeriUserTable>, List<NumeriFragment>>() {
-
-                @Override
-                protected List<NumeriFragment> doInBackground(List<NumeriUserStorager.NumeriUserTable> numeriUserTables) {
-                    runOnUiThread(() -> {
-                        infoTextView.setVisibility(View.VISIBLE);
-                        infoTextView.setText("ユーザー情報を取得中...");
-                    });
-                    Global.getInstance().getNumeriUsers().clear();
-                    for (NumeriUserStorager.NumeriUserTable table : numeriUserTables) {
-                        Global.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
-                    }
-                    for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
-                        numeriUser.getStreamSwitcher().startStream();
-                        runOnUiThread(() -> infoTextView.setText(numeriUser.getScreenName() + " : startStream"));
-                    }
-                    NotificationSender.getInstance().sendStart();
-                    List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
-                    List<NumeriFragment> numeriFragments = new ArrayList<>();
-                    if (!numeriUsers.isEmpty()) {
-                        SimpleTweetStatus.startObserveFavorite();
-                        //SimpleTweetStatus.startObserveDestroyTweet();
-                        UserListItem.startObserveRelation();
-                        numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
-                    }
-                    return numeriFragments;
+            Handler handler = new Handler();
+            new Thread(() -> {
+                runOnUiThread(() -> {
+                    infoTextView.setVisibility(View.VISIBLE);
+                    infoTextView.setText("ユーザー情報を取得中...");
+                });
+                Global.getInstance().getNumeriUsers().clear();
+                for (NumeriUserStorager.NumeriUserTable table : NumeriUserStorager.getInstance().loadNumeriUserTables()) {
+                    Global.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
                 }
-
-                @Override
-                protected void onPostExecute(List<NumeriFragment> numeriFragments) {
+                for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
+                    numeriUser.getStreamSwitcher().startStream();
+                    runOnUiThread(() -> infoTextView.setText(numeriUser.getScreenName() + " : startStream"));
+                }
+                NotificationSender.getInstance().sendStart();
+                List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
+                List<NumeriFragment> numeriFragments = new ArrayList<>();
+                if (!numeriUsers.isEmpty()) {
+                    SimpleTweetStatus.startObserveFavorite();
+                    //SimpleTweetStatus.startObserveDestroyTweet();
+                    UserListItem.startObserveRelation();
+                    numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
+                }
+                handler.post(() -> {
                     if (!numeriFragments.isEmpty()) {
                         infoTextView.setText("フラグメントを生成しています...");
                         for (NumeriFragment numeriFragment : numeriFragments) {
@@ -128,8 +122,8 @@ public class MainActivity extends NumeriActivity {
                     } else {
                         infoTextView.setText("メニュー -> フラグメント管理 からフラグメントを追加してください。");
                     }
-                }
-            }.execute(tables);
+                });
+            }).start();
         }
     }
 
@@ -189,7 +183,7 @@ public class MainActivity extends NumeriActivity {
             names[i] = Global.getInstance().getNumeriUsers().getNumeriUsers().get(i).getScreenName();
         }
         AlertDialog alertDialog = new AlertDialog.Builder(this).setTitle("ユーザーを選択").setItems(names, (dialog, witch) -> {
-            SimpleAsyncTask.backgroundExecute(() -> {
+            new Thread(() -> {
                 try {
                     Map<String, RateLimitStatus> rateLimitStatus = Global.getInstance().getNumeriUsers().getNumeriUsers().get(witch)
                             .getTwitter().getRateLimitStatus("statuses");
@@ -199,7 +193,7 @@ public class MainActivity extends NumeriActivity {
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
-            });
+            }).start();
         }).create();
         setCurrentShowDialog(alertDialog);
     }

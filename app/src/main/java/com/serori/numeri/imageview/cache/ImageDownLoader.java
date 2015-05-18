@@ -2,9 +2,9 @@ package com.serori.numeri.imageview.cache;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.util.Log;
 
-import com.serori.numeri.util.async.SimpleAsyncTask;
 
 
 import java.io.IOException;
@@ -28,6 +28,7 @@ public class ImageDownloader {
     private static final List<String> urls = new ArrayList<>();
     private static volatile Map<String, List<OnLoadImageCompletedListener>> onLoadImageCompletedListeners = new LinkedHashMap<>();
     private boolean loadImageAlreadyCalled = false;
+    private Handler handler = new Handler();
 
     private void entryRemoved() {
         int index = 0;
@@ -81,10 +82,10 @@ public class ImageDownloader {
             throw new IllegalStateException("loadImageが二度呼ばれました");
         }
         loadImageAlreadyCalled = true;
-        ImageData image;
-        image = imageCache.get(url);
-        if (image != null && !image.getImage().isRecycled()) {
-            onCompletedListener.onLoadImageCompleted(image, url);
+        ImageData imageData;
+        imageData = imageCache.get(url);
+        if (imageData != null && !imageData.getImage().isRecycled()) {
+            onCompletedListener.onLoadImageCompleted(imageData, url);
             return;
         }
 
@@ -110,36 +111,28 @@ public class ImageDownloader {
             if (onStartDownLoadListener != null) onStartDownLoadListener.onDownLoadStart(url);
             urls.add(url);
 
-            new SimpleAsyncTask<String, ImageData>() {
-                @Override
-                protected ImageData doInBackground(String s) {
-                    Bitmap image = downloadImage(s);
-                    if (image != null) {
-                        ImageData imageData = new ImageData(image, s);
-                        imageCache.put(s, imageData);
-                        currentCacheSize += image.getByteCount();
-                        entryRemoved();
-                        return imageData;
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(ImageData imageData) {
-                    if (imageData != null) {
-                        onCompletedListener.onLoadImageCompleted(imageData, url);
+            new Thread(() -> {
+                Bitmap image = downloadImage(url);
+                if (image != null) {
+                    ImageData imageData1 = new ImageData(image, url);
+                    imageCache.put(url, imageData1);
+                    currentCacheSize += image.getByteCount();
+                    entryRemoved();
+                    handler.post(() -> {
+                        onCompletedListener.onLoadImageCompleted(imageData1, url);
                         List<OnLoadImageCompletedListener> listeners = onLoadImageCompletedListeners.get(url);
                         if (listeners != null) {
                             for (OnLoadImageCompletedListener onLoadImageCompletedListener : listeners) {
-                                onLoadImageCompletedListener.onLoadImageCompleted(imageData, url);
+                                onLoadImageCompletedListener.onLoadImageCompleted(imageData1, url);
                             }
                             onLoadImageCompletedListeners.remove(url);
                         }
-                    } else {
-                        urls.remove(url);
-                    }
+                    });
+                } else {
+                    urls.remove(url);
                 }
-            }.execute(url);
+
+            }).start();
         }
     }
 
@@ -164,24 +157,13 @@ public class ImageDownloader {
             }
             loadImageAlreadyCalled = true;
 
-            new SimpleAsyncTask<String, ImageData>() {
-
-                @Override
-                protected ImageData doInBackground(String s) {
-                    Bitmap image = downloadImage(s);
-                    if (image != null) {
-                        return new ImageData(image, s);
-                    }
-                    return null;
+            new Thread(() -> {
+                Bitmap image = downloadImage(url);
+                if (image != null) {
+                    ImageData imageData = new ImageData(image, url);
+                    handler.post(() -> onCompletedListener.onLoadImageCompleted(imageData, url));
                 }
-
-                @Override
-                protected void onPostExecute(ImageData imageData) {
-                    if (imageData != null) {
-                        onCompletedListener.onLoadImageCompleted(imageData, url);
-                    }
-                }
-            }.execute(url);
+            }).start();
         }
     }
 

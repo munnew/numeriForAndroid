@@ -9,7 +9,6 @@ import android.widget.TextView;
 import com.serori.numeri.R;
 import com.serori.numeri.fragment.listview.item.OnUpdateRelationshipListener;
 import com.serori.numeri.fragment.listview.item.UserListItem;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -53,7 +52,7 @@ public class UserListView extends AttachedBottomCallBackListView implements OnUp
 
     public void updateFriendship(UserListItem userListItem) {
         Twitter twitter = userListItem.getNumeriUser().getTwitter();
-        SimpleAsyncTask.execute(() -> {
+        new Thread(() -> {
             try {
                 if (userListItem.isFollow()) {
                     twitter.destroyFriendship(userListItem.getUserId());
@@ -63,7 +62,7 @@ public class UserListView extends AttachedBottomCallBackListView implements OnUp
             } catch (TwitterException e) {
                 e.printStackTrace();
             }
-        });
+        }).start();
     }
 
     @Override

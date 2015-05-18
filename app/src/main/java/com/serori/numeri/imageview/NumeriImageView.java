@@ -4,15 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.imageview.cache.ImageDownloader;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.io.File;
@@ -113,14 +110,14 @@ public class NumeriImageView extends ImageView {
             setOnLongClickListener(v -> {
                 AlertDialog alertDialog = new AlertDialog.Builder(getContext()).setMessage("画像を保存しますか？")
                         .setPositiveButton("はい", (dialog, which) -> {
-                            SimpleAsyncTask.execute(() -> {
+                            new Thread(() -> {
                                 boolean success = saveImage();
                                 if (success) {
                                     ToastSender.sendToast(imageName + "を保存しました");
                                 } else {
                                     ToastSender.sendToast("保存に失敗しました");
                                 }
-                            });
+                            }).start();
                         })
                         .setNegativeButton("いいえ", (dialog, which) -> {
                         })

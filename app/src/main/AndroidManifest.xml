@@ -138,6 +138,7 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".util.twitter.TweetService" />
     </application>
 
 </manifest>

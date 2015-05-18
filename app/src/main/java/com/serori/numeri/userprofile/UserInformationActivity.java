@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -24,14 +25,12 @@ import com.serori.numeri.fragment.UserInfoPagerAdapter;
 import com.serori.numeri.fragment.UserPublicTimeLineFragment;
 import com.serori.numeri.imageview.NumeriImageView;
 import com.serori.numeri.user.NumeriUser;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import twitter4j.Relationship;
-import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
 
@@ -44,6 +43,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
     private User user = null;
     private boolean isBlocking = false;
     private boolean isMuteing = false;
+    private Handler handler = new Handler();
 
     private Button followButton;
     private TextView relationIndicator;
@@ -119,25 +119,10 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
         for (Button button : buttonList) {
             button.setTextColor(Color.parseColor(textColor));
         }
-
-        new SimpleAsyncTask<Twitter, User>() {
-
-            @Override
-            protected User doInBackground(Twitter twitter) {
-                User user = null;
-                try {
-                    user = twitter.showUser(userId);
-                } catch (TwitterException e) {
-                    e.printStackTrace();
-                    TwitterExceptionDisplay.show(e);
-                }
-                return user;
-            }
-
-            @Override
-            protected void onPostExecute(User _user) {
-                if (_user != null) {
-                    user = _user;
+        new Thread(() -> {
+            try {
+                User user = numeriUser.getTwitter().showUser(userId);
+                handler.post(() -> {
                     iconImage.startLoadImage(true, NumeriImageView.ProgressType.LOAD_ICON, user.getBiggerProfileImageURL());
                     screenName.setText(user.getScreenName());
                     userName.setText(user.getName());
@@ -153,9 +138,13 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                     } else {
                         relationIndicator.setText("自分");
                     }
-                }
+                });
+
+            } catch (TwitterException e) {
+                e.printStackTrace();
+                TwitterExceptionDisplay.show(e);
             }
-        }.execute(numeriUser.getTwitter());
+        }).start();
     }
 
     private void initFragments() {
@@ -224,7 +213,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
     }
 
     private void updateFriendship(User user, Relationship relationship) {
-        SimpleAsyncTask.execute(() -> {
+        new Thread(() -> {
             try {
                 if (!relationship.isSourceBlockingTarget()) {
                     if (relationship.isTargetFollowedBySource()) {
@@ -239,34 +228,26 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
             }
 
             setRelationShip(user);
-        });
+        }).start();
 
     }
 
     private void setRelationShip(User user) {
-        new SimpleAsyncTask<Long, Relationship>() {
+        new Thread(() -> {
 
-            @Override
-            protected Relationship doInBackground(Long id) {
-                Relationship relationship = null;
-                try {
-                    relationship = numeriUser.getTwitter().showFriendship(numeriUser.getAccessToken().getUserId(), id);
-                } catch (TwitterException e) {
-                    e.printStackTrace();
-                    TwitterExceptionDisplay.show(e);
-                }
-                return relationship;
+            try {
+                Relationship relationship = numeriUser.getTwitter().showFriendship(numeriUser.getAccessToken().getUserId(), user.getId());
+                handler.post(() -> {
+                    updateRelationshipIndicator(relationship);
+                    isBlocking = relationship.isSourceBlockingTarget();
+                    isMuteing = relationship.isSourceMutingTarget();
+                    followButton.setOnClickListener(v -> updateFriendship(user, relationship));
+                });
+            } catch (TwitterException e) {
+                e.printStackTrace();
+                TwitterExceptionDisplay.show(e);
             }
-
-            @Override
-            protected void onPostExecute(Relationship relationship) {
-                updateRelationshipIndicator(relationship);
-                isBlocking = relationship.isSourceBlockingTarget();
-                isMuteing = relationship.isSourceMutingTarget();
-
-                followButton.setOnClickListener(v -> updateFriendship(user, relationship));
-            }
-        }.execute(user.getId());
+        }).start();
     }
 
     @Override
@@ -309,7 +290,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
             String message = !isBlocking ? "このユーザーをブッロクしますか？" : "このユーザーをブロック解除しますか？";
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setMessage(message).setPositiveButton("はい", (dialog, which) -> {
-                        SimpleAsyncTask.execute(() -> {
+                        new Thread(() -> {
                             try {
                                 if (!isBlocking) {
                                     numeriUser.getTwitter().createBlock(user.getId());
@@ -320,7 +301,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                             } catch (TwitterException e) {
                                 TwitterExceptionDisplay.show(e);
                             }
-                        });
+                        }).start();
 
                     }).setNegativeButton("いいえ", null).create();
             setCurrentShowDialog(alertDialog);
@@ -332,7 +313,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
             String message = !isMuteing ? "このユーザーをミュートしますか？" : "このユーザーをミュート解除しますか？";
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setMessage(message).setPositiveButton("はい", (dialog, which) -> {
-                        SimpleAsyncTask.execute(() -> {
+                        new Thread(() -> {
                             try {
                                 if (!isMuteing) {
                                     numeriUser.getTwitter().createMute(user.getId());
@@ -343,7 +324,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                             } catch (TwitterException e) {
                                 TwitterExceptionDisplay.show(e);
                             }
-                        });
+                        }).start();
                     }).setNegativeButton("いいえ", null).create();
             setCurrentShowDialog(alertDialog);
         }
@@ -354,14 +335,14 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
             String message = "このユーザーをスパム報告しますか？";
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setMessage(message).setPositiveButton("はい", (dialog, which) -> {
-                        SimpleAsyncTask.execute(() -> {
+                        new Thread(() -> {
                             try {
                                 numeriUser.getTwitter().reportSpam(user.getId());
                                 setRelationShip(user);
                             } catch (TwitterException e) {
                                 TwitterExceptionDisplay.show(e);
                             }
-                        });
+                        }).start();
                     }).setNegativeButton("いいえ", null).create();
             setCurrentShowDialog(alertDialog);
         }

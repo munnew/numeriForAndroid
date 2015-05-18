@@ -3,14 +3,17 @@ package com.serori.numeri.twitter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,6 +34,7 @@ import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.util.twitter.TweetBuilder;
+import com.serori.numeri.util.twitter.TweetService;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +61,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     private List<File> appendedImages = new ArrayList<>();
     private LinearLayout appendedImageViews;
     private Map<String, OnStatusListener> onStatusListeners = new LinkedHashMap<>();
+    private String[] column = {MediaStore.Images.Media.DATA};
 
     public static void replyTweet(Context activityContext, NumeriUser numeriUser, SimpleTweetStatus destinationTweetStatus) {
         if (!(activityContext instanceof NumeriActivity)) return;
@@ -178,7 +183,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             tweetBuilder.addImages(appendedImages);
         }
 
-        tweetBuilder.tweet();
+        TweetService.sendTweet(this, tweetBuilder);
         tweetEditText.setText("");
         inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
         finish();
@@ -199,7 +204,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.setType("image/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(intent, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                startActivityForResult(intent, KITKAT_GALLERY);
             }
         } else {
             ToastSender.sendToast("4つ以上は添付できません");
@@ -207,7 +212,6 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     }
 
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK || data == null) return;
@@ -215,17 +219,24 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
         Bitmap bitmap = null;
         if (requestCode == GALLERY) {
             uri = data.getData();
-            String[] datas ={ MediaStore.Images.Media.DATA};
-            Cursor c = getContentResolver().query(uri,datas,null,null,null);
-        } else if (requestCode == KITKAT_GALLERY) {
-            uri = data.getData();
-            final int frags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            getContentResolver().takePersistableUriPermission(uri, frags);
+
+            Cursor cursor = null;
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-            } catch (IOException e) {
-                bitmap = null;
+                cursor = getContentResolver().query(uri, column, null, null, null);
+                int index = cursor.getColumnIndexOrThrow(column[0]);
+                String path = cursor.getColumnName(index);
+                File file = new File(path);
+                if (cursor.moveToFirst() || file.exists()) {
+                    bitmap = BitmapFactory.decodeFile(cursor.getColumnName(index));
+                    appendedImages.add(file);
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
+        } else if (requestCode == KITKAT_GALLERY) {
+            bitmap = getKitKatImage(data);
         }
         if (bitmap != null) {
             try {
@@ -256,6 +267,36 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             ToastSender.sendToast("画像を取得できませんでした。");
             Log.v("TweetActivity", "Check path:" + uri);
         }
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private Bitmap getKitKatImage(Intent data) {
+        Uri uri = data.getData();
+        Bitmap bitmap = null;
+        Cursor cursor = null;
+        final int frags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        getContentResolver().takePersistableUriPermission(uri, frags);
+        try {
+            String[] splitIds = DocumentsContract.getDocumentId(uri).split(":");
+            String imageId = splitIds[splitIds.length - 1];
+            cursor = getContentResolver()
+                    .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            column, "_id=?", new String[]{imageId}, null);
+            if (cursor.moveToFirst()) {
+                appendedImages.add(new File(cursor.getString(0)));
+                ToastSender.sendToast(cursor.getString(0));
+            } else {
+                throw new NullPointerException();
+            }
+            bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+        } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return bitmap;
     }
 
     /**
@@ -295,10 +336,11 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             numeriUsersName.add(numeriUser.getScreenName());
             numeriUsers.add(numeriUser);
         }
-        new AlertDialog.Builder(this).setItems(numeriUsersName.toArray(new CharSequence[numeriUsersName.size()]), (dialog, which) -> {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).setItems(numeriUsersName.toArray(new CharSequence[numeriUsersName.size()]), (dialog, which) -> {
             currentNumeriUser = numeriUsers.get(which);
             currentUserTextView.setText(numeriUsersName.get(which));
-        }).create().show();
+        }).create();
+        setCurrentShowDialog(alertDialog);
     }
 
 

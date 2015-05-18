@@ -1,18 +1,15 @@
 package com.serori.numeri.fragment;
 
 
-import android.util.Log;
+import android.os.Handler;
 
-import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.twitter.SimpleTweetStatus;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 
 import twitter4j.Paging;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.User;
 
 /**
  */
@@ -22,64 +19,47 @@ public class UserPublicTimeLineFragment extends NumeriFragment {
     @Override
     protected void initializeLoad() {
         if (userId > 0) {
-            Log.v(toString(), "init");
-            new SimpleAsyncTask<Twitter, ResponseList<Status>>() {
-
-                @Override
-                protected ResponseList<twitter4j.Status> doInBackground(Twitter twitter) {
-                    try {
-                        Log.v(toString(), "startAsyncTask");
-                        return twitter.getUserTimeline(userId);
-                    } catch (TwitterException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(ResponseList<twitter4j.Status> statuses) {
-                    if (statuses != null) {
-                        Log.v(toString(), "onPost");
-                        for (twitter4j.Status status : statuses) {
-                            getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
-                        }
-                    }
-                }
-            }.execute(getNumeriUser().getTwitter());
-
+            Paging paging = new Paging();
+            paging.setCount(30);
+            getTweets(paging, false);
         }
     }
 
     @Override
     protected void onAttachedBottom() {
-        getTimelineListView().onAttachedBottomCallbackEnabled(false);
-        new SimpleAsyncTask<Twitter, ResponseList<Status>>() {
+        Paging paging = new Paging();
+        paging.setCount(31);
+        paging.setMaxId(getAdapter().getItem(getAdapter().getCount() - 1).getStatusId());
+        getTweets(paging, true);
+    }
 
-            @Override
-            protected ResponseList<twitter4j.Status> doInBackground(Twitter twitter) {
-                try {
-                    Paging paging = new Paging();
-                    paging.setCount(21);
-                    paging.setMaxId(getAdapter().getItem(getAdapter().getCount() - 1).getStatusId());
-                    return twitter.getUserTimeline(userId, paging);
-                } catch (TwitterException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(ResponseList<twitter4j.Status> statuses) {
-                if (statuses != null) {
-                    if (!statuses.isEmpty())
-                        statuses.remove(0);
-                    for (twitter4j.Status status : statuses) {
-                        getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
+    private void getTweets(Paging paging, boolean isBelowUnder) {
+        Handler handler = new Handler();
+        new Thread(() -> {
+            getTimelineListView().onAttachedBottomCallbackEnabled(false);
+            ResponseList<Status> favoriteStatuses = getResponseList(paging);
+            handler.post(() -> {
+                if (favoriteStatuses != null) {
+                    if (!favoriteStatuses.isEmpty() && isBelowUnder)
+                        favoriteStatuses.remove(0);
+                    for (Status favoriteStatus : favoriteStatuses) {
+                        getAdapter().add(SimpleTweetStatus.build(favoriteStatus, getNumeriUser()));
                     }
                 }
                 getTimelineListView().onAttachedBottomCallbackEnabled(true);
-            }
-        }.execute(getNumeriUser().getTwitter());
+            });
+        }).start();
+    }
+
+    private ResponseList<Status> getResponseList(Paging paging) {
+        Twitter twitter = getNumeriUser().getTwitter();
+        ResponseList<Status> responseList = null;
+        try {
+            responseList = twitter.getUserTimeline(userId, paging);
+        } catch (TwitterException e) {
+            e.printStackTrace();
+        }
+        return responseList;
     }
 
     public void setUserId(long userId) {

@@ -1,7 +1,8 @@
 package com.serori.numeri.fragment;
 
+import android.os.Handler;
+
 import com.serori.numeri.fragment.listview.item.UserListItem;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import java.util.List;
 import twitter4j.Friendship;
 import twitter4j.PagableResponseList;
 import twitter4j.ResponseList;
-import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
 
@@ -30,20 +30,10 @@ public class FollowUserListFragment extends UserListFragment {
     private void getFollows(long cursor) {
         getUserListView().onAttachedBottomCallbackEnabled(false);
         if (cursor != 0) {
-            new SimpleAsyncTask<Long, PagableResponseList<User>>() {
-                @Override
-                protected PagableResponseList<User> doInBackground(Long cursor) {
-                    PagableResponseList<User> followers = null;
-                    try {
-                        followers = getNumeriUser().getTwitter().getFriendsList(getUserId(), cursor, 50);
-                    } catch (TwitterException e) {
-                        TwitterExceptionDisplay.show(e);
-                    }
-                    return followers;
-                }
-
-                @Override
-                protected void onPostExecute(PagableResponseList<User> users) {
+            Handler handler = new Handler();
+            new Thread(() -> {
+                PagableResponseList<User> users = getPagableUserList(cursor);
+                handler.post(() -> {
                     if (users != null && !users.isEmpty()) {
                         List<UserListItem> userListItems = new ArrayList<>();
                         for (User user : users) {
@@ -55,38 +45,48 @@ public class FollowUserListFragment extends UserListFragment {
                         getRelationships(userListItems);
                     }
                     getUserListView().onAttachedBottomCallbackEnabled(true);
-
-                }
-            }.execute(cursor);
+                });
+            }).start();
         }
     }
 
     private void getRelationships(List<UserListItem> userListItems) {
+        Handler handler = new Handler();
+        new Thread(() -> {
+            ResponseList<Friendship> friendships = getFriendships(userListItems);
+            handler.post(() -> {
+                if (friendships != null) {
+                    for (int i = 0; i < friendships.size(); i++) {
+                        if (!userListItems.get(i).isShowedRelation())
+                            userListItems.get(i).setRelationship(friendships.get(i));
+                    }
+                }
+            });
+        }).start();
+    }
+
+    private PagableResponseList<User> getPagableUserList(long cursor) {
+        PagableResponseList<User> followers = null;
+        try {
+            followers = getNumeriUser().getTwitter().getFriendsList(getUserId(), cursor, 100);
+        } catch (TwitterException e) {
+            TwitterExceptionDisplay.show(e);
+        }
+        return followers;
+    }
+
+    private ResponseList<Friendship> getFriendships(List<UserListItem> userListItems) {
         long userIds[] = new long[userListItems.size()];
         for (int i = 0; i < userListItems.size(); i++) {
             userIds[i] = userListItems.get(i).getUserId();
         }
-        new SimpleAsyncTask<Twitter, ResponseList<Friendship>>() {
-
-            @Override
-            protected ResponseList<Friendship> doInBackground(Twitter twitter) {
-                ResponseList<Friendship> friendships = null;
-                try {
-                    friendships = twitter.lookupFriendships(userIds);
-                } catch (TwitterException e) {
-                    TwitterExceptionDisplay.show(e);
-                }
-                return friendships;
-            }
-
-            @Override
-            protected void onPostExecute(ResponseList<Friendship> friendships) {
-                if (friendships != null) {
-                    for (int i = 0; i < friendships.size(); i++) {
-                        userListItems.get(i).setRelationship(friendships.get(i));
-                    }
-                }
-            }
-        }.execute(getNumeriUser().getTwitter());
+        ResponseList<Friendship> friendships = null;
+        try {
+            friendships = getNumeriUser().getTwitter().lookupFriendships(userIds);
+        } catch (TwitterException e) {
+            TwitterExceptionDisplay.show(e);
+        }
+        return friendships;
     }
+
 }

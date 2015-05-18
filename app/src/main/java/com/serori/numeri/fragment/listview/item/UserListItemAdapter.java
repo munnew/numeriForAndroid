@@ -13,7 +13,6 @@ import com.serori.numeri.R;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.imageview.NumeriImageView;
 import com.serori.numeri.userprofile.UserInformationActivity;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 
 import java.util.List;
 
@@ -87,7 +86,7 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
 
     public void updateFriendship(UserListItem userListItem) {
         Twitter twitter = userListItem.getNumeriUser().getTwitter();
-        SimpleAsyncTask.execute(() -> {
+        new Thread(() -> {
             try {
                 if (userListItem.isFollow()) {
                     twitter.destroyFriendship(userListItem.getUserId());
@@ -97,7 +96,7 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
             } catch (TwitterException e) {
                 e.printStackTrace();
             }
-        });
+        }).start();
 
 
     }

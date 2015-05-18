@@ -1,9 +1,9 @@
 package com.serori.numeri.fragment;
 
-import android.util.Log;
+
+import android.os.Handler;
 
 import com.serori.numeri.twitter.SimpleTweetStatus;
-import com.serori.numeri.util.async.SimpleAsyncTask;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
@@ -35,11 +35,9 @@ public class ListFragment extends NumeriFragment {
 
     @Override
     protected void initializeLoad() {
-        SimpleAsyncTask.backgroundExecute(() -> {
-            Paging pages = new Paging(1);
-            pages.count(31);
+        Handler handler = new Handler();
+        new Thread(() -> {
             try {
-                ResponseList<Status> statuses = getNumeriUser().getTwitter().getUserListStatuses(listId, pages);
                 long nextCursor = -1;
                 while (nextCursor != 0) {
                     PagableResponseList<User> users = getNumeriUser().getTwitter().getUserListMembers(listId, nextCursor);
@@ -48,20 +46,20 @@ public class ListFragment extends NumeriFragment {
                     }
                     nextCursor = users.getNextCursor();
                 }
-                Log.v(toString(), "listUsers" + listUserIds.size());
+                Paging paging = new Paging();
+                paging.setCount(30);
+                ResponseList<Status> statuses = getTweetsList(paging, false);
 
-                getActivity().runOnUiThread(() -> {
+                handler.post(() -> {
                     for (Status status : statuses) {
                         getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
                     }
+                    startPseudoStream();
                 });
-                startPseudoStream();
-
             } catch (TwitterException e) {
-                e.printStackTrace();
                 TwitterExceptionDisplay.show(e);
             }
-        });
+        }).start();
     }
 
     /**
@@ -80,26 +78,33 @@ public class ListFragment extends NumeriFragment {
 
     @Override
     protected void onAttachedBottom() {
-        getTimelineListView().onAttachedBottomCallbackEnabled(false);
-        SimpleAsyncTask.backgroundExecute(() -> {
+        Handler handler = new Handler();
+        new Thread(() -> {
+            getTimelineListView().onAttachedBottomCallbackEnabled(false);
             Paging paging = new Paging();
             paging.setMaxId(getAdapter().getItem(getAdapter().getCount() - 1).getStatusId());
             paging.count(31);
-            try {
-                ResponseList<Status> statuses = getNumeriUser().getTwitter().getUserListStatuses(listId, paging);
-                if (!statuses.isEmpty())
-                    statuses.remove(0);
-                getActivity().runOnUiThread(() -> {
-                    for (Status status : statuses) {
-                        getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
-                    }
-                    getTimelineListView().onAttachedBottomCallbackEnabled(true);
-                });
-            } catch (TwitterException e) {
-                TwitterExceptionDisplay.show(e);
-                e.printStackTrace();
+            ResponseList<Status> statuses = getTweetsList(paging, true);
+            handler.post(() -> {
+                for (Status status : statuses) {
+                    getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
+                }
                 getTimelineListView().onAttachedBottomCallbackEnabled(true);
+            });
+        }).start();
+    }
+
+    private ResponseList<Status> getTweetsList(Paging paging, boolean isBelowUnder) {
+        ResponseList<Status> statuses = null;
+        try {
+            statuses = getNumeriUser().getTwitter().getUserListStatuses(listId, paging);
+            if (!statuses.isEmpty() && isBelowUnder) {
+                statuses.remove(0);
             }
-        });
+        } catch (TwitterException e) {
+            e.printStackTrace();
+            TwitterExceptionDisplay.show(e);
+        }
+        return statuses;
     }
 }

@@ -2,6 +2,7 @@ package com.serori.numeri.fragment;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ public abstract class UserListFragment extends Fragment implements AttachedBotto
     private UserListItemAdapter userListItemAdapter;
     private UserListView userListView;
     private CursorHolder cursorHolder = new CursorHolder();
+    private Handler handler = new Handler();
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -93,6 +95,7 @@ public abstract class UserListFragment extends Fragment implements AttachedBotto
     protected CursorHolder getCursorHolder() {
         return cursorHolder;
     }
+
 
     protected class CursorHolder {
         private long nextCursor = -1;
