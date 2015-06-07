@@ -3,6 +3,7 @@ package com.serori.numeri.fragment.listview.item;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -57,10 +58,6 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
         userNameTextView.setText(userListItem.getUserName());
         bioTextView.setText(userListItem.getBio());
 
-        convertView.setOnClickListener(v -> {
-            Log.v(toString(), "onClick");
-            UserInformationActivity.show(getContext(), userListItem.getUserId(), userListItem.getNumeriUser());
-        });
 
         if (userListItem.isMe()) {
             followButton.setText("");
@@ -68,7 +65,7 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
             relationIndicator.setText("自分");
             return convertView;
         }
-
+        convertView.setOnTouchListener((v1, event) -> onTouchEvent(v1, event, userListItem));
         if (userListItem.isShowedRelation()) {
             Log.v(toString(), "setRelation");
             if (userListItem.isFollow()) {
@@ -82,6 +79,21 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
             followButton.setOnClickListener(v -> updateFriendship(userListItem));
         }
         return convertView;
+    }
+
+
+    private boolean onTouchEvent(View view, MotionEvent event, UserListItem userListItem) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                view.findViewById(R.id.overlay).setBackgroundColor(getContext().getResources().getColor(R.color.touched));
+                break;
+            case MotionEvent.ACTION_UP:
+                view.findViewById(R.id.overlay).setBackgroundColor(getContext().getResources().getColor(R.color.transparency));
+                UserInformationActivity.show(getContext(), userListItem.getUserId(), userListItem.getNumeriUser());
+            default:
+                view.findViewById(R.id.overlay).setBackgroundColor(getContext().getResources().getColor(R.color.transparency));
+        }
+        return true;
     }
 
     public void updateFriendship(UserListItem userListItem) {
@@ -98,7 +110,5 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
             }
         }).start();
 
-
     }
 }
-

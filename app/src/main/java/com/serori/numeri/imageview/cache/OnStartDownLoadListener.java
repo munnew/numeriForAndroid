@@ -3,7 +3,7 @@ package com.serori.numeri.imageview.cache;
 /**
  * OnDownLoadStartListener
  */
-public interface OnStartDownLoadListener {
+public interface OnStartDownloadListener {
     /**
      * 画像のダウンロードがスタートした際のイベントハンドラ
      *

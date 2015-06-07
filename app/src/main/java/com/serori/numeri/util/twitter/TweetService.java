@@ -2,17 +2,20 @@ package com.serori.numeri.util.twitter;
 
 
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.main.Global;
 
 /**
+ * TweetService
  */
 public class TweetService extends IntentService {
     private static final String NAME = "Tweet";
-    private static TweetBuilder tweetBuilder;
+    private static Tweet tweet;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -27,9 +30,14 @@ public class TweetService extends IntentService {
         super(NAME);
     }
 
-    public static void sendTweet(Context context, TweetBuilder tweetBuilder) {
+    public static void sendTweet(Context context, Tweet tweet) {
         if (!(context instanceof NumeriActivity)) return;
-        TweetService.tweetBuilder = tweetBuilder;
+        NotificationManager notificationManager = (NotificationManager) Global.getInstance()
+                .getMainActivityContext()
+                .getSystemService(NOTIFICATION_SERVICE);
+
+        tweet.setNotificationManager(notificationManager);
+        TweetService.tweet = tweet;
         Intent intent = new Intent(context, TweetService.class);
         context.startService(intent);
     }
@@ -38,6 +46,6 @@ public class TweetService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.v(toString(), "onHandleIntent");
-        tweetBuilder.tweet();
+        tweet.tweet();
     }
 }

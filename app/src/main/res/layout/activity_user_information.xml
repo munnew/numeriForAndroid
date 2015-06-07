@@ -57,7 +57,7 @@
                             android:layout_gravity="center_horizontal"
                             android:layout_marginLeft="5dp"
                             android:contentDescription="@string/description_protected_image"
-                            android:src="@drawable/key"
+                            android:src="@drawable/ic_key"
                             android:visibility="gone" />
                     </LinearLayout>
 

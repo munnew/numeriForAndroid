@@ -2,10 +2,12 @@ package com.serori.numeri.fragment.listview;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ListAdapter;
 
 import com.serori.numeri.R;
@@ -33,10 +35,11 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
     private static final int LEFT = 0;
     private static final int CENTER = 1;
     private static final int RIGHT = 2;
+
     private TwitterActions twitterAction;
 
 
-    private List<SimpleTweetStatus> storedItems = new ArrayList<>();
+    private volatile List<SimpleTweetStatus> storedItems = new ArrayList<>();
 
 
     public TimeLineListView(Context context, AttributeSet attrs) {
@@ -61,6 +64,16 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
     public boolean onTouchEvent(@NonNull MotionEvent ev) {
         touchedCoordinatesX = ev.getX();
         return super.onTouchEvent(ev);
+    }
+
+    @Override
+    protected void onTouchItem(View touchedItem) {
+        touchedItem.findViewById(R.id.overlay).setBackgroundColor(getResources().getColor(R.color.touched));
+    }
+
+    @Override
+    protected void onDeTouch(View visibleItem) {
+        visibleItem.findViewById(R.id.overlay).setBackgroundColor(getResources().getColor(R.color.transparency));
     }
 
 
@@ -198,4 +211,5 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
             storedItems.add(item);
         }
     }
+
 }

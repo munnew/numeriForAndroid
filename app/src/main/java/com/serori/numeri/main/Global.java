@@ -3,7 +3,6 @@ package com.serori.numeri.main;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Point;
 import android.view.WindowManager;
 
@@ -55,7 +54,7 @@ public class Global {
      */
     public void destroyMainActivity() {
         if (mainActivityContext != null) {
-            if (!isDestroyMainActivity()) {
+            if (!isActiveMainActivity()) {
                 ((Activity) mainActivityContext).finish();
             }
         }
@@ -88,7 +87,7 @@ public class Global {
      *
      * @return true : 生きている false : 死んでいる
      */
-    public boolean isDestroyMainActivity() {
+    public boolean isActiveMainActivity() {
         return ((Activity) mainActivityContext).isFinishing();
     }
 

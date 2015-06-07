@@ -9,6 +9,7 @@ import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;
 import com.serori.numeri.stream.StreamSwitcher;
 import com.serori.numeri.util.twitter.TweetBuilder;
+import com.serori.numeri.util.twitter.TwitterAPIConfirmer;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -26,6 +27,7 @@ public class NumeriUser {
     private StreamEvent streamEvent;
     private String screenName = null;
     private NumeriUserStorager.NumeriUserTable table;
+    private TwitterAPIConfirmer twitterAPIConfirmer;
 
     /**
      * このコンストラクタは非同期タスクで実行する必要があります
@@ -34,6 +36,7 @@ public class NumeriUser {
      */
     public NumeriUser(NumeriUserStorager.NumeriUserTable table) {
         this.table = table;
+        twitterAPIConfirmer = new TwitterAPIConfirmer(this);
         auth();
     }
 
@@ -94,7 +97,13 @@ public class NumeriUser {
         return new TweetBuilder(this);
     }
 
+    public TwitterAPIConfirmer getTwitterAPIConfirmer() {
+        return twitterAPIConfirmer;
+    }
+
     public String getScreenName() {
         return screenName;
     }
+
+
 }

@@ -50,7 +50,7 @@
             android:clickable="true"
             android:contentDescription="@string/description_tweet_button"
             android:scaleType="centerCrop"
-            android:src="@drawable/gotweet" />
+            android:src="@drawable/ic_gotweet" />
     </LinearLayout>
 
 

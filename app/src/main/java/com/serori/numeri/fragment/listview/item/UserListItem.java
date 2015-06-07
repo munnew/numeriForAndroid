@@ -52,8 +52,6 @@ public class UserListItem {
                     for (OnUpdateRelationshipListener onUpdateRelationshipListener : onUpdateRelationshipListeners) {
                         onUpdateRelationshipListener.onUpdateRelationship(target.getId(), relation.isFollow(), relation.getRelationship());
                     }
-
-
                 }
             } else if (target.getScreenName().equals(numeriUser.getScreenName())) {
                 Relation relation = relationMap.get(createRelationId(numeriUser, source.getId()));
@@ -112,11 +110,10 @@ public class UserListItem {
             } else {
                 relation = "無関心";
             }
-            if (!onUpdateRelationshipListeners.isEmpty()) {
-                relationMap.put(createRelationId(numeriUser, userId), new Relation(relation, isFollowing));
-                for (OnUpdateRelationshipListener onUpdateRelationshipListener : onUpdateRelationshipListeners) {
-                    onUpdateRelationshipListener.onUpdateRelationship(userId, isFollowing, relation);
-                }
+            relationMap.put(createRelationId(numeriUser, userId), new Relation(relation, isFollowing));
+
+            for (OnUpdateRelationshipListener onUpdateRelationshipListener : onUpdateRelationshipListeners) {
+                onUpdateRelationshipListener.onUpdateRelationship(userId, isFollowing, relation);
             }
             isShowedRelation = true;
         }

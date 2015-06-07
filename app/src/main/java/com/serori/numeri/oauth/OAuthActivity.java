@@ -137,7 +137,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
                     ToastSender.sendToast(token.getScreenName() + "認証");
                     NumeriUserStorager.NumeriUserTable userTable = new NumeriUserStorager.NumeriUserTable(token.getToken(), token.getTokenSecret(), token.getScreenName());
                     NumeriUserStorager.getInstance().saveNumeriUser(userTable);
-                    if (!Global.getInstance().isDestroyMainActivity()) {
+                    if (!Global.getInstance().isActiveMainActivity()) {
                         Global.getInstance().destroyMainActivity();
                     }
                     startActivity(MainActivity.class, true);
@@ -172,7 +172,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (Global.getInstance().isDestroyMainActivity()) {
+            if (Global.getInstance().isActiveMainActivity()) {
                 startActivity(MainActivity.class, true);
             } else {
                 finish();

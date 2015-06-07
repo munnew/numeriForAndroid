@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.util.Log;
 
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -17,18 +16,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 画像をキャッシュするクラス
+ * 画像をDLしたりキャッシュしたりするクラス
  * 生成されたインスタンスを使いまわすことは出来ません
  */
 public class ImageDownloader {
     private static final int maxCacheSize = 8 * 1024 * 1024;
     private static int currentCacheSize = 0;
-    private OnStartDownLoadListener onStartDownLoadListener = null;
+    private OnStartDownloadListener onStartDownloadListener = null;
     private static volatile Map<String, ImageData> imageCache = new LinkedHashMap<>();
-    private static final List<String> urls = new ArrayList<>();
-    private static volatile Map<String, List<OnLoadImageCompletedListener>> onLoadImageCompletedListeners = new LinkedHashMap<>();
+    private static volatile List<String> urls = new ArrayList<>();
+    private static volatile Map<String, List<OnLoadImageCompletedListener>> onLoadImageCompletedListenerMap = new LinkedHashMap<>();
     private boolean loadImageAlreadyCalled = false;
-    private Handler handler = new Handler();
+
 
     private void entryRemoved() {
         int index = 0;
@@ -58,11 +57,10 @@ public class ImageDownloader {
      * @param listener OnDownLoadStartListener
      * @return 自身のインスタンス
      */
-    public ImageDownloader setOnStartDownLoadListener(OnStartDownLoadListener listener) {
-        if (loadImageAlreadyCalled) {
+    public ImageDownloader setOnStartDownloadListener(OnStartDownloadListener listener) {
+        if (loadImageAlreadyCalled)
             throw new IllegalStateException("loadImageが呼び出された後に呼び出されました。");
-        }
-        onStartDownLoadListener = listener;
+        onStartDownloadListener = listener;
         return this;
     }
 
@@ -82,25 +80,25 @@ public class ImageDownloader {
             throw new IllegalStateException("loadImageが二度呼ばれました");
         }
         loadImageAlreadyCalled = true;
-        ImageData imageData;
-        imageData = imageCache.get(url);
+        ImageData imageData = imageCache.get(url);
+
         if (imageData != null && !imageData.getImage().isRecycled()) {
             onCompletedListener.onLoadImageCompleted(imageData, url);
             return;
         }
 
         boolean startedDownload = false;
+        if (onStartDownloadListener != null)
+            onStartDownloadListener.onDownLoadStart(url);
         for (String s : urls) {
             if (s.equals(url)) {
                 startedDownload = true;
                 if (imageCache.get(url) == null) {
-                    if (onStartDownLoadListener != null)
-                        onStartDownLoadListener.onDownLoadStart(url);
                     List<OnLoadImageCompletedListener> listeners = new ArrayList<>();
                     listeners.add(onCompletedListener);
-                    List<OnLoadImageCompletedListener> previousListeners = onLoadImageCompletedListeners.put(url, listeners);
+                    List<OnLoadImageCompletedListener> previousListeners = onLoadImageCompletedListenerMap.put(url, listeners);
                     if (previousListeners != null) {
-                        onLoadImageCompletedListeners.get(url).addAll(previousListeners);
+                        onLoadImageCompletedListenerMap.get(url).addAll(previousListeners);
                     }
                 }
                 break;
@@ -108,9 +106,8 @@ public class ImageDownloader {
         }
 
         if (!startedDownload) {
-            if (onStartDownLoadListener != null) onStartDownLoadListener.onDownLoadStart(url);
             urls.add(url);
-
+            Handler handler = new Handler();
             new Thread(() -> {
                 Bitmap image = downloadImage(url);
                 if (image != null) {
@@ -120,18 +117,17 @@ public class ImageDownloader {
                     entryRemoved();
                     handler.post(() -> {
                         onCompletedListener.onLoadImageCompleted(imageData1, url);
-                        List<OnLoadImageCompletedListener> listeners = onLoadImageCompletedListeners.get(url);
+                        List<OnLoadImageCompletedListener> listeners = onLoadImageCompletedListenerMap.get(url);
                         if (listeners != null) {
                             for (OnLoadImageCompletedListener onLoadImageCompletedListener : listeners) {
                                 onLoadImageCompletedListener.onLoadImageCompleted(imageData1, url);
                             }
-                            onLoadImageCompletedListeners.remove(url);
+                            onLoadImageCompletedListenerMap.remove(url);
                         }
                     });
                 } else {
                     urls.remove(url);
                 }
-
             }).start();
         }
     }
@@ -156,7 +152,7 @@ public class ImageDownloader {
                 throw new IllegalStateException("loadImageが二度呼ばれました");
             }
             loadImageAlreadyCalled = true;
-
+            Handler handler = new Handler();
             new Thread(() -> {
                 Bitmap image = downloadImage(url);
                 if (image != null) {

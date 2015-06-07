@@ -183,7 +183,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             tweetBuilder.addImages(appendedImages);
         }
 
-        TweetService.sendTweet(this, tweetBuilder);
+        TweetService.sendTweet(this, tweetBuilder.create());
         tweetEditText.setText("");
         inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
         finish();

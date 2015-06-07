@@ -3,11 +3,9 @@ package com.serori.numeri.main;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -18,7 +16,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.serori.numeri.Notification.NotificationSender;
+import com.serori.numeri.notification.NotificationSender;
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.color.ColorManagerActivity;
@@ -35,6 +33,7 @@ import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
 import com.serori.numeri.fragment.listview.item.UserListItem;
 import com.serori.numeri.util.toast.ToastSender;
+import com.serori.numeri.util.twitter.TwitterAPIConfirmer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +55,7 @@ public class MainActivity extends NumeriActivity {
         Global.getInstance().setMainActivityContext(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        sendReport();
+        ExceptionReportStorager.sendReport(this);
         infoTextView = (TextView) findViewById(R.id.infoText);
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -177,45 +176,19 @@ public class MainActivity extends NumeriActivity {
     }
 
     private void useApiFrequencyConfirmation() {
-
-        CharSequence[] names = new CharSequence[Global.getInstance().getNumeriUsers().getNumeriUsers().size()];
+        List<NumeriUser> numeriUsers = Global.getInstance().getNumeriUsers().getNumeriUsers();
+        CharSequence[] names = new CharSequence[numeriUsers.size()];
         for (int i = 0; i < names.length; i++) {
-            names[i] = Global.getInstance().getNumeriUsers().getNumeriUsers().get(i).getScreenName();
+            names[i] = numeriUsers.get(i).getScreenName();
         }
         AlertDialog alertDialog = new AlertDialog.Builder(this).setTitle("ユーザーを選択").setItems(names, (dialog, witch) -> {
-            new Thread(() -> {
-                try {
-                    Map<String, RateLimitStatus> rateLimitStatus = Global.getInstance().getNumeriUsers().getNumeriUsers().get(witch)
-                            .getTwitter().getRateLimitStatus("statuses");
-                    String apiConfirmation = "get home_timeline API: remaining: " + rateLimitStatus.get("/statuses/home_timeline").getRemaining() + "\n";
-                    apiConfirmation += "get mentions_timeline API: remaining: " + rateLimitStatus.get("/statuses/mentions_timeline").getRemaining() + "\n";
-                    ToastSender.sendToast(apiConfirmation, Toast.LENGTH_LONG);
-                } catch (TwitterException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+            numeriUsers.get(witch).getTwitterAPIConfirmer().acquireTwitterAPIRemaining(apiRemainingInfo -> {
+                String apiConfirmation = "get home_timeline API: remaining: " + apiRemainingInfo.get(TwitterAPIConfirmer.TwitterAPI.HOME_TIMELINE) + "\n";
+                apiConfirmation += "get mentions_timeline API: remaining: " + apiRemainingInfo.get(TwitterAPIConfirmer.TwitterAPI.MENTIONS_TIMELINE);
+                ToastSender.sendToast(apiConfirmation);
+            });
         }).create();
         setCurrentShowDialog(alertDialog);
-    }
-
-    private void sendReport() {
-        String exceptionReport = ExceptionReportStorager.getInstance().loadExceptionReport();
-        if (!(exceptionReport == null)) {
-            AlertDialog alertDialog = new AlertDialog.Builder(this).setMessage("前回の起動で予期しないエラーが発生しました。\nバグレポートを送信しますか？")
-                    .setPositiveButton("はい", (dialog, which) -> {
-                        String info = "ブランド名 : " + Build.BRAND;
-                        info += "\n" + "デバイス : " + Build.DEVICE;
-                        info += "\n" + "プロダクト名 : " + Build.PRODUCT;
-                        info += "\n" + "APIバージョン : " + Build.VERSION.SDK_INT + " : " + Build.VERSION.CODENAME + "\n";
-                        Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_SENDTO);
-                        intent.setData(Uri.parse("mailto:" + "numerical.developer@gmail.com"));
-                        intent.putExtra(Intent.EXTRA_SUBJECT, "【report】");
-                        intent.putExtra(Intent.EXTRA_TEXT, info + exceptionReport);
-                        startActivity(intent);
-                    }).setNegativeButton("いいえ", null).create();
-            setCurrentShowDialog(alertDialog);
-        }
     }
 
     @Override

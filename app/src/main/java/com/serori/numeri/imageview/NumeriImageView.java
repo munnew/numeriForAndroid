@@ -73,7 +73,7 @@ public class NumeriImageView extends ImageView {
             imageExtension = String.valueOf(charArray[length]) + imageExtension;
         }
 
-        imageDownloader.setOnStartDownLoadListener(key -> {
+        imageDownloader.setOnStartDownloadListener(key -> {
             if (key.equals(imageKey)) {
                 switch (type) {
                     case LOAD_ICON:
@@ -173,6 +173,7 @@ public class NumeriImageView extends ImageView {
             imageData = null;
         }
     }
+
 
     public enum ProgressType {
         LOAD_ICON,

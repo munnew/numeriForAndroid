@@ -3,12 +3,16 @@ package com.serori.numeri.fragment.listview;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.fragment.listview.item.OnUpdateRelationshipListener;
 import com.serori.numeri.fragment.listview.item.UserListItem;
+import com.serori.numeri.fragment.listview.item.UserListItemAdapter;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -24,6 +28,12 @@ public class UserListView extends AttachedBottomCallBackListView implements OnUp
         UserListItem.addOnUpdateRelationshipListener(this);
     }
 
+    @Override
+    public void setAdapter(ListAdapter adapter) {
+        if (!(adapter instanceof UserListItemAdapter))
+            throw new IllegalArgumentException("AdapterがUserListItemAdapterを継承していません");
+        super.setAdapter(adapter);
+    }
 
     @Override
     public void onUpdateRelationship(long userId, boolean isFollow, String relationship) {
@@ -64,6 +74,7 @@ public class UserListView extends AttachedBottomCallBackListView implements OnUp
             }
         }).start();
     }
+
 
     @Override
     protected void onDetachedFromWindow() {

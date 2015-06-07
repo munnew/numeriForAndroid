@@ -42,7 +42,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
     private static NumeriUser numeriUser;
     private User user = null;
     private boolean isBlocking = false;
-    private boolean isMuteing = false;
+    private boolean isMuted = false;
     private Handler handler = new Handler();
 
     private Button followButton;
@@ -121,7 +121,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
         }
         new Thread(() -> {
             try {
-                User user = numeriUser.getTwitter().showUser(userId);
+                user = numeriUser.getTwitter().showUser(userId);
                 handler.post(() -> {
                     iconImage.startLoadImage(true, NumeriImageView.ProgressType.LOAD_ICON, user.getBiggerProfileImageURL());
                     screenName.setText(user.getScreenName());
@@ -202,10 +202,15 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
             } else {
                 if (relationship.isSourceBlockingTarget()) {
                     relationIndicator.setText("ブロック中");
+                    followButton.setText("");
+                    followButton.setBackgroundColor(getResources().getColor(R.color.not_selected_color));
+                    followButton.setOnClickListener(null);
+                    return;
                 } else {
                     relationIndicator.setText("無関心");
                 }
             }
+            followButton.setOnClickListener(v -> updateFriendship(user, relationship));
             if (relationship.isSourceMutingTarget()) {
                 relationIndicator.setText(relationIndicator.getText() + "\n" + "ミュート中");
             }
@@ -240,8 +245,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                 handler.post(() -> {
                     updateRelationshipIndicator(relationship);
                     isBlocking = relationship.isSourceBlockingTarget();
-                    isMuteing = relationship.isSourceMutingTarget();
-                    followButton.setOnClickListener(v -> updateFriendship(user, relationship));
+                    isMuted = relationship.isSourceMutingTarget();
                 });
             } catch (TwitterException e) {
                 e.printStackTrace();
@@ -263,7 +267,8 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_user_information, menu);
+        if (numeriUser.getAccessToken().getUserId() != userId)
+            getMenuInflater().inflate(R.menu.menu_user_information, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -310,12 +315,12 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
 
     private void mute() {
         if (user != null) {
-            String message = !isMuteing ? "このユーザーをミュートしますか？" : "このユーザーをミュート解除しますか？";
+            String message = !isMuted ? "このユーザーをミュートしますか？" : "このユーザーをミュート解除しますか？";
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setMessage(message).setPositiveButton("はい", (dialog, which) -> {
                         new Thread(() -> {
                             try {
-                                if (!isMuteing) {
+                                if (!isMuted) {
                                     numeriUser.getTwitter().createMute(user.getId());
                                 } else {
                                     numeriUser.getTwitter().destroyMute(user.getId());

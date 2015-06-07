@@ -38,8 +38,8 @@ public class SimpleTweetStatus {
     private long inReplyToStatusId;
     private volatile static Map<String, SimpleTweetStatus> simpleTweetStatusMap = new LinkedHashMap<>();
     private static boolean observeFavoriteStarted = false;
-    private long statusAcquirerId;
     private static boolean observeDestroyTweetStarted = false;
+    private NumeriUser ownerUser;
 
     /**
      * StatusをSimpleTweetStatusとしてキャッシュします。
@@ -138,7 +138,7 @@ public class SimpleTweetStatus {
 
     private SimpleTweetStatus(Status status, NumeriUser numeriUser) {
         createdTime = new SimpleDateFormat(DATE_FORMAT).format(status.getCreatedAt());
-        statusAcquirerId = numeriUser.getAccessToken().getUserId();
+        ownerUser = numeriUser;
         statusId = status.getId();
         if (status.isRetweet()) { //RT
             isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
@@ -291,6 +291,10 @@ public class SimpleTweetStatus {
         return retweetedStatusId;
     }
 
+    public NumeriUser getOwnerUser() {
+        return ownerUser;
+    }
+
     @Override
     public boolean equals(Object o) {
         boolean isSimpleTweetStatus = o instanceof SimpleTweetStatus;
@@ -304,7 +308,7 @@ public class SimpleTweetStatus {
                     || this.statusId == ((SimpleTweetStatus) o).getRetweetedStatusId();
         }
 
-        return isSameTweet && ((SimpleTweetStatus) o).statusAcquirerId == this.statusAcquirerId;
+        return isSameTweet && ((SimpleTweetStatus) o).getOwnerUser().getAccessToken().getUserId() == this.ownerUser.getAccessToken().getUserId();
     }
 
 

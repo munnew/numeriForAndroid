@@ -76,6 +76,7 @@ public class ConfigActivity extends NumeriActivity {
             }
         });
 
+
         rightTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.RIGHT, ((Button) v).getText()));
         centerTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.CENTER, ((Button) v).getText()));
         leftTapConfButton.setOnClickListener(v -> chooseAction(ActionStorager.RespectTapPositionActions.LEFT, ((Button) v).getText()));
@@ -205,7 +206,7 @@ public class ConfigActivity extends NumeriActivity {
                 Global.getInstance().destroyMainActivity();
                 Toast.makeText(this, "テーマが変更されました。アプリケーションを再起動します。", Toast.LENGTH_SHORT).show();
             }
-            if (Global.getInstance().isDestroyMainActivity()) {
+            if (Global.getInstance().isActiveMainActivity()) {
                 startActivity(MainActivity.class, true);
             } else {
                 finish();

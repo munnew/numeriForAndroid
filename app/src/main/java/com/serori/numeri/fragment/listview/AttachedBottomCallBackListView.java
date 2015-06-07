@@ -1,7 +1,10 @@
 package com.serori.numeri.fragment.listview;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
@@ -58,6 +61,39 @@ public abstract class AttachedBottomCallBackListView extends ListView {
     public void setOnItemScrollListener(OnItemScrollListener onItemScrollListener) {
         this.onItemScrollListener = onItemScrollListener;
     }
+
+    @Override
+    public boolean onTouchEvent(@NonNull MotionEvent ev) {
+        float y = ev.getY();
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                for (int i = _visibleItemCount + 1; i >= 0; i--) {
+                    View item = getChildAt(i);
+                    if (item != null && y >= item.getY()) {
+                        onTouchItem(item);
+                        break;
+                    }
+                }
+                break;
+            default:
+                for (int i = _visibleItemCount + 1; i >= 0; i--) {
+                    View item = getChildAt(i);
+                    if (item != null)
+                        onDeTouch(item);
+                }
+                break;
+        }
+        return super.onTouchEvent(ev);
+    }
+
+    protected void onTouchItem(View touchedItem) {
+
+    }
+
+    protected void onDeTouch(View visibleItem) {
+
+    }
+
 
     /**
      * コールバックするか否かを切り替える

@@ -212,7 +212,7 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (Global.getInstance().isDestroyMainActivity()) {
+            if (Global.getInstance().isActiveMainActivity()) {
                 startActivity(MainActivity.class, true);
             } else {
                 finish();

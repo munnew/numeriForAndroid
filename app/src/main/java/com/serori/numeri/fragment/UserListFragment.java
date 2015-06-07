@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +17,15 @@ import com.serori.numeri.fragment.listview.item.UserListItem;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.fragment.listview.item.UserListItemAdapter;
 import com.serori.numeri.fragment.listview.UserListView;
+import com.serori.numeri.userprofile.UserInformationActivity;
+import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import twitter4j.Friendship;
+import twitter4j.ResponseList;
+import twitter4j.TwitterException;
 
 /**
  */
@@ -28,7 +35,7 @@ public abstract class UserListFragment extends Fragment implements AttachedBotto
     private UserListItemAdapter userListItemAdapter;
     private UserListView userListView;
     private CursorHolder cursorHolder = new CursorHolder();
-    private Handler handler = new Handler();
+    protected static final int LOAD_USER_NUM = 50;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -96,6 +103,34 @@ public abstract class UserListFragment extends Fragment implements AttachedBotto
         return cursorHolder;
     }
 
+    protected ResponseList<Friendship> getFriendships(List<UserListItem> userListItems) {
+        long userIds[] = new long[userListItems.size()];
+        for (int i = 0; i < userListItems.size(); i++) {
+            userIds[i] = userListItems.get(i).getUserId();
+        }
+        ResponseList<Friendship> friendships = null;
+        try {
+            friendships = getNumeriUser().getTwitter().lookupFriendships(userIds);
+        } catch (TwitterException e) {
+            TwitterExceptionDisplay.show(e);
+        }
+        return friendships;
+    }
+
+    protected void getRelationships(List<UserListItem> userListItems) {
+        Handler handler = new Handler();
+        new Thread(() -> {
+            ResponseList<Friendship> friendships = getFriendships(userListItems);
+            handler.post(() -> {
+                if (friendships != null) {
+                    for (int i = 0; i < friendships.size(); i++) {
+                        if (!userListItems.get(i).isShowedRelation())
+                            userListItems.get(i).setRelationship(friendships.get(i));
+                    }
+                }
+            });
+        }).start();
+    }
 
     protected class CursorHolder {
         private long nextCursor = -1;

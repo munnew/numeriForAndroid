@@ -1,4 +1,4 @@
-package com.serori.numeri.Notification;
+package com.serori.numeri.notification;
 
 import android.util.Log;
 
@@ -55,9 +55,14 @@ public class NotificationSender {
                 }
             })).addOnStatusListener(status -> {
                 for (UserMentionEntity userMentionEntity : status.getUserMentionEntities()) {
-                    if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
+                    if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId() && !status.isRetweet()) {
                         ToastSender.sendToast(status.getUser().getScreenName() + "さんからリプライを受け取りました");
                         break;
+                    }
+                }
+                if(status.isRetweet()){
+                    if(numeriUser.getAccessToken().getUserId() == status.getRetweetedStatus().getUser().getId()){
+                        ToastSender.sendToast(status.getUser().getScreenName()+"にRTされました。");
                     }
                 }
             });

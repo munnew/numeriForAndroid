@@ -1,4 +1,4 @@
-package com.serori.numeri.Notification;
+package com.serori.numeri.notification;
 
 /**
  */
