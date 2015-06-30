@@ -1,11 +1,10 @@
 package com.serori.numeri.fragment;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +12,10 @@ import android.view.ViewGroup;
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.config.ConfigurationStorager;
-import com.serori.numeri.fragment.listview.AttachedBottomListener;
-import com.serori.numeri.fragment.listview.TimeLineListView;
+import com.serori.numeri.listview.AttachedBottomListener;
+import com.serori.numeri.listview.TimeLineListView;
 import com.serori.numeri.twitter.SimpleTweetStatus;
-import com.serori.numeri.fragment.listview.item.TimeLineItemAdapter;
+import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
@@ -31,48 +30,43 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
 
     protected String name = "fragment";
     private NumeriUser numeriUser = null;
-
+    private boolean enableAttachedBottomDialog = true;
     private TimeLineListView timelineListView;
     private TimeLineItemAdapter adapter;
-    private List<SimpleTweetStatus> timeLineItems;
     protected Context context;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public final View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         if (!(getActivity() instanceof NumeriActivity))
             throw new IllegalStateException("親のアクティビティがNunmeriActivityを継承してません");
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
         if (numeriUser == null)
-            return rootView;//ランタイムエラー回避
+            return rootView;
 
         setRetainInstance(true);
         context = rootView.getContext();
         timelineListView = (TimeLineListView) rootView.findViewById(R.id.timeLineListView);
         timelineListView.setAttachedBottomListener(this);
         if (savedInstanceState == null) {
-            timeLineItems = new ArrayList<>();
+            List<SimpleTweetStatus> timeLineItems = new ArrayList<>();
             adapter = new TimeLineItemAdapter(context, 0, timeLineItems);
             timelineListView.setAdapter(adapter);
             initializeLoad();
         } else {
             timelineListView.setAdapter(adapter);
         }
-        timelineListView.onTouchItemEnabled(getNumeriUser(), getActivity());
-        timelineListView.startObserveFavorite(getNumeriUser());
+        timelineListView.setNumeriUser(numeriUser);
         return rootView;
     }
 
-    protected TimeLineListView getTimelineListView() {
+    /**
+     * TimeLineItemAdapterをセットされたListView
+     *
+     * @return TimeLineListView
+     */
+    protected final TimeLineListView getTimelineListView() {
         return timelineListView;
-    }
-
-    protected TimeLineItemAdapter getAdapter() {
-        return adapter;
-    }
-
-    protected List<SimpleTweetStatus> getTimeLineItems() {
-        return timeLineItems;
     }
 
     public String getFragmentName() {
@@ -87,9 +81,10 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
         this.numeriUser = numeriUser;
     }
 
-    protected NumeriUser getNumeriUser() {
-        return numeriUser;
+    public final NumeriUser getNumeriUser() {
+        return this.numeriUser;
     }
+
 
     /**
      * タイムラインを取得して表示する処理を実装するメソッド
@@ -103,28 +98,24 @@ public abstract class NumeriFragment extends Fragment implements AttachedBottomL
 
     @Override
     public void attachedBottom() {
+
         if (ConfigurationStorager.EitherConfigurations.CONFIRMATION_LESS_GET_TWEET.isEnabled()) {
             onAttachedBottom();
         } else {
-            AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage("ツイートを更に読み込みますか？")
-                    .setNegativeButton("いいえ", (dialog, id) -> {
-                    })
-                    .setPositiveButton("はい", (dialog, id) -> {
-                        onAttachedBottom();
-                    })
-                    .create();
-            ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
+            if (enableAttachedBottomDialog) {
+                enableAttachedBottomDialog = false;
+                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage("ツイートを更に読み込みますか？")
+                        .setNegativeButton("キャンセル", (dialog, id) -> {
+                            enableAttachedBottomDialog = true;
+                        })
+                        .setPositiveButton("はい", (dialog, id) -> {
+                            onAttachedBottom();
+                            enableAttachedBottomDialog = true;
+                        }).setOnDismissListener(dialog -> enableAttachedBottomDialog = true)
+                        .create();
+                ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
+            }
         }
-    }
-
-
-    /**
-     * 親のNumeriActivityを取得する
-     *
-     * @return 親のNumeriActivity
-     */
-    protected NumeriActivity getNumeriActivity() {
-        return (NumeriActivity) getActivity();
     }
 
 }

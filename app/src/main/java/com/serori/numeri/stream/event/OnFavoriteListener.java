@@ -7,5 +7,5 @@ import twitter4j.User;
  * OnFavoriteListener
  */
 public interface OnFavoriteListener {
-    public void onFavorite(User source, User target, Status favoritedStatus);
+    void onFavorite(User source, User target, Status favoritedStatus);
 }

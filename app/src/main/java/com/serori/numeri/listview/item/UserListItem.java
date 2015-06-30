@@ -1,7 +1,6 @@
-package com.serori.numeri.fragment.listview.item;
+package com.serori.numeri.listview.item;
 
 
-import com.serori.numeri.main.Global;
 import com.serori.numeri.user.NumeriUser;
 
 
@@ -23,22 +22,17 @@ public class UserListItem {
     private String userName = "";
     private String bio = "";
     private long userId = -1;
-    private NumeriUser numeriUser = null;
-    private static ArrayList<OnUpdateRelationshipListener> onUpdateRelationshipListeners = new ArrayList<>();
+    private final NumeriUser numeriUser;
+    private final static ArrayList<OnUpdateRelationshipListener> onUpdateRelationshipListeners = new ArrayList<>();
     private boolean isShowedRelation = false;
     private boolean isMe = false;
     private static volatile Map<String, Relation> relationMap = new LinkedHashMap<>();
-    private static boolean observeRelationStarted = false;
+    private boolean isProtected;
 
-    public static void startObserveRelation() {
-        if (!observeRelationStarted) {
-            observeRelationStarted = true;
-            for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
-                numeriUser.getStreamEvent()
-                        .addOnFollowListener((source, followedUser) -> updateFriendShip(numeriUser, source, followedUser))
-                        .addOnUnFollowListener((source1, unfollowedUser) -> updateFriendShip(numeriUser, source1, unfollowedUser));
-            }
-        }
+    public static void startObserveRelation(NumeriUser numeriUser) {
+        numeriUser.getStreamEvent()
+                .addOnFollowListener((source, followedUser) -> updateFriendShip(numeriUser, source, followedUser))
+                .addOnUnFollowListener((source1, unfollowedUser) -> updateFriendShip(numeriUser, source1, unfollowedUser));
     }
 
     private static void updateFriendShip(NumeriUser numeriUser, User source, User target) {
@@ -82,7 +76,7 @@ public class UserListItem {
         userName = user.getName();
         userId = user.getId();
         bio = user.getDescription();
-
+        isProtected = user.isProtected();
         if (userId == numeriUser.getAccessToken().getUserId()) {
             if (!onUpdateRelationshipListeners.isEmpty()) {
                 String relation = "自分";
@@ -186,6 +180,10 @@ public class UserListItem {
 
     public String getIconImageUrl() {
         return iconImageUrl;
+    }
+
+    public boolean isProtected() {
+        return isProtected;
     }
 
     public static class Relation {

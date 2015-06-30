@@ -2,16 +2,16 @@ package com.serori.numeri.license;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Log;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 
 /**
  */
-public class LicenseActivity extends NumeriActivity {
+public class LicenseActivity extends SubsidiaryActivity {
 
     private static String license = "";
     public static String twitter4JLicense = "\nTwitter4J Licence\n\n" +

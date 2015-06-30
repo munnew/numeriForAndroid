@@ -90,6 +90,44 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp" />
 
+            <LinearLayout
+                android:id="@+id/appendedImageThumbnails"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.serori.numeri.imageview.NumeriImageView
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:background="@color/transparency" />
+
+                <com.serori.numeri.imageview.NumeriImageView
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:background="@color/transparency" />
+
+                <com.serori.numeri.imageview.NumeriImageView
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:background="@color/transparency" />
+
+                <com.serori.numeri.imageview.NumeriImageView
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:background="@color/transparency" />
+
+
+            </LinearLayout>
+
 
             <TextView
                 android:id="@+id/timeLine_via"
@@ -112,5 +150,7 @@
             android:contentDescription="@string/description_favorite"
             android:src="@drawable/ic_favorite_star"
             android:visibility="gone" />
+
+
     </LinearLayout>
 </LinearLayout>

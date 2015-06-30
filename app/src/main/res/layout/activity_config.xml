@@ -195,6 +195,63 @@
                     android:layout_weight="0" />
 
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/ConfigComponent_Dark"
+                android:orientation="horizontal"
+                android:paddingLeft="5dp"
+                android:paddingRight="0dp">
+
+                <TextView
+                    android:id="@+id/fastScrollText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:gravity="left|center_vertical"
+                    android:text="@string/use_fast_scroll"
+                    android:textColor="#000000"
+                    android:textSize="13.5sp" />
+
+                <CheckBox
+                    android:id="@+id/fastScrollCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/ConfigComponent_Light"
+                android:orientation="horizontal"
+                android:paddingLeft="5dp"
+                android:paddingRight="0dp">
+
+                <TextView
+                    android:id="@+id/displayImageThumbText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:gravity="left|center_vertical"
+                    android:text="@string/enable_image_thumb"
+                    android:textColor="#000000"
+                    android:textSize="13.5sp" />
+
+                <CheckBox
+                    android:id="@+id/displayImageThumbCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
 

@@ -6,7 +6,7 @@ import android.util.Log;
 import com.serori.numeri.color.ColorStorager;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.exceptionreport.ExceptionReportStorager;
-import com.serori.numeri.fragment.listview.action.ActionStorager;
+import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.util.toast.ToastSender;
 
 /**

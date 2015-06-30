@@ -3,8 +3,6 @@ package com.serori.numeri.imageview.cache;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
-import android.util.Log;
-
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,9 +16,10 @@ import java.util.Map;
 /**
  * 画像をDLしたりキャッシュしたりするクラス
  * 生成されたインスタンスを使いまわすことは出来ません
+ * 表示されている画像がmaxCacheSizeを超えた場合も表示している分はキャッシュに保持されます。
  */
-public class ImageDownloader {
-    private static final int maxCacheSize = 8 * 1024 * 1024;
+public final class ImageDownloader {
+    private static final int maxCacheSize = 15 * 1024 * 1024;
     private static int currentCacheSize = 0;
     private OnStartDownloadListener onStartDownloadListener = null;
     private static volatile Map<String, ImageData> imageCache = new LinkedHashMap<>();
@@ -32,18 +31,16 @@ public class ImageDownloader {
     private void entryRemoved() {
         int index = 0;
         while (maxCacheSize < currentCacheSize) {
-            if (imageCache.isEmpty() && urls.size() <= index) {
-                return;
+            if (imageCache.isEmpty() || urls.size() <= index) {
+                break;
             }
 
             ImageData removeImage = imageCache.get(urls.get(index));
-            int removeImageByteSize = removeImage.getImage().getByteCount();
 
-            if (removeImage.delete()) {
-                currentCacheSize -= removeImageByteSize;
+            if (removeImage != null && removeImage.delete()) {
+                currentCacheSize -= removeImage.getByteCount();
                 imageCache.remove(urls.get(index));
-                String url = urls.remove(index);
-                Log.v("ImageDownloader", "remove : " + url);
+                urls.remove(index);
             } else {
                 index++;
             }
@@ -79,6 +76,7 @@ public class ImageDownloader {
         if (loadImageAlreadyCalled) {
             throw new IllegalStateException("loadImageが二度呼ばれました");
         }
+
         loadImageAlreadyCalled = true;
         ImageData imageData = imageCache.get(url);
 
@@ -90,6 +88,8 @@ public class ImageDownloader {
         boolean startedDownload = false;
         if (onStartDownloadListener != null)
             onStartDownloadListener.onDownLoadStart(url);
+        List<String> urls = new ArrayList<>();
+        urls.addAll(ImageDownloader.urls);
         for (String s : urls) {
             if (s.equals(url)) {
                 startedDownload = true;
@@ -106,27 +106,28 @@ public class ImageDownloader {
         }
 
         if (!startedDownload) {
-            urls.add(url);
             Handler handler = new Handler();
             new Thread(() -> {
+                ImageDownloader.urls.add(url);
                 Bitmap image = downloadImage(url);
                 if (image != null) {
                     ImageData imageData1 = new ImageData(image, url);
                     imageCache.put(url, imageData1);
                     currentCacheSize += image.getByteCount();
-                    entryRemoved();
                     handler.post(() -> {
                         onCompletedListener.onLoadImageCompleted(imageData1, url);
                         List<OnLoadImageCompletedListener> listeners = onLoadImageCompletedListenerMap.get(url);
+                        entryRemoved();
                         if (listeners != null) {
                             for (OnLoadImageCompletedListener onLoadImageCompletedListener : listeners) {
                                 onLoadImageCompletedListener.onLoadImageCompleted(imageData1, url);
                             }
                             onLoadImageCompletedListenerMap.remove(url);
                         }
+
                     });
                 } else {
-                    urls.remove(url);
+                    ImageDownloader.urls.remove(url);
                 }
             }).start();
         }
@@ -174,10 +175,15 @@ public class ImageDownloader {
             httpURLConnection.setInstanceFollowRedirects(true);
             httpURLConnection.setRequestMethod("GET");
             httpURLConnection.connect();
-
-            if (httpURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            int responseCode = httpURLConnection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 inputStream = httpURLConnection.getInputStream();
                 image = BitmapFactory.decodeStream(inputStream);
+            } else if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                String redirectUrl = httpURLConnection.getHeaderField("Location");
+                if (redirectUrl != null) {
+                    return downloadImage(redirectUrl);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -195,15 +201,20 @@ public class ImageDownloader {
     /**
      * 画像を表すクラス
      */
-    public class ImageData {
-        //TODO かなりダサい
+    public final class ImageData {
+        //TODO ダサい
         private Bitmap image;
         private int usedQuantity = 0;
         private String key = "";
+        private final int byteCount;
 
         ImageData(Bitmap image, String key) {
+            if (image == null) {
+                throw new NullPointerException("nullが渡されました");
+            }
             this.image = image;
             this.key = key;
+            byteCount = image.getByteCount();
         }
 
         /**
@@ -212,7 +223,7 @@ public class ImageDownloader {
          * @return true : 開放した false : 開放出来なかった
          */
         boolean delete() {
-            if (usedQuantity == 0) {
+            if (usedQuantity == 0 && image != null) {
                 image.recycle();
                 image = null;
                 return true;
@@ -227,7 +238,6 @@ public class ImageDownloader {
          */
         public boolean recycle() {
             if (imageCache.get(key) == null && image != null) {
-                Log.v(toString(), "recycle");
                 image.recycle();
                 image = null;
                 return true;
@@ -262,5 +272,8 @@ public class ImageDownloader {
             }
         }
 
+        public int getByteCount() {
+            return byteCount;
+        }
     }
 }

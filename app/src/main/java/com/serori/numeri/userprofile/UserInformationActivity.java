@@ -1,22 +1,23 @@
 package com.serori.numeri.userprofile;
 
-import android.app.AlertDialog;
 import android.content.Context;
+import android.support.v7.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.fragment.FavoriteTweetsFragment;
 import com.serori.numeri.fragment.FollowUserListFragment;
@@ -30,6 +31,7 @@ import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.IDs;
 import twitter4j.Relationship;
 import twitter4j.TwitterException;
 import twitter4j.User;
@@ -37,8 +39,9 @@ import twitter4j.User;
 /**
  *
  */
-public class UserInformationActivity extends NumeriActivity implements ViewPager.OnPageChangeListener {
-    private static long userId;
+public class UserInformationActivity extends SubsidiaryActivity implements ViewPager.OnPageChangeListener {
+    private static long userId = -1;
+    private static String screenName = "";
     private static NumeriUser numeriUser;
     private User user = null;
     private boolean isBlocking = false;
@@ -64,19 +67,31 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
         if ((context instanceof NumeriActivity)) {
             Log.v("UserInformationActivity", "show");
             userId = id;
+            screenName = "";
             UserInformationActivity.numeriUser = numeriUser;
             ((NumeriActivity) context).startActivity(UserInformationActivity.class, false);
         }
     }
 
+    public static void show(Context context, String screenName, NumeriUser numeriUser) {
+        if ((context instanceof NumeriActivity)) {
+            Log.v("UserInformationActivity", "show");
+            userId = -1;
+            UserInformationActivity.screenName = screenName;
+            UserInformationActivity.numeriUser = numeriUser;
+            ((NumeriActivity) context).startActivity(UserInformationActivity.class, false);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_information);
+        if (userId == -1 && screenName.equals("")) {
+            throw new IllegalStateException("userIdとscreenNameのどちらも設定されていません");
+        }
         if (savedInstanceState == null) {
             init();
-            initFragments();
             initTabAction();
         }
 
@@ -121,9 +136,14 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
         }
         new Thread(() -> {
             try {
-                user = numeriUser.getTwitter().showUser(userId);
+                if (userId != -1) {
+                    user = numeriUser.getTwitter().showUser(userId);
+                } else {
+                    user = numeriUser.getTwitter().showUser(UserInformationActivity.screenName);
+                    userId = user.getId();
+                }
                 handler.post(() -> {
-                    iconImage.startLoadImage(true, NumeriImageView.ProgressType.LOAD_ICON, user.getBiggerProfileImageURL());
+                    iconImage.setImage(true, NumeriImageView.ProgressType.LOAD_ICON, user.getBiggerProfileImageURL());
                     screenName.setText(user.getScreenName());
                     userName.setText(user.getName());
                     if (user.isProtected()) isProtectedImage.setVisibility(View.VISIBLE);
@@ -138,6 +158,8 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                     } else {
                         relationIndicator.setText("自分");
                     }
+                    initFragments();
+                    initFollowRequestComponent();
                 });
 
             } catch (TwitterException e) {
@@ -184,13 +206,13 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
     }
 
 
-    private void updateRelationshipIndicator(Relationship relationship) {
+    private void updateRelationshipIndicator(User user, Relationship relationship) {
         if (relationship != null) {
             if (relationship.isTargetFollowedBySource()) {
                 followButton.setText("フォロー解除");
                 followButton.setBackgroundColor(getResources().getColor(R.color.un_follow_color));
             } else {
-                followButton.setText("フォローする");
+                followButton.setText(user.isProtected() ? "フォローリクエスト" : "フォローする");
                 followButton.setBackgroundColor(getResources().getColor(R.color.follow_color));
             }
             if (relationship.isTargetFollowedBySource() && relationship.isTargetFollowingSource()) {
@@ -231,19 +253,16 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
             } catch (TwitterException e) {
                 TwitterExceptionDisplay.show(e);
             }
-
             setRelationShip(user);
         }).start();
-
     }
 
     private void setRelationShip(User user) {
         new Thread(() -> {
-
             try {
                 Relationship relationship = numeriUser.getTwitter().showFriendship(numeriUser.getAccessToken().getUserId(), user.getId());
                 handler.post(() -> {
-                    updateRelationshipIndicator(relationship);
+                    updateRelationshipIndicator(user, relationship);
                     isBlocking = relationship.isSourceBlockingTarget();
                     isMuted = relationship.isSourceMutingTarget();
                 });
@@ -254,16 +273,6 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
         }).start();
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                finish();
-                return true;
-            default:
-                return false;
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -290,6 +299,46 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
         }
     }
 
+    @Override
+    public void finish() {
+        userId = -1;
+        screenName = "";
+        super.finish();
+    }
+
+    private void initFollowRequestComponent() {
+        if (userId == numeriUser.getAccessToken().getUserId()) {
+            LinearLayout followRequest = (LinearLayout) findViewById(R.id.followRequest);
+            TextView followRequestNumText = (TextView) findViewById(R.id.followRequestNum);
+            Handler handler = new Handler();
+            new Thread(() -> {
+                long nextCursor = -1;
+                List<IDs> iDsList = new ArrayList<>();
+                List<Long> followRequestUserIds = new ArrayList<>();
+                while (nextCursor != 0) {
+                    try {
+                        IDs iDs = numeriUser.getTwitter().getIncomingFriendships(nextCursor);
+                        iDsList.add(iDs);
+                        nextCursor = iDs.getNextCursor();
+                    } catch (TwitterException e) {
+                        e.printStackTrace();
+                        break;
+                    }
+                }
+                for (IDs iDs : iDsList) {
+                    for (long id : iDs.getIDs()) {
+                        followRequestUserIds.add(id);
+                    }
+                }
+                int followRequestNum = followRequestUserIds.size();
+                followRequestNumText.setText("" + followRequestNum);
+                handler.post(() -> {
+                    followRequest.setVisibility(followRequestNum > 0 ? View.VISIBLE : View.GONE);
+                });
+            }).start();
+        }
+    }
+
     private void block() {
         if (user != null) {
             String message = !isBlocking ? "このユーザーをブッロクしますか？" : "このユーザーをブロック解除しますか？";
@@ -308,7 +357,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                             }
                         }).start();
 
-                    }).setNegativeButton("いいえ", null).create();
+                    }).setNegativeButton("キャンセル", null).create();
             setCurrentShowDialog(alertDialog);
         }
     }
@@ -330,7 +379,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                                 TwitterExceptionDisplay.show(e);
                             }
                         }).start();
-                    }).setNegativeButton("いいえ", null).create();
+                    }).setNegativeButton("キャンセル", null).create();
             setCurrentShowDialog(alertDialog);
         }
     }
@@ -348,7 +397,7 @@ public class UserInformationActivity extends NumeriActivity implements ViewPager
                                 TwitterExceptionDisplay.show(e);
                             }
                         }).start();
-                    }).setNegativeButton("いいえ", null).create();
+                    }).setNegativeButton("キャンセル", null).create();
             setCurrentShowDialog(alertDialog);
         }
     }

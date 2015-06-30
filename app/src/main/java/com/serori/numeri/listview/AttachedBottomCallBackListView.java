@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.listview;
+package com.serori.numeri.listview;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -7,6 +7,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
+
+import com.serori.numeri.config.ConfigurationStorager;
 
 /**
  * 一番下まで見るとそれをコールバックしてくれる抽象クラスなListView
@@ -18,9 +20,12 @@ public abstract class AttachedBottomCallBackListView extends ListView {
     private OnItemScrollListener onItemScrollListener;
     private int _visibleItemCount = 0;
     private int _totalItemCount = 0;
+    private boolean enabledFastScroll;
 
     public AttachedBottomCallBackListView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        enabledFastScroll = ConfigurationStorager.EitherConfigurations.USE_FAST_SCROLL.isEnabled();
+        setFastScrollEnabled(enabledFastScroll);
         this.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -46,6 +51,11 @@ public abstract class AttachedBottomCallBackListView extends ListView {
                 } else if (firstVisibleItemPosition + visibleItemCount <= totalItemCount - 1) {
                     onAttachedBottom = false;
                 }
+                if (enabledFastScroll != ConfigurationStorager.EitherConfigurations.USE_FAST_SCROLL.isEnabled()) {
+                    enabledFastScroll = ConfigurationStorager.EitherConfigurations.USE_FAST_SCROLL.isEnabled();
+                    setFastScrollEnabled(enabledFastScroll);
+                }
+
             }
         });
     }

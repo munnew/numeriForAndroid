@@ -29,7 +29,7 @@ public class FavoriteTweetsFragment extends NumeriFragment {
     protected void onAttachedBottom() {
         Paging paging = new Paging();
         paging.setCount(30);
-        paging.setMaxId(getAdapter().getItem(getAdapter().getCount() - 1).getStatusId());
+        paging.setMaxId(getTimelineListView().getAdapter().getItem(getTimelineListView().getAdapter().getCount() - 1).getStatusId());
         getFavoriteTweets(paging, true);
     }
 
@@ -43,7 +43,7 @@ public class FavoriteTweetsFragment extends NumeriFragment {
                     if (!favoriteStatuses.isEmpty() && isBelowUnder)
                         favoriteStatuses.remove(0);
                     for (Status favoriteStatus : favoriteStatuses) {
-                        getAdapter().add(SimpleTweetStatus.build(favoriteStatus, getNumeriUser()));
+                        getTimelineListView().getAdapter().add(SimpleTweetStatus.build(favoriteStatus, getNumeriUser()));
                     }
                 }
                 getTimelineListView().onAttachedBottomCallbackEnabled(true);

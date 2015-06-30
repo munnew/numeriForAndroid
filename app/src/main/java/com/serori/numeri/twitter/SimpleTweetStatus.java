@@ -3,7 +3,6 @@ package com.serori.numeri.twitter;
 import android.text.Html;
 import android.util.Log;
 
-import com.serori.numeri.main.Global;
 import com.serori.numeri.user.NumeriUser;
 
 import java.text.SimpleDateFormat;
@@ -12,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import twitter4j.HashtagEntity;
 import twitter4j.MediaEntity;
 import twitter4j.Status;
 import twitter4j.TwitterException;
@@ -21,25 +21,32 @@ import twitter4j.UserMentionEntity;
 /**
  * Statusから生成される軽量化されたStatus
  */
-public class SimpleTweetStatus {
-    private String biggerIconImageUrl;
-    private String iconImageUrl;
-    private String name, mainText, via;
-    private long statusId, userId, retweetedStatusId = -1;
+public final class SimpleTweetStatus {
+    private String biggerProfileImageURL;
+    private String profileImageURL;
+    private String name, text, via;
+    private final long statusId, userId, retweetedStatusId;
     private static final String DATE_FORMAT = "MM/dd HH:mm:ss";
     private String screenName;
-    private boolean isMyRT = false, isMention = false, isFavorite = false;
+    private boolean isReTweeted = false, isMention = false, isFavorite = false;
     private boolean isMyTweet = false;
     private boolean isProtectedUser = false;
-    private String createdTime;
-    private List<String> destinationUserNames = new ArrayList<>();
-    private List<String> uris = new ArrayList<>();
-    private List<String> mediaUris = new ArrayList<>();
-    private long inReplyToStatusId;
+    private final String createdTime;
+    private final List<String> destinationUserNames = new ArrayList<>();
+    private final List<String> uris = new ArrayList<>();
+    private final List<String> mediaUris = new ArrayList<>();
+    private final List<String> thumbnailUris = new ArrayList<>();
+    private final List<String> hashtags = new ArrayList<>();
+    private final List<String> involvedUserNames = new ArrayList<>();
+    private final long inReplyToStatusId;
     private volatile static Map<String, SimpleTweetStatus> simpleTweetStatusMap = new LinkedHashMap<>();
-    private static boolean observeFavoriteStarted = false;
-    private static boolean observeDestroyTweetStarted = false;
-    private NumeriUser ownerUser;
+    private final NumeriUser ownerUser;
+    private static final String TWITPIC_URL = "^https?:\\/\\/twitpic\\.com/[a-z0-9]+$";
+    private static final String TWIPPLE_URL = "^https?:\\/\\/p\\.twipple\\.jp/[a-zA-Z0-9]+$";
+    private static final String PHOTOZOU_URL = "^https?:\\/\\/photozou\\.jp/photo/show/" +
+            "[0-9][0-9][0-9][0-9][0-9][0-9][0-9]/" +
+            "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]";
+
 
     /**
      * StatusをSimpleTweetStatusとしてキャッシュします。
@@ -84,52 +91,44 @@ public class SimpleTweetStatus {
 
     /**
      * お気に入りにイベントの監視を開始しアプリケーションのユーザーがお気に入り登録を行った場合はそのパラメータを変更する<br>
-     * このメソッドはアプリケーションが生きている間一度しか実行することが出来ない
+     *
+     * @param numeriUser Applicationのユーザー
      */
-    public static void startObserveFavorite() {
-        List<NumeriUser> numeriUsers = Global.getInstance().getNumeriUsers().getNumeriUsers();
-        if (observeFavoriteStarted || numeriUsers.isEmpty()) return;
-        observeFavoriteStarted = true;
+    public static void startObserveFavorite(NumeriUser numeriUser) {
 
-        for (NumeriUser numeriUser : numeriUsers) {
-            numeriUser.getStreamEvent().addOnFavoriteListener((user1, user2, favoritedStatus) -> {
-                if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
-                    SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
-                    for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
-                        if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
-                            simpleTweetStatus.setFavorite(true);
-                        }
+        numeriUser.getStreamEvent().addOnFavoriteListener((user1, user2, favoritedStatus) -> {
+            if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
+                SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(favoritedStatus, numeriUser);
+                for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
+                    if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
+                        simpleTweetStatus.setFavorite(true);
                     }
                 }
+            }
 
-            }).addOnUnFavoriteListener((user1, user2, unFavoritedStatus) -> {
-                if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
-                    SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
-                    for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
-                        if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
-                            simpleTweetStatus.setFavorite(false);
-                        }
+        }).addOnUnFavoriteListener((user1, user2, unFavoritedStatus) -> {
+            if (user1.getId() == numeriUser.getAccessToken().getUserId()) {
+                SimpleTweetStatus favoritedSimpleTweetStatus = SimpleTweetStatus.build(unFavoritedStatus, numeriUser);
+                for (SimpleTweetStatus simpleTweetStatus : simpleTweetStatusMap.values()) {
+                    if (simpleTweetStatus.equals(favoritedSimpleTweetStatus)) {
+                        simpleTweetStatus.setFavorite(false);
                     }
                 }
-            });
-        }
-        Global.getInstance().addOnFinishMainActivityListener(() -> observeFavoriteStarted = false);
+            }
+        });
     }
 
     /**
      * ツイートの削除イベントの監視を開始し削除された場合はキャッシュから削除する<br>
      * このメソッドはアプリケーションが生きている間一度しか実行することが出来ない
+     *
+     * @param numeriUser Applicationのユーザー
      */
-    public static void startObserveDestroyTweet() {
-        List<NumeriUser> numeriUsers = Global.getInstance().getNumeriUsers().getNumeriUsers();
-        if (observeDestroyTweetStarted || numeriUsers.isEmpty()) return;
-
-        for (NumeriUser numeriUser : numeriUsers) {
-            numeriUser.getStreamEvent().addOnDeletionNoticeListener(statusDeletionNotice -> {
-                long deletedStatusId = statusDeletionNotice.getStatusId();
-                simpleTweetStatusMap.remove(createSimpleTweetStatusKey(numeriUser, deletedStatusId));
-            });
-        }
+    public static void startObserveDestroyTweet(NumeriUser numeriUser) {
+        numeriUser.getStreamEvent().addOnStatusDeletionNoticeListener(statusDeletionNotice -> {
+            long deletedStatusId = statusDeletionNotice.getStatusId();
+            simpleTweetStatusMap.remove(createSimpleTweetStatusKey(numeriUser, deletedStatusId));
+        });
     }
 
     private static String createSimpleTweetStatusKey(NumeriUser numeriUser, long statusId) {
@@ -142,55 +141,99 @@ public class SimpleTweetStatus {
         statusId = status.getId();
         if (status.isRetweet()) { //RT
             isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
-            biggerIconImageUrl = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
-            iconImageUrl = status.getRetweetedStatus().getUser().getProfileImageURL();
-            mainText = status.getRetweetedStatus().getText();
+            biggerProfileImageURL = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
+            profileImageURL = status.getRetweetedStatus().getUser().getProfileImageURL();
+            text = status.getRetweetedStatus().getText();
             name = status.getRetweetedStatus().getUser().getName();
             via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName() + "\n RT count : " + status.getRetweetedStatus().getRetweetCount();
             screenName = status.getRetweetedStatus().getUser().getScreenName();
             isFavorite = status.getRetweetedStatus().isFavorited();
             userId = status.getRetweetedStatus().getUser().getId();
             inReplyToStatusId = status.getRetweetedStatus().getInReplyToStatusId();
-            isMyRT = status.getRetweetedStatus().isRetweetedByMe();
+            isReTweeted = status.getRetweetedStatus().isRetweetedByMe();
             retweetedStatusId = status.getRetweetedStatus().getId();
         } else {//!RT
             isProtectedUser = status.getUser().isProtected();
-            biggerIconImageUrl = status.getUser().getBiggerProfileImageURL();
-            iconImageUrl = status.getUser().getProfileImageURL();
-            mainText = status.getText();
+            biggerProfileImageURL = status.getUser().getBiggerProfileImageURL();
+            profileImageURL = status.getUser().getProfileImageURL();
+            text = status.getText();
             name = status.getUser().getName();
             via = "via " + Html.fromHtml(status.getSource()).toString();
             screenName = status.getUser().getScreenName();
             isFavorite = status.isFavorited();
             userId = status.getUser().getId();
             inReplyToStatusId = status.getInReplyToStatusId();
-            isMyRT = status.isRetweetedByMe();
+            isReTweeted = status.isRetweetedByMe();
+            retweetedStatusId = -1;
             if (numeriUser.getAccessToken().getUserId() == status.getUser().getId()) {
                 isMyTweet = true;
-            }
-        }
-
-        UserMentionEntity[] mentionEntity = status.getUserMentionEntities();
-        destinationUserNames.add(screenName);
-        for (UserMentionEntity userMentionEntity : mentionEntity) {//?Mention
-            if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
-                isMention = true;
-            } else if (!screenName.equals(userMentionEntity.getScreenName())) {
-                destinationUserNames.add(userMentionEntity.getScreenName());
             }
         }
         name = name.replaceAll("\r", "");
         name = name.replaceAll("\n", "");
         name = name.replaceAll("\t", "");
+        setHashtags(status);
+        setEntity(status, numeriUser);
+        setUrlEntity(status);
+    }
+
+    private void setHashtags(Status status) {
+        for (HashtagEntity hashtagEntity : status.getHashtagEntities()) {
+            hashtags.add(hashtagEntity.getText());
+        }
+    }
+
+    private void setEntity(Status status, NumeriUser numeriUser) {
+        UserMentionEntity[] mentionEntity = status.getUserMentionEntities();
+        destinationUserNames.add(screenName);
+        involvedUserNames.add(screenName);
+        for (UserMentionEntity userMentionEntity : mentionEntity) {
+            boolean nonMatch1 = true;
+            for (String involvedUserName : involvedUserNames) {
+                if (involvedUserName.equals(userMentionEntity.getScreenName())) {
+                    nonMatch1 = false;
+                    break;
+                }
+            }
+            boolean nonMatch2 = true;
+            for (String destinationUserName : destinationUserNames) {
+                if (destinationUserName.equals(userMentionEntity.getScreenName())) {
+                    nonMatch2 = false;
+                    break;
+                }
+            }
+
+            if (nonMatch1) involvedUserNames.add(userMentionEntity.getScreenName());
+            if (userMentionEntity.getId() == numeriUser.getAccessToken().getUserId()) {
+                isMention = true;
+            } else if (!screenName.equals(userMentionEntity.getScreenName()) && nonMatch2) {
+                destinationUserNames.add(userMentionEntity.getScreenName());
+            }
+        }
+
+    }
+
+    private void setUrlEntity(Status status) {
 
         for (MediaEntity mediaEntity : status.getExtendedMediaEntities()) {
             mediaUris.add(mediaEntity.getMediaURL());
+            thumbnailUris.add(mediaEntity.getMediaURL() + ":thumb");
         }
-
         for (URLEntity urlEntity : status.getURLEntities()) {
-            uris.add(urlEntity.getExpandedURL());
+            String expandedURL = urlEntity.getExpandedURL();
+            if (expandedURL.matches(TWITPIC_URL)) {
+                mediaUris.add(expandedURL.replaceFirst("twitpic\\.com", "twitpic.com/show/full"));
+                thumbnailUris.add(expandedURL.replaceFirst("twitpic\\.com/", "twitpic.com/show/thumb/"));
+            } else if (expandedURL.matches(TWIPPLE_URL)) {
+                mediaUris.add(expandedURL.replaceFirst("twipple\\.jp/", "twipple.jp/show/orig/"));
+                thumbnailUris.add(expandedURL.replaceFirst("twipple\\.jp/", "twipple.jp/show/thumb/"));
+            } else if (expandedURL.matches(PHOTOZOU_URL)) {
+                mediaUris.add(expandedURL.replaceFirst("photozou\\.jp/photo/show/[0-9]*/", "photozou.jp/p/img/"));
+                thumbnailUris.add(expandedURL.replaceFirst("photozou\\.jp/photo/show/[0-9]*/", "photozou.jp/p/thumb/"));
+            } else {
+                uris.add(expandedURL);
+            }
         }
-
     }
 
     //setter
@@ -198,8 +241,8 @@ public class SimpleTweetStatus {
         this.isFavorite = isFavorite;
     }
 
-    public void setMyRT(boolean isRT) {
-        this.isMyRT = isRT;
+    public void setReTweeted(boolean isRT) {
+        this.isReTweeted = isRT;
     }
 
     //getter
@@ -213,8 +256,8 @@ public class SimpleTweetStatus {
         return destinationUserNames;
     }
 
-    public String getMainText() {
-        return mainText;
+    public String getText() {
+        return text;
     }
 
 
@@ -235,8 +278,8 @@ public class SimpleTweetStatus {
         return userId;
     }
 
-    public boolean isMyRT() {
-        return isMyRT;
+    public boolean isReTweeted() {
+        return isReTweeted;
     }
 
     public boolean isMention() {
@@ -251,12 +294,12 @@ public class SimpleTweetStatus {
         return createdTime;
     }
 
-    public String getBiggerIconImageUrl() {
-        return biggerIconImageUrl;
+    public String getBiggerProfileImageURL() {
+        return biggerProfileImageURL;
     }
 
-    public String getIconImageUrl() {
-        return iconImageUrl;
+    public String getProfileImageURL() {
+        return profileImageURL;
     }
 
     public boolean isRT() {
@@ -279,6 +322,12 @@ public class SimpleTweetStatus {
         return mediaUris;
     }
 
+    public List<String> getThumbnailUris() {
+        List<String> thumbnailUris = new ArrayList<>();
+        thumbnailUris.addAll(this.thumbnailUris);
+        return thumbnailUris;
+    }
+
     public boolean isMyTweet() {
         return isMyTweet;
     }
@@ -293,6 +342,16 @@ public class SimpleTweetStatus {
 
     public NumeriUser getOwnerUser() {
         return ownerUser;
+    }
+
+    public List<String> getHashtags() {
+        List<String> hashtags = new ArrayList<>();
+        hashtags.addAll(this.hashtags);
+        return hashtags;
+    }
+
+    public List<String> getInvolvedUserNames() {
+        return involvedUserNames;
     }
 
     @Override
@@ -310,6 +369,4 @@ public class SimpleTweetStatus {
 
         return isSameTweet && ((SimpleTweetStatus) o).getOwnerUser().getAccessToken().getUserId() == this.ownerUser.getAccessToken().getUserId();
     }
-
-
 }

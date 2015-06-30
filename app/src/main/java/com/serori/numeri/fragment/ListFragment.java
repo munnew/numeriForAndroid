@@ -3,7 +3,10 @@ package com.serori.numeri.fragment;
 
 import android.os.Handler;
 
+import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.twitter.SimpleTweetStatus;
+import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
@@ -19,7 +22,7 @@ import twitter4j.User;
 /**
  * ユーザーリストを表示するFragment
  */
-public class ListFragment extends NumeriFragment {
+public class ListFragment extends NumeriFragment implements OnStatusListener {
 
     private long listId;
     private List<Long> listUserIds = new ArrayList<>();
@@ -49,12 +52,12 @@ public class ListFragment extends NumeriFragment {
                 Paging paging = new Paging();
                 paging.setCount(30);
                 ResponseList<Status> statuses = getTweetsList(paging, false);
-
+                if (statuses == null) return;
                 handler.post(() -> {
                     for (Status status : statuses) {
-                        getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
+                        getTimelineListView().getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
                     }
-                    startPseudoStream();
+                    getNumeriUser().getStreamEvent().addOnStatusListener(this);
                 });
             } catch (TwitterException e) {
                 TwitterExceptionDisplay.show(e);
@@ -62,19 +65,6 @@ public class ListFragment extends NumeriFragment {
         }).start();
     }
 
-    /**
-     * ユーザーリストでの擬似的なストリームを開始する。
-     */
-    private void startPseudoStream() {
-        getNumeriUser().getStreamEvent().addOnStatusListener(status -> {
-            for (Long listUserId : listUserIds) {
-                if (status.getUser().getId() == listUserId && status.getUserMentionEntities().length == 0) {
-                    getTimelineListView().insertItem(SimpleTweetStatus.build(status, getNumeriUser()));
-                    break;
-                }
-            }
-        });
-    }
 
     @Override
     protected void onAttachedBottom() {
@@ -82,12 +72,13 @@ public class ListFragment extends NumeriFragment {
         new Thread(() -> {
             getTimelineListView().onAttachedBottomCallbackEnabled(false);
             Paging paging = new Paging();
-            paging.setMaxId(getAdapter().getItem(getAdapter().getCount() - 1).getStatusId());
+            paging.setMaxId(getTimelineListView().getAdapter().getItem(getTimelineListView().getAdapter().getCount() - 1).getStatusId());
             paging.count(31);
             ResponseList<Status> statuses = getTweetsList(paging, true);
+            if (statuses == null) return;
             handler.post(() -> {
                 for (Status status : statuses) {
-                    getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
+                    getTimelineListView().getAdapter().add(SimpleTweetStatus.build(status, getNumeriUser()));
                 }
                 getTimelineListView().onAttachedBottomCallbackEnabled(true);
             });
@@ -106,5 +97,23 @@ public class ListFragment extends NumeriFragment {
             TwitterExceptionDisplay.show(e);
         }
         return statuses;
+    }
+
+    @Override
+    public void onStatus(Status status) {
+        for (Long listUserId : listUserIds) {
+            if (status.getUser().getId() == listUserId && status.getUserMentionEntities().length == 0) {
+                getTimelineListView().insert(SimpleTweetStatus.build(status, getNumeriUser()));
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        NumeriUser numeriUser = getNumeriUser();
+        if (numeriUser != null)
+            getNumeriUser().getStreamEvent().removeOnStatusListener(this);
+        super.onDestroy();
     }
 }

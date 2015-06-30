@@ -1,4 +1,4 @@
-package com.serori.numeri.notification;
+package com.serori.numeri.user;
 
 /**
  */
@@ -8,9 +8,9 @@ public enum Notification {
     RT("RT"),
     FAVORITE("FAVORITE"),
     UN_FAVORITE("UN_FAVORITE"),
-    MENTION("MENTION");
+    REPLY("REPLY");
     private boolean isEnable = true;
-    private String id = "";
+    private String id;
 
     Notification(String id) {
         this.id = id;

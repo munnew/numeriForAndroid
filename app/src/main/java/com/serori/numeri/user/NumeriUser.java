@@ -4,10 +4,12 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.serori.numeri.R;
+import com.serori.numeri.listview.item.UserListItem;
 import com.serori.numeri.main.Global;
 import com.serori.numeri.stream.IStreamEvent;
 import com.serori.numeri.stream.StreamEvent;
 import com.serori.numeri.stream.StreamSwitcher;
+import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.util.twitter.TweetBuilder;
 import com.serori.numeri.util.twitter.TwitterAPIConfirmer;
 
@@ -22,12 +24,12 @@ import twitter4j.conf.ConfigurationBuilder;
 /**
  * このアプリケーションを使用するユーザーを表す
  */
-public class NumeriUser {
-    private Twitter twitter;
-    private StreamEvent streamEvent;
+public final class NumeriUser {
+    private final Twitter twitter;
+    private final StreamEvent streamEvent;
     private String screenName = null;
-    private NumeriUserStorager.NumeriUserTable table;
-    private TwitterAPIConfirmer twitterAPIConfirmer;
+    private final NumeriUserStorager.NumeriUserTable table;
+    private final TwitterAPIConfirmer twitterAPIConfirmer;
 
     /**
      * このコンストラクタは非同期タスクで実行する必要があります
@@ -37,11 +39,6 @@ public class NumeriUser {
     public NumeriUser(NumeriUserStorager.NumeriUserTable table) {
         this.table = table;
         twitterAPIConfirmer = new TwitterAPIConfirmer(this);
-        auth();
-    }
-
-
-    private void auth() {
         ConfigurationBuilder builder = new ConfigurationBuilder()
                 .setOAuthConsumerKey(Global.getInstance().getApplicationContext().getString(R.string.twitter_consumer_key))
                 .setOAuthConsumerSecret(Global.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret))
@@ -52,7 +49,7 @@ public class NumeriUser {
             if (!table.getScreenName().equals(screenName)) {
                 AsyncTask.execute(() -> {
                     table.setScreenName(screenName);
-                    NumeriUserStorager.getInstance().saveNumeriUser(table);
+                    NumeriUserStorager.getInstance().addNumeriUserTable(table);
                 });
             }
         } catch (TwitterException e) {
@@ -64,7 +61,12 @@ public class NumeriUser {
                 Global.getInstance().getApplicationContext().getString(R.string.twitter_consumer_secret));
         twitterStream.setOAuthAccessToken(new AccessToken(table.getAccessToken(), table.getAccessTokenSecret()));
         streamEvent = new StreamEvent(twitterStream);
+        NotificationSetter.setUp(this);
+        SimpleTweetStatus.startObserveFavorite(this);
+        UserListItem.startObserveRelation(this);
+        //SimpleTweetStatus.startObserveDestroyTweet(this);
     }
+
 
     public Twitter getTwitter() {
         return twitter;
@@ -105,5 +107,8 @@ public class NumeriUser {
         return screenName;
     }
 
-
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof NumeriUser && ((NumeriUser) o).getScreenName().equals(screenName);
+    }
 }

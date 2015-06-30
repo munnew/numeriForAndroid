@@ -1,13 +1,15 @@
 package com.serori.numeri.twitter;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.fragment.listview.TimeLineListView;
-import com.serori.numeri.fragment.listview.item.TimeLineItemAdapter;
+import com.serori.numeri.activity.SubsidiaryActivity;
+import com.serori.numeri.listview.TimeLineListView;
+import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
@@ -19,16 +21,26 @@ import twitter4j.TwitterException;
 /**
  * 会話を表示するためのActivity
  */
-public class ConversationActivity extends NumeriActivity {
+public class ConversationActivity extends SubsidiaryActivity {
 
     private TimeLineListView conversationListView;
     private TimeLineItemAdapter adapter;
     private static NumeriUser numeriUser = null;
     private static long nextStatusId;
 
+    public static void show(Context activityContext, NumeriUser numeriUser, long statusId) {
+        ConversationActivity.numeriUser = numeriUser;
+        ConversationActivity.nextStatusId = statusId;
+        if (activityContext instanceof NumeriActivity) {
+            ((NumeriActivity) activityContext).startActivity(ConversationActivity.class, false);
+        }
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.in_right, R.anim.out_left);
         setContentView(R.layout.activity_display_conversation);
         if (numeriUser == null) {
             throw new NullPointerException("numeriUserがセットされていません");
@@ -39,7 +51,6 @@ public class ConversationActivity extends NumeriActivity {
             adapter = new TimeLineItemAdapter(this, 0, simpleTweetStatuses);
             conversationListView = (TimeLineListView) findViewById(R.id.conversationListView);
 
-            NumeriUser user = numeriUser;
             conversationListView.setAdapter(adapter);
 
             AsyncTask.execute(() -> {
@@ -61,8 +72,7 @@ public class ConversationActivity extends NumeriActivity {
                     }
                 }
                 if (successfulCompletion) {
-                    conversationListView.onTouchItemEnabled(user, this);
-                    conversationListView.startObserveFavorite(user);
+                    conversationListView.setNumeriUser(numeriUser);
                 }
 
             });
@@ -70,32 +80,18 @@ public class ConversationActivity extends NumeriActivity {
 
     }
 
-    /**
-     * 会話を表示するためのstatusIdをセットします。
-     *
-     * @param statusId statusId
-     */
-    public static void setConversationStatusId(long statusId) {
-        nextStatusId = statusId;
-    }
-
-    /**
-     * ユーザーをセットします。
-     * このActivityに遷移する前に必ずセットしてください。
-     *
-     * @param user NumeriUser
-     */
-    public static void setNumeriUser(NumeriUser user) {
-        numeriUser = user;
+    @Override
+    public void finish() {
+        numeriUser = null;
+        nextStatusId = -1;
+        super.finish();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             numeriUser = null;
-            finish();
-            return true;
         }
-        return false;
+        return super.onKeyDown(keyCode, event);
     }
 }

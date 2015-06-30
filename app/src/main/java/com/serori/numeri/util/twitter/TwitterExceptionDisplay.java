@@ -21,7 +21,10 @@ public class TwitterExceptionDisplay {
         if (info != null) {
             ToastSender.sendToast(info);
         } else {
-            ToastSender.sendToast(e.getRateLimitStatus().toString());
+            info = e.getErrorMessage();
+            if (info != null) {
+                ToastSender.sendToast(info);
+            }
         }
     }
 }

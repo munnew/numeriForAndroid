@@ -1,10 +1,7 @@
 package com.serori.numeri.main;
 
-import android.app.AlertDialog;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -14,33 +11,27 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.serori.numeri.notification.NotificationSender;
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.color.ColorManagerActivity;
 import com.serori.numeri.config.ConfigActivity;
+import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.exceptionreport.ExceptionReportStorager;
 import com.serori.numeri.fragment.NumeriFragment;
 import com.serori.numeri.fragment.SectionsPagerAdapter;
 import com.serori.numeri.main.manager.FragmentManagerActivity;
 import com.serori.numeri.main.manager.FragmentStorager;
 import com.serori.numeri.oauth.OAuthActivity;
-import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.twitter.TweetActivity;
+import com.serori.numeri.twitter.TweetSearchActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
-import com.serori.numeri.fragment.listview.item.UserListItem;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.util.twitter.TwitterAPIConfirmer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import twitter4j.RateLimitStatus;
-import twitter4j.TwitterException;
 
 /**
  * MainActivity
@@ -79,57 +70,70 @@ public class MainActivity extends NumeriActivity {
 
     }
 
-    @SuppressWarnings("unchecked")
     private void init() {
         Log.v("initLoad", "init");
+        infoTextView.setVisibility(View.VISIBLE);
         List<NumeriUserStorager.NumeriUserTable> tables = new ArrayList<>();
         tables.addAll(NumeriUserStorager.getInstance().loadNumeriUserTables());
         if (tables.isEmpty()) {
-            startActivity(OAuthActivity.class, true);
+            startActivity(OAuthActivity.class, false);
+            infoTextView.setText("メニュー->ユーザー管理 からユーザーを追加してください");
+            NumeriUserStorager.getInstance().addOnAddedNumeriUserListener(numeriUser -> {
+                FragmentStorager.FragmentsTable tlFragmentTable
+                        = new FragmentStorager.FragmentsTable(FragmentStorager.FragmentType.TL, numeriUser.getScreenName(), numeriUser.getAccessToken().getToken());
+                FragmentStorager.FragmentsTable mentionsFragmentTable
+                        = new FragmentStorager.FragmentsTable(FragmentStorager.FragmentType.MENTIONS, numeriUser.getScreenName(), numeriUser.getAccessToken().getToken());
+                FragmentStorager fragmentStorager = FragmentStorager.getInstance();
+                fragmentStorager.saveFragmentData(tlFragmentTable);
+                fragmentStorager.saveFragmentData(mentionsFragmentTable);
+                initNumeriFragments();
+            });
         } else {
-            Handler handler = new Handler();
-            new Thread(() -> {
-                runOnUiThread(() -> {
-                    infoTextView.setVisibility(View.VISIBLE);
-                    infoTextView.setText("ユーザー情報を取得中...");
-                });
+            initNumeriFragments();
+        }
+    }
+
+    private void initNumeriFragments() {
+        Handler handler = new Handler();
+        boolean createdNumeriUser = !NumeriUsers.getInstance().getNumeriUsers().isEmpty();
+
+        new Thread(() -> {
+            if (!createdNumeriUser) {
+                runOnUiThread(() -> infoTextView.setText("ユーザー情報を取得中..."));
                 Global.getInstance().getNumeriUsers().clear();
                 for (NumeriUserStorager.NumeriUserTable table : NumeriUserStorager.getInstance().loadNumeriUserTables()) {
-                    Global.getInstance().getNumeriUsers().addNumeriUser(new NumeriUser(table));
-                }
-                for (NumeriUser numeriUser : Global.getInstance().getNumeriUsers().getNumeriUsers()) {
+                    NumeriUser numeriUser = new NumeriUser(table);
                     numeriUser.getStreamSwitcher().startStream();
+                    Global.getInstance().getNumeriUsers().addNumeriUser(numeriUser);
                     runOnUiThread(() -> infoTextView.setText(numeriUser.getScreenName() + " : startStream"));
                 }
-                NotificationSender.getInstance().sendStart();
-                List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
-                List<NumeriFragment> numeriFragments = new ArrayList<>();
-                if (!numeriUsers.isEmpty()) {
-                    SimpleTweetStatus.startObserveFavorite();
-                    //SimpleTweetStatus.startObserveDestroyTweet();
-                    UserListItem.startObserveRelation();
-                    numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
-                }
-                handler.post(() -> {
-                    if (!numeriFragments.isEmpty()) {
-                        infoTextView.setText("フラグメントを生成しています...");
-                        for (NumeriFragment numeriFragment : numeriFragments) {
-                            sectionsPagerAdapter.add(numeriFragment);
-                        }
-                        viewPager.setAdapter(sectionsPagerAdapter);
-                        infoTextView.setVisibility(View.GONE);
-                    } else {
-                        infoTextView.setText("メニュー -> フラグメント管理 からフラグメントを追加してください。");
+            }
+            List<NumeriUser> numeriUsers = NumeriUsers.getInstance().getNumeriUsers();
+            List<NumeriFragment> numeriFragments = new ArrayList<>();
+            if (!numeriUsers.isEmpty()) {
+                numeriFragments.addAll(FragmentStorager.getInstance().getFragments(numeriUsers));
+            }
+            handler.post(() -> {
+                if (!numeriFragments.isEmpty()) {
+                    infoTextView.setText("フラグメントを生成しています...");
+                    for (NumeriFragment numeriFragment : numeriFragments) {
+                        sectionsPagerAdapter.add(numeriFragment);
                     }
-                });
-            }).start();
-        }
+                    viewPager.setAdapter(sectionsPagerAdapter);
+                    infoTextView.setVisibility(View.GONE);
+                } else {
+                    infoTextView.setText("メニュー -> フラグメント管理 からフラグメントを追加してください。");
+                }
+            });
+        }).start();
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        if (ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled())
+            menu.findItem(R.id.action_dm).setIcon(R.drawable.ic_dm_light);
         return true;
     }
 
@@ -138,6 +142,11 @@ public class MainActivity extends NumeriActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
+            case R.id.action_search:
+                startActivity(TweetSearchActivity.class, false);
+                break;
+            case R.id.action_dm:
+                break;
             case R.id.action_settings:
                 startActivity(ConfigActivity.class, false);
                 break;
@@ -166,13 +175,11 @@ public class MainActivity extends NumeriActivity {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
                 moveTaskToBack(true);
-                return true;
-            case KeyEvent.KEYCODE_HOME:
-                moveTaskToBack(true);
-                return true;
+                break;
             default:
-                return false;
+                break;
         }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void useApiFrequencyConfirmation() {

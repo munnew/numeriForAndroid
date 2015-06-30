@@ -1,23 +1,21 @@
 package com.serori.numeri.fragment;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.fragment.listview.AttachedBottomListener;
-import com.serori.numeri.fragment.listview.item.UserListItem;
+import com.serori.numeri.listview.AttachedBottomListener;
+import com.serori.numeri.listview.item.UserListItem;
 import com.serori.numeri.user.NumeriUser;
-import com.serori.numeri.fragment.listview.item.UserListItemAdapter;
-import com.serori.numeri.fragment.listview.UserListView;
-import com.serori.numeri.userprofile.UserInformationActivity;
+import com.serori.numeri.listview.item.UserListItemAdapter;
+import com.serori.numeri.listview.UserListView;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
@@ -36,9 +34,10 @@ public abstract class UserListFragment extends Fragment implements AttachedBotto
     private UserListView userListView;
     private CursorHolder cursorHolder = new CursorHolder();
     protected static final int LOAD_USER_NUM = 50;
+    private boolean enableAttachedBottomDialog = true;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public final View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_userlist, container, false);
         if (numeriUser == null)
@@ -77,10 +76,6 @@ public abstract class UserListFragment extends Fragment implements AttachedBotto
         return userId;
     }
 
-    public UserListItemAdapter getAdapter() {
-        return userListItemAdapter;
-    }
-
     abstract void onAttachedBottom();
 
     protected UserListView getUserListView() {
@@ -89,14 +84,19 @@ public abstract class UserListFragment extends Fragment implements AttachedBotto
 
     @Override
     public void attachedBottom() {
-        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage("さらにユーザーを読み込みますか？")
-                .setNegativeButton("いいえ", (dialog, id) -> {
-                })
-                .setPositiveButton("はい", (dialog, id) -> {
-                    onAttachedBottom();
-                })
-                .create();
-        ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
+        if (enableAttachedBottomDialog) {
+            enableAttachedBottomDialog = false;
+            AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setMessage("さらにユーザーを読み込みますか？")
+                    .setNegativeButton("キャンセル", (dialog, id) -> {
+                        enableAttachedBottomDialog = true;
+                    })
+                    .setPositiveButton("はい", (dialog, id) -> {
+                        onAttachedBottom();
+                        enableAttachedBottomDialog = true;
+                    }).setOnDismissListener(dialog -> enableAttachedBottomDialog = true)
+                    .create();
+            ((NumeriActivity) getActivity()).setCurrentShowDialog(alertDialog);
+        }
     }
 
     protected CursorHolder getCursorHolder() {

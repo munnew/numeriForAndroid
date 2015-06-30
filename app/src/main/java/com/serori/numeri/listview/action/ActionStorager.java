@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.listview.action;
+package com.serori.numeri.listview.action;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
@@ -57,10 +57,11 @@ public class ActionStorager {
         for (TwitterActions.Actions action : TwitterActions.Actions.values()) {
             if (action == null) {
                 defaultActions[i] = TwitterActions.Actions.ACTION_NONE;
-            } else {
+                i++;
+            } else if (action != TwitterActions.Actions.FAVORITE && action != TwitterActions.Actions.RT) {
                 defaultActions[i] = action;
+                i++;
             }
-            i++;
             if (i == 6) break;
         }
         try {

@@ -18,7 +18,7 @@ public class NumeriUsers {
         return NumeriUsersHolder.instance;
     }
 
-    void addNumeriUser(NumeriUser numeriUser) {
+    public void addNumeriUser(NumeriUser numeriUser) {
         numeriUsers.add(numeriUser);
     }
 
@@ -36,6 +36,12 @@ public class NumeriUsers {
         }
         numeriUsers.clear();
     }
+
+    public void removeNumeriUser(NumeriUser numeriUser) {
+        new Thread(() -> numeriUser.getStreamSwitcher().closeStream());
+        numeriUsers.remove(numeriUser);
+    }
+
 
     private static class NumeriUsersHolder {
         private static final NumeriUsers instance = new NumeriUsers();

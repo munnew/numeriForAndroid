@@ -2,9 +2,8 @@ package com.serori.numeri.twitter;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.ContentResolver;
 import android.content.Context;
+import android.support.v7.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -29,6 +28,7 @@ import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 import com.serori.numeri.main.Global;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.user.NumeriUser;
@@ -47,7 +47,7 @@ import java.util.Map;
 /**
  * TweetActivity
  */
-public class TweetActivity extends NumeriActivity implements TextWatcher {
+public class TweetActivity extends SubsidiaryActivity implements TextWatcher {
     private EditText tweetEditText;
     private TextView remainingTextView;
     private Button tweetButton;
@@ -62,11 +62,13 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     private LinearLayout appendedImageViews;
     private Map<String, OnStatusListener> onStatusListeners = new LinkedHashMap<>();
     private String[] column = {MediaStore.Images.Media.DATA};
+    private static String destinationStatusText = "";
 
     public static void replyTweet(Context activityContext, NumeriUser numeriUser, SimpleTweetStatus destinationTweetStatus) {
         if (!(activityContext instanceof NumeriActivity)) return;
         currentNumeriUser = numeriUser;
         destinationUserNames.addAll(destinationTweetStatus.getDestinationUserNames());
+        destinationStatusText = destinationTweetStatus.getScreenName() + " : " + destinationTweetStatus.getText();
         if (!destinationTweetStatus.isRT()) {
             destinationStatusId = destinationTweetStatus.getStatusId();
         } else {
@@ -78,7 +80,23 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     public static void quoteRetweet(Context activityContext, NumeriUser numeriUser, SimpleTweetStatus quotedTweetStatus) {
         if (!(activityContext instanceof NumeriActivity)) return;
         currentNumeriUser = numeriUser;
-        tweetText = "QT " + quotedTweetStatus.getScreenName() + " >" + quotedTweetStatus.getMainText() + " : ";
+        tweetText = "QT " + quotedTweetStatus.getScreenName() + " >" + quotedTweetStatus.getText() + " : ";
+        ((NumeriActivity) activityContext).startActivity(TweetActivity.class, false);
+    }
+
+    public static void hashtagTweet(Context activityContext, NumeriUser numeriUser, String hashtag) {
+        if (!(activityContext instanceof NumeriActivity)) return;
+        currentNumeriUser = numeriUser;
+        tweetText = hashtag + " ";
+        ((NumeriActivity) activityContext).startActivity(TweetActivity.class, false);
+    }
+
+    public static void hashtagsTweet(Context activityContext, NumeriUser numeriUser, List<String> hashtags) {
+        if (!(activityContext instanceof NumeriActivity)) return;
+        currentNumeriUser = numeriUser;
+        for (String hashtag : hashtags) {
+            tweetText += "#" + hashtag + " ";
+        }
         ((NumeriActivity) activityContext).startActivity(TweetActivity.class, false);
     }
 
@@ -86,6 +104,7 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.in_right, R.anim.out_left);
         setContentView(R.layout.activity_tweet);
         if (savedInstanceState == null) {
             Button changeUserButton = (Button) findViewById(R.id.changeUser);
@@ -125,7 +144,11 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
             });
         }
 
-        if (destinationStatusId != -1) setUserNames();
+        if (destinationStatusId != -1) {
+            setDestinationUserNames();
+            TextView destinationStatusText = (TextView) findViewById(R.id.destinationStatusText);
+            destinationStatusText.setText(TweetActivity.destinationStatusText);
+        }
         if (!tweetText.isEmpty()) {
             tweetEditText.setText(tweetText);
             tweetEditText.setSelection(tweetEditText.length());
@@ -137,15 +160,16 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                finish();
-                return true;
+                inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
+                break;
             case KeyEvent.KEYCODE_MOVE_HOME:
                 inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
                 moveTaskToBack(true);
-                return true;
+                break;
             default:
-                return false;
+                break;
         }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -314,13 +338,13 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
                         }
                     }
                 })
-                .setNegativeButton("いいえ", (dialog, id) -> {
+                .setNegativeButton("キャンセル", (dialog, id) -> {
                 })
                 .create().show();
     }
 
 
-    private void setUserNames() {
+    private void setDestinationUserNames() {
         for (String destinationUserName : destinationUserNames) {
             tweetEditText.setText(tweetEditText.getText() + "@" + destinationUserName + " ");
         }
@@ -354,6 +378,8 @@ public class TweetActivity extends NumeriActivity implements TextWatcher {
         destinationStatusId = -1;
         destinationUserNames.clear();
         appendedImages.clear();
+        inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
+        destinationStatusText = "";
         super.finish();
     }
 }

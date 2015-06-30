@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.listview.item;
+package com.serori.numeri.listview.item;
 
 /**
  */

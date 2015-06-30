@@ -43,6 +43,10 @@
     <string name="center_press_long">中長押し</string>
     <string name="left_press_long">左長押し</string>
     <string name="use_high_resolution_icon">高解像度のアイコンを使う</string>
+    <string name="use_fast_scroll">高速スクロールを使う</string>
+    <string name="enable_image_thumb">画像のサムネイルを表示する</string>
+    <string name="search">検索</string>
+    <string name="DM">DM</string>
     <string name="setting_color">色設定</string>
     <string name="account">アカウント</string>
     <string name="fragment_manage">フラグメント管理</string>
@@ -51,4 +55,8 @@
     <string name="block">ブロック</string>
     <string name="mute">ミュート</string>
     <string name="report_spam">スパム報告</string>
+    <string name="tweet_search">ツイート検索</string>
+    <string name="tweet_search_query_hint">ハッシュタグ、検索ワード</string>
+    <string name="select_user_to_search">検索をするユーザーを選択</string>
+    <string name="follow_request">フォローリクエスト</string>
 </resources>

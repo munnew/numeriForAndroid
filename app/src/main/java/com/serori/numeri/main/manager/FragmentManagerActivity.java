@@ -1,19 +1,17 @@
 package com.serori.numeri.main.manager;
 
-import android.app.AlertDialog;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ListView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 import com.serori.numeri.main.Global;
-import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
@@ -26,7 +24,7 @@ import twitter4j.UserList;
 /**
  * Fragment管理用のActivity
  */
-public class FragmentManagerActivity extends NumeriActivity implements OnFragmentDataDeleteListener {
+public class FragmentManagerActivity extends SubsidiaryActivity implements OnFragmentDataDeleteListener {
     private FragmentManagerItemAdapter adapter;
     private List<FragmentManagerItem> managerItems = new ArrayList<>();
 
@@ -64,9 +62,8 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
         int id = item.getItemId();
         switch (id) {
             case R.id.action_addfragment:
-
+                showAddFragmentDialog();
                 return true;
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -207,19 +204,6 @@ public class FragmentManagerActivity extends NumeriActivity implements OnFragmen
      */
     private void createDMFragmentsListDialog() {
 
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (Global.getInstance().isActiveMainActivity()) {
-                startActivity(MainActivity.class, true);
-            } else {
-                finish();
-            }
-            return true;
-        }
-        return false;
     }
 
     @Override

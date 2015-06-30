@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.listview.item;
+package com.serori.numeri.listview.item;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -14,8 +14,10 @@ import com.serori.numeri.R;
 import com.serori.numeri.color.ColorStorager;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.imageview.NumeriImageView;
+import com.serori.numeri.media.MediaActivity;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,7 +32,6 @@ public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         simpleTweetStatusList = objects;
     }
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -72,14 +73,55 @@ public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
         }
 
         boolean useHighResolution = ConfigurationStorager.EitherConfigurations.USE_HIGH_RESOLUTION_ICON.isEnabled();
-        String iconUrl = useHighResolution ? simpleTweetStatus.getBiggerIconImageUrl() : simpleTweetStatus.getIconImageUrl();
-        iconImageView.startLoadImage(true, NumeriImageView.ProgressType.LOAD_ICON, iconUrl);
+        String iconUrl = useHighResolution ? simpleTweetStatus.getBiggerProfileImageURL() : simpleTweetStatus.getProfileImageURL();
+        iconImageView.setImage(true, NumeriImageView.ProgressType.LOAD_ICON, iconUrl);
 
         screenNameTextView.setText(simpleTweetStatus.getScreenName());
         nameTextView.setText(simpleTweetStatus.getName());
-        mainTextView.setText(simpleTweetStatus.getMainText());
+        mainTextView.setText(simpleTweetStatus.getText());
         viaTextView.setText(simpleTweetStatus.getVia());
         createdTime.setText(simpleTweetStatus.getCreatedTime());
+
+        LinearLayout appendedImageThumbnails = (LinearLayout) convertView.findViewById(R.id.appendedImageThumbnails);
+        if (ConfigurationStorager.EitherConfigurations.DISPLAY_IMAGE_THUMB.isEnabled()) {
+            List<String> thumbnailUris = simpleTweetStatus.getThumbnailUris();
+            List<NumeriImageView> thumbnails = new ArrayList<>();
+            for (int i = 0; i < appendedImageThumbnails.getChildCount(); i++) {
+                NumeriImageView thumbnail = (NumeriImageView) appendedImageThumbnails.getChildAt(i);
+                thumbnails.add(thumbnail);
+            }
+            if (thumbnailUris.isEmpty()) {
+                for (NumeriImageView thumbnail : thumbnails) {
+                    thumbnail.setBackgroundColor(thumbnail.getResources().getColor(R.color.transparency));
+                    thumbnail.setImage(null);
+                    thumbnail.setOnClickListener(null);
+                    thumbnail.setClickable(false);
+                }
+                appendedImageThumbnails.setVisibility(View.GONE);
+            } else {
+                for (int i = 0; i < thumbnails.size(); i++) {
+                    NumeriImageView thumbnail = thumbnails.get(i);
+                    if (i < thumbnailUris.size()) {
+                        thumbnail.setVisibility(View.VISIBLE);
+                        thumbnail.setImageDrawable(null);
+                        thumbnail.setBackgroundColor(convertView.getResources().getColor(R.color.imageView_BackGround));
+                        thumbnail.setImage(true, NumeriImageView.ProgressType.NONE, thumbnailUris.get(i));
+                        int j = i;
+                        thumbnail.setOnClickListener(view -> MediaActivity.show(getContext(), simpleTweetStatus.getMediaUris(), j));
+                    } else {
+                        thumbnail.setBackgroundColor(thumbnail.getResources().getColor(R.color.transparency));
+                        thumbnail.setImage(null);
+                        thumbnail.setOnClickListener(null);
+                        thumbnail.setVisibility(View.GONE);
+                    }
+                }
+                appendedImageThumbnails.setVisibility(View.VISIBLE);
+            }
+        } else {
+            appendedImageThumbnails.setVisibility(View.GONE);
+        }
+
+
         if (simpleTweetStatus.isFavorite()) {
             favoriteStar.setVisibility(View.VISIBLE);
         } else {

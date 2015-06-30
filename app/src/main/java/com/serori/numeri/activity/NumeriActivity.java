@@ -1,12 +1,8 @@
 package com.serori.numeri.activity;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -19,8 +15,7 @@ import java.util.List;
 /**
  * Activityが継承すべきクラス
  */
-public class NumeriActivity extends AppCompatActivity {
-    private AlertDialog currentShowDialog = null;
+public class NumeriActivity extends DialogActivity {
     private List<OnFinishListener> onFinishListeners = new ArrayList<>();
 
     @Override
@@ -36,51 +31,16 @@ public class NumeriActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    protected void onStop() {
-        if (currentShowDialog != null) {
-            if (currentShowDialog.isShowing()) {
-                currentShowDialog.hide();
-            } else {
-                currentShowDialog = null;
-            }
-        }
-        super.onStop();
-    }
-
-    @Override
-    protected void onRestart() {
-        if (currentShowDialog != null) {
-            currentShowDialog.show();
-        }
-        super.onRestart();
-    }
-
-    /**
-     * Dialogをセットすると同時に表示します<br>
-     * このメソッドを使用してDialogを表示した場合、そのDialogのライフサイクルはActivityのライフサイクルに準じます
-     *
-     * @param dialog セットするダイアログ
-     */
-    public void setCurrentShowDialog(AlertDialog dialog) {
-        runOnUiThread(dialog::show);
-        currentShowDialog = dialog;
+    public void addOnFinishListener(OnFinishListener listener) {
+        onFinishListeners.add(listener);
     }
 
     @Override
     protected void onDestroy() {
-        if (currentShowDialog != null) {
-            currentShowDialog.dismiss();
-        }
         if (ConfigurationStorager.EitherConfigurations.SLEEPLESS.isEnabled()) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
-        currentShowDialog = null;
         super.onDestroy();
-    }
-
-    public void addOnFinishListener(OnFinishListener listener) {
-        onFinishListeners.add(listener);
     }
 
     @Override
@@ -103,5 +63,15 @@ public class NumeriActivity extends AppCompatActivity {
         if (finish) {
             finish();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_HOME:
+                moveTaskToBack(true);
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

@@ -2,7 +2,7 @@ package com.serori.numeri.fragment;
 
 import android.os.Handler;
 
-import com.serori.numeri.fragment.listview.item.UserListItem;
+import com.serori.numeri.listview.item.UserListItem;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class FollowUserListFragment extends UserListFragment {
                         List<UserListItem> userListItems = new ArrayList<>();
                         for (User user : users) {
                             UserListItem userListItem = new UserListItem(user, getNumeriUser());
-                            getAdapter().add(userListItem);
+                            getUserListView().getAdapter().add(userListItem);
                             userListItems.add(userListItem);
                         }
                         getCursorHolder().setNextCursor(users.getNextCursor());

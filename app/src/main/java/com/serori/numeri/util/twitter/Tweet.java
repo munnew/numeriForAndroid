@@ -18,7 +18,7 @@ import twitter4j.UploadedMedia;
 
 /**
  */
-public class Tweet {
+public final class Tweet {
     private NumeriUser numeriUser = null;
     private List<File> images = new ArrayList<>();
     private long statusId = -1;

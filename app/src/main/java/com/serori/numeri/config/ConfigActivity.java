@@ -1,7 +1,7 @@
 package com.serori.numeri.config;
 
-import android.app.AlertDialog;
 import android.graphics.Color;
+import android.support.v7.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,10 +14,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 import com.serori.numeri.license.LicenseActivity;
-import com.serori.numeri.fragment.listview.action.ActionStorager;
-import com.serori.numeri.fragment.listview.action.TwitterActions;
+import com.serori.numeri.listview.action.ActionStorager;
+import com.serori.numeri.listview.action.TwitterActions;
 import com.serori.numeri.main.Global;
 import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.util.toast.ToastSender;
@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * アプリケーションの設定についてのActivity
  */
-public class ConfigActivity extends NumeriActivity {
+public class ConfigActivity extends SubsidiaryActivity {
     private boolean previousTheme;
     private String textColor = "#000000";
 
@@ -53,10 +53,14 @@ public class ConfigActivity extends NumeriActivity {
         TextView tweetAdditionalAcquisitionFlagText = ((TextView) findViewById(R.id.tweetAdditionalAcquisitionFlagText));
         TextView sleeplessText = (TextView) findViewById(R.id.sleeplessText);
         TextView useHighResolutionIconText = (TextView) findViewById(R.id.useHighResolutionIconText);
+        TextView fastScrollText = (TextView) findViewById(R.id.fastScrollText);
+        TextView displayImageThumbText = (TextView) findViewById(R.id.displayImageThumbText);
         openMenuButton.setTextColor(Color.parseColor(textColor));
         tweetAdditionalAcquisitionFlagText.setTextColor(Color.parseColor(textColor));
         sleeplessText.setTextColor(Color.parseColor(textColor));
         useHighResolutionIconText.setTextColor(Color.parseColor(textColor));
+        fastScrollText.setTextColor(Color.parseColor(textColor));
+        displayImageThumbText.setTextColor(Color.parseColor(textColor));
         for (int i = 0; i < actionMenu.getChildCount(); i++) {
             ((Button) actionMenu.getChildAt(i)).setTextColor(Color.parseColor(textColor));
         }
@@ -94,6 +98,15 @@ public class ConfigActivity extends NumeriActivity {
         CheckBox useHighResolutionIconCheckBox = (CheckBox) findViewById(R.id.useHighResolutionIconCheckBox);
         initChooseEitherAction(useHighResolutionIconText, useHighResolutionIconCheckBox,
                 ConfigurationStorager.EitherConfigurations.USE_HIGH_RESOLUTION_ICON);
+
+        CheckBox fastScrollCheckBox = (CheckBox) findViewById(R.id.fastScrollCheckBox);
+        initChooseEitherAction(fastScrollText, fastScrollCheckBox,
+                ConfigurationStorager.EitherConfigurations.USE_FAST_SCROLL);
+
+        CheckBox displayImageThumbCheckBox = (CheckBox) findViewById(R.id.displayImageThumbCheckBox);
+        initChooseEitherAction(displayImageThumbText, displayImageThumbCheckBox,
+                ConfigurationStorager.EitherConfigurations.DISPLAY_IMAGE_THUMB);
+
     }
 
     private void initChooseEitherAction(TextView textView, CheckBox checkBox, ConfigurationStorager.EitherConfigurations eitherConfiguration) {
@@ -168,7 +181,7 @@ public class ConfigActivity extends NumeriActivity {
         List<CharSequence> actionTexts = new ArrayList<>();
         List<TwitterActions.Actions> actions = new ArrayList<>();
         for (TwitterActions.Actions action : TwitterActions.Actions.values()) {
-            if (TwitterActions.Actions.OPEN_URI != action) {
+            if (!action.getName().equals("")) {
                 actionTexts.add(action.getName());
                 actions.add(action);
             }

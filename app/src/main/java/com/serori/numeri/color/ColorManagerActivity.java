@@ -1,12 +1,11 @@
 package com.serori.numeri.color;
 
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.ListView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import java.util.List;
 /**
  * ColorManagerActivity
  */
-public class ColorManagerActivity extends NumeriActivity {
+public class ColorManagerActivity extends SubsidiaryActivity {
     private ColorListAdapter adapter;
 
     @Override
@@ -46,15 +45,4 @@ public class ColorManagerActivity extends NumeriActivity {
         }
 
     }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            finish();
-            return true;
-        }
-        return false;
-    }
-
-
 }

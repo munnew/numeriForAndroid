@@ -1,13 +1,12 @@
 package com.serori.numeri.stream;
 
-import com.serori.numeri.stream.event.OnDeletionNoticeListener;
+import com.serori.numeri.stream.event.OnStatusDeletionNoticeListener;
 import com.serori.numeri.stream.event.OnFavoriteListener;
 import com.serori.numeri.stream.event.OnFollowListener;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.stream.event.OnUnFavoriteListener;
 import com.serori.numeri.stream.event.OnUnFollowListener;
 
-import java.io.InputStream;
 
 /**
  * Streamのイベントを追加していくためのインターフェース
@@ -44,7 +43,7 @@ public interface IStreamEvent {
      * @param listener OnDeletionNoticeListener
      * @return IStreamEvent
      */
-    IStreamEvent addOnDeletionNoticeListener(OnDeletionNoticeListener listener);
+    IStreamEvent addOnStatusDeletionNoticeListener(OnStatusDeletionNoticeListener listener);
 
     /**
      * onFollowイベントを追加する
@@ -88,7 +87,7 @@ public interface IStreamEvent {
      *
      * @param listener OnDeletionNoticeListener
      */
-    void removeOnDeletionNoticeListener(OnDeletionNoticeListener listener);
+    void removeOnDeletionNoticeListener(OnStatusDeletionNoticeListener listener);
 
     /**
      * onFollowイベントをリムーブする

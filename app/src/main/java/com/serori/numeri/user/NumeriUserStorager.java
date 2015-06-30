@@ -1,6 +1,7 @@
 package com.serori.numeri.user;
 
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
@@ -20,6 +21,7 @@ import java.util.List;
  *
  */
 public class NumeriUserStorager {
+    private List<OnAddedNumeriUserListener> onAddedNumeriUserListeners = new ArrayList<>();
 
     private NumeriUserStorager() {
     }
@@ -28,7 +30,7 @@ public class NumeriUserStorager {
         return NumeriUserStoragerHolder.instance;
     }
 
-    public void saveNumeriUser(NumeriUserTable userTable) {
+    public void addNumeriUserTable(NumeriUserTable userTable) {
         ConnectionSource connectionSource = null;
         try {
             DataBaseHelper helper = new DataBaseHelper(Global.getInstance().getApplicationContext());
@@ -36,6 +38,22 @@ public class NumeriUserStorager {
             TableUtils.createTableIfNotExists(connectionSource, NumeriUserTable.class);
             Dao<NumeriUserTable, String> dao = helper.getDao(NumeriUserTable.class);
             dao.createOrUpdate(userTable);
+            if (!onAddedNumeriUserListeners.isEmpty()) {
+                Handler handler = new Handler();
+                new Thread(() -> {
+                    NumeriUser numeriUser = new NumeriUser(userTable);
+                    numeriUser.getStreamSwitcher().startStream();
+                    Global.getInstance().getNumeriUsers().addNumeriUser(numeriUser);
+                    handler.post(() -> {
+                        for (OnAddedNumeriUserListener onAddedNumeriUserListener : onAddedNumeriUserListeners) {
+                            onAddedNumeriUserListener.OnAddedNumeriUserTable(numeriUser);
+                        }
+                        List<OnAddedNumeriUserListener> listeners = new ArrayList<>();
+                        listeners.addAll(onAddedNumeriUserListeners);
+                        onAddedNumeriUserListeners.removeAll(listeners);
+                    });
+                }).start();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -105,6 +123,10 @@ public class NumeriUserStorager {
                 }
             }
         }
+    }
+
+    public void addOnAddedNumeriUserListener(OnAddedNumeriUserListener onAddedNumeriUserListener) {
+        this.onAddedNumeriUserListeners.add(onAddedNumeriUserListener);
     }
 
     private static class NumeriUserStoragerHolder {

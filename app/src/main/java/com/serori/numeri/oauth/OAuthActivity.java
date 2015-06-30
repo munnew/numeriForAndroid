@@ -5,16 +5,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ListView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 import com.serori.numeri.main.Global;
-import com.serori.numeri.main.MainActivity;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
@@ -34,7 +32,7 @@ import twitter4j.conf.ConfigurationContext;
 /**
  * 認証用の画面
  */
-public class OAuthActivity extends NumeriActivity implements OnUserDeleteListener {
+public class OAuthActivity extends SubsidiaryActivity implements OnUserDeleteListener {
     private UserListItemAdapter adapter;
 
     @Override
@@ -42,7 +40,7 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oauth);
         if (savedInstanceState == null) {
-            List<NumeriUserListItem> userListItems = new ArrayList<>();
+            List<NumeriUser> userListItems = new ArrayList<>();
             ListView numeriUserListView;
             numeriUserListView = (ListView) findViewById(R.id.numeriUserListView);
             adapter = new UserListItemAdapter(this, 0, userListItems);
@@ -135,12 +133,9 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
                 if (resultToken != null) {
                     Log.v("screenName", token.getScreenName());
                     ToastSender.sendToast(token.getScreenName() + "認証");
+                    NumeriUserStorager.getInstance().addOnAddedNumeriUserListener(adapter::add);
                     NumeriUserStorager.NumeriUserTable userTable = new NumeriUserStorager.NumeriUserTable(token.getToken(), token.getTokenSecret(), token.getScreenName());
-                    NumeriUserStorager.getInstance().saveNumeriUser(userTable);
-                    if (!Global.getInstance().isActiveMainActivity()) {
-                        Global.getInstance().destroyMainActivity();
-                    }
-                    startActivity(MainActivity.class, true);
+                    NumeriUserStorager.getInstance().addNumeriUserTable(userTable);
                 } else {
                     ToastSender.sendToast("認証失敗");
                 }
@@ -157,35 +152,18 @@ public class OAuthActivity extends NumeriActivity implements OnUserDeleteListene
             numeriUsers = Global.getInstance().getNumeriUsers().getNumeriUsers();
             Log.v("numeriUsersSize", "" + numeriUsers.size());
             if (!numeriUsers.isEmpty()) {
-                List<NumeriUserListItem> listItems = new ArrayList<>();
-                for (NumeriUser numeriUser : numeriUsers) {
-                    NumeriUserListItem item = new NumeriUserListItem();
-                    item.setScreenName(numeriUser.getScreenName());
-                    item.setToken(numeriUser.getAccessToken().getToken());
-                    listItems.add(item);
-                }
-                runOnUiThread(() -> adapter.addAll(listItems));
+                runOnUiThread(() -> adapter.addAll(numeriUsers));
             }
         });
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (Global.getInstance().isActiveMainActivity()) {
-                startActivity(MainActivity.class, true);
-            } else {
-                finish();
-            }
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public void onUserDelete(int position) {
-        Global.getInstance().destroyMainActivity();
+        NumeriUser numeriUser = Global.getInstance().getNumeriUsers().getNumeriUsers().get(position);
+        Global.getInstance().getNumeriUsers().removeNumeriUser(numeriUser);
         adapter.remove(adapter.getItem(position));
+        Global.getInstance().destroyMainActivity();
     }
 }
 

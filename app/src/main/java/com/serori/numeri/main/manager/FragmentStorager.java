@@ -245,7 +245,7 @@ public class FragmentStorager {
     /**
      * Fragmentの種類を表す列挙型
      */
-    public static enum FragmentType {
+    public enum FragmentType {
         TL("TimeLine"),
         MENTIONS("Mentions"),
         LIST("リスト");

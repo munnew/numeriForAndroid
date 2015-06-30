@@ -1,4 +1,4 @@
-package com.serori.numeri.fragment.listview.item;
+package com.serori.numeri.listview.item;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
@@ -51,12 +52,18 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
         followButton.setBackgroundColor(getContext().getResources().getColor(R.color.not_selected_color));
         TextView relationIndicator = (TextView) convertView.findViewById(R.id.relationIndicator);
         relationIndicator.setText("");
+        ImageView protectedIndicator = (ImageView) convertView.findViewById(R.id.key);
         boolean useHighResolution = ConfigurationStorager.EitherConfigurations.USE_HIGH_RESOLUTION_ICON.isEnabled();
         String iconUrl = useHighResolution ? userListItem.getBiggerIconImageUrl() : userListItem.getIconImageUrl();
-        iconImageView.startLoadImage(true, NumeriImageView.ProgressType.LOAD_ICON, iconUrl);
+        iconImageView.setImage(true, NumeriImageView.ProgressType.LOAD_ICON, iconUrl);
         userScreenNameTextView.setText(userListItem.getUserScreenName());
         userNameTextView.setText(userListItem.getUserName());
         bioTextView.setText(userListItem.getBio());
+        if (userListItem.isProtected()) {
+            protectedIndicator.setVisibility(View.VISIBLE);
+        } else {
+            protectedIndicator.setVisibility(View.GONE);
+        }
 
 
         if (userListItem.isMe()) {
@@ -72,7 +79,7 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
                 followButton.setText("フォロー解除");
                 followButton.setBackgroundColor(getContext().getResources().getColor(R.color.un_follow_color));
             } else {
-                followButton.setText("フォローする");
+                followButton.setText(userListItem.isProtected() ? "フォローリクエスト" : "フォローする");
                 followButton.setBackgroundColor(getContext().getResources().getColor(R.color.follow_color));
             }
             relationIndicator.setText(userListItem.getRelationship());

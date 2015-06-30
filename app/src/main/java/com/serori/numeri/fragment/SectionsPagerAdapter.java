@@ -44,4 +44,8 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         }
         fragments.add(fragment);
     }
+
+    public void remove(Fragment fragment) {
+        fragments.remove(fragment);
+    }
 }

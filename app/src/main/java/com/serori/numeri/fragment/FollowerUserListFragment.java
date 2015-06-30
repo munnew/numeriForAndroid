@@ -2,12 +2,13 @@ package com.serori.numeri.fragment;
 
 import android.os.Handler;
 
-import com.serori.numeri.fragment.listview.item.UserListItem;
+import com.serori.numeri.listview.item.UserListItem;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.IDs;
 import twitter4j.PagableResponseList;
 import twitter4j.TwitterException;
 import twitter4j.User;
@@ -38,7 +39,7 @@ public class FollowerUserListFragment extends UserListFragment {
                         List<UserListItem> userListItems = new ArrayList<>();
                         for (User user : users) {
                             UserListItem userListItem = new UserListItem(user, getNumeriUser());
-                            getAdapter().add(userListItem);
+                            getUserListView().getAdapter().add(userListItem);
                             userListItems.add(userListItem);
                         }
                         getCursorHolder().setNextCursor(users.getNextCursor());
@@ -49,7 +50,6 @@ public class FollowerUserListFragment extends UserListFragment {
             }).start();
         }
     }
-
 
     private PagableResponseList<User> getPagableUserList(long cursor) {
         PagableResponseList<User> followers = null;

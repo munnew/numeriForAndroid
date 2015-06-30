@@ -1,7 +1,7 @@
 package com.serori.numeri.exceptionreport;
 
-import android.app.AlertDialog;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.net.Uri;
 import android.os.Build;
 
@@ -96,7 +96,7 @@ public class ExceptionReportStorager {
                         intent.putExtra(Intent.EXTRA_SUBJECT, "【report】");
                         intent.putExtra(Intent.EXTRA_TEXT, info + exceptionReport);
                         activity.startActivity(intent);
-                    }).setNegativeButton("いいえ", null).create();
+                    }).setNegativeButton("キャンセル", null).create();
             activity.setCurrentShowDialog(alertDialog);
         }
     }

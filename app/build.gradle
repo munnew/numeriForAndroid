@@ -54,13 +54,14 @@ repositories {
 
 dependencies {
     retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:1.6.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'org.twitter4j:twitter4j-core:4.0.2'
     compile 'org.twitter4j:twitter4j-async:4.0.2'
     compile 'org.twitter4j:twitter4j-stream:4.0.2'
     compile 'com.j256.ormlite:ormlite-core:4.48'
     compile 'com.j256.ormlite:ormlite-android:4.48'
     compile 'com.android.support:appcompat-v7:22.1.1'
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.google.android.gms:play-services-identity:7.3.0'
 }
 
 
@@ -68,7 +69,6 @@ retrolambda {
     jdk System.getenv("JAVA_HOME")
     oldJdk System.getenv("JAVA_HOME")
     javaVersion JavaVersion.VERSION_1_7
-    // jvmArgs '-arg1', '-arg2'
     incremental false
 }
 
