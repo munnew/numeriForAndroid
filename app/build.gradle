@@ -15,7 +15,7 @@ android {
         serori {
             keyAlias 'serori'
             keyPassword 'bbB3yYa9'
-            storeFile file('serori.keystore')
+            storeFile file('../serori.keystore')
             storePassword 'bbB3yYa9'
         }
     }
