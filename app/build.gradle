@@ -42,6 +42,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles 'proguard-rules.pro'
+            signingConfig signingConfigs.serori
+        }
+        debug {
+            signingConfig signingConfigs.serori
         }
     }
     aaptOptions {
@@ -64,8 +68,8 @@ dependencies {
     compile 'org.twitter4j:twitter4j-stream:4.0.2'
     compile 'com.j256.ormlite:ormlite-core:4.48'
     compile 'com.j256.ormlite:ormlite-android:4.48'
-    compile 'com.android.support:appcompat-v7:22.1.1'
-    compile 'com.google.android.gms:play-services-identity:7.3.0'
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.google.android.gms:play-services-identity:7.5.0'
 }
 
 
