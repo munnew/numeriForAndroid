@@ -11,18 +11,23 @@ apply plugin: 'com.android.application'
 
 
 android {
+    signingConfigs {
+        serori {
+            keyAlias 'serori'
+            keyPassword 'bbB3yYa9'
+            storeFile file('serori.keystore')
+            storePassword 'bbB3yYa9'
+        }
+    }
     compileSdkVersion 22
     buildToolsVersion '22.0.1'
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     lintOptions {
         abortOnError false
     }
-
     defaultConfig {
         applicationId "com.serori.numeri"
         minSdkVersion 16
@@ -33,7 +38,6 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
     }
-
     buildTypes {
         release {
             minifyEnabled false

@@ -331,8 +331,8 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
                     }
                 }
                 int followRequestNum = followRequestUserIds.size();
-                followRequestNumText.setText("" + followRequestNum);
                 handler.post(() -> {
+                    followRequestNumText.setText("" + followRequestNum);
                     followRequest.setVisibility(followRequestNum > 0 ? View.VISIBLE : View.GONE);
                 });
             }).start();
