@@ -1,4 +1,4 @@
-package com.serori.numeri.activity;
+package com.serori.numeri.temp.activity;
 
 import android.view.KeyEvent;
 

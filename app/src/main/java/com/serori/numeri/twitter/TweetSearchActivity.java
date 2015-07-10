@@ -8,7 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.SubsidiaryActivity;
+import com.serori.numeri.temp.activity.SubsidiaryActivity;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.listview.TimeLineListView;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;

@@ -6,8 +6,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.activity.SubsidiaryActivity;
+import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.temp.activity.SubsidiaryActivity;
 
 import java.util.ArrayList;
 import java.util.List;

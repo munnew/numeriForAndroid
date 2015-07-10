@@ -3,7 +3,7 @@ package com.serori.numeri.directmessage;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.serori.numeri.activity.SubsidiaryActivity;
+import com.serori.numeri.temp.activity.SubsidiaryActivity;
 import com.serori.numeri.main.Global;
 import com.serori.numeri.user.NumeriUser;
 

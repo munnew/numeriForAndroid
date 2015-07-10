@@ -8,8 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.imageview.NumeriImageView;
+import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.temp.imageview.NumeriImageView;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.serori.numeri.activity;
+package com.serori.numeri.temp.activity;
 
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;

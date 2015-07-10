@@ -1,4 +1,4 @@
-package com.serori.numeri.imageview;
+package com.serori.numeri.temp.imageview;
 
 import android.content.Context;
 import android.support.v7.app.AlertDialog;
@@ -8,8 +8,8 @@ import android.os.Environment;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.imageview.cache.ImageDownloader;
+import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.temp.imageview.cache.ImageDownloader;
 import com.serori.numeri.util.toast.ToastSender;
 
 import java.io.File;

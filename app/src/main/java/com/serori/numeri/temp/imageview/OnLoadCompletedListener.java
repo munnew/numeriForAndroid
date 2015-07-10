@@ -1,4 +1,4 @@
-package com.serori.numeri.imageview;
+package com.serori.numeri.temp.imageview;
 
 import android.graphics.Bitmap;
 

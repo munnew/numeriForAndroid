@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.SubsidiaryActivity;
+import com.serori.numeri.temp.activity.SubsidiaryActivity;
 import com.serori.numeri.main.Global;
 import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.user.NumeriUser;

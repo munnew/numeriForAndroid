@@ -3,8 +3,6 @@ package com.serori.numeri.fragment;
 import android.os.Handler;
 import android.util.Log;
 
-import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.main.Global;
 import com.serori.numeri.main.manager.FragmentStorager;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.twitter.SimpleTweetStatus;

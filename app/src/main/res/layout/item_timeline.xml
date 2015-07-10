@@ -18,7 +18,7 @@
             android:layout_margin="0dp" />
 
 
-        <com.serori.numeri.imageview.NumeriImageView
+        <com.serori.numeri.temp.imageview.NumeriImageView
             android:id="@+id/userIcon"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -97,28 +97,28 @@
                 android:orientation="horizontal"
                 android:visibility="gone">
 
-                <com.serori.numeri.imageview.NumeriImageView
+                <com.serori.numeri.temp.imageview.NumeriImageView
                     android:layout_width="55dp"
                     android:layout_height="55dp"
                     android:layout_gravity="center"
                     android:layout_margin="5dp"
                     android:background="@color/transparency" />
 
-                <com.serori.numeri.imageview.NumeriImageView
+                <com.serori.numeri.temp.imageview.NumeriImageView
                     android:layout_width="55dp"
                     android:layout_height="55dp"
                     android:layout_gravity="center"
                     android:layout_margin="5dp"
                     android:background="@color/transparency" />
 
-                <com.serori.numeri.imageview.NumeriImageView
+                <com.serori.numeri.temp.imageview.NumeriImageView
                     android:layout_width="55dp"
                     android:layout_height="55dp"
                     android:layout_gravity="center"
                     android:layout_margin="5dp"
                     android:background="@color/transparency" />
 
-                <com.serori.numeri.imageview.NumeriImageView
+                <com.serori.numeri.temp.imageview.NumeriImageView
                     android:layout_width="55dp"
                     android:layout_height="55dp"
                     android:layout_gravity="center"

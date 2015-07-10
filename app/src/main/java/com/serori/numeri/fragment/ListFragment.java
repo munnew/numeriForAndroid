@@ -3,7 +3,6 @@ package com.serori.numeri.fragment;
 
 import android.os.Handler;
 
-import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.twitter.SimpleTweetStatus;
 import com.serori.numeri.user.NumeriUser;

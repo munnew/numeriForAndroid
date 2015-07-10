@@ -2,7 +2,7 @@ package com.serori.numeri.userprofile;
 
 import android.os.Bundle;
 
-import com.serori.numeri.activity.SubsidiaryActivity;
+import com.serori.numeri.temp.activity.SubsidiaryActivity;
 
 /**
  */

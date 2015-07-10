@@ -16,15 +16,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
-import com.serori.numeri.activity.SubsidiaryActivity;
+import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.temp.activity.SubsidiaryActivity;
 import com.serori.numeri.config.ConfigurationStorager;
 import com.serori.numeri.fragment.FavoriteTweetsFragment;
 import com.serori.numeri.fragment.FollowUserListFragment;
 import com.serori.numeri.fragment.FollowerUserListFragment;
 import com.serori.numeri.fragment.UserInfoPagerAdapter;
 import com.serori.numeri.fragment.UserPublicTimeLineFragment;
-import com.serori.numeri.imageview.NumeriImageView;
+import com.serori.numeri.temp.imageview.NumeriImageView;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 

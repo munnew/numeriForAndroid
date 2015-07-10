@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.temp.activity.NumeriActivity;
 import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.user.NumeriUserStorager;
 import com.serori.numeri.userprofile.UserInformationActivity;

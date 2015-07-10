@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.serori.numeri.R;
-import com.serori.numeri.activity.SubsidiaryActivity;
+import com.serori.numeri.temp.activity.SubsidiaryActivity;
 import com.serori.numeri.license.LicenseActivity;
 import com.serori.numeri.listview.action.ActionStorager;
 import com.serori.numeri.listview.action.TwitterActions;
