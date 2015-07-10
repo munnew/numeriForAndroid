@@ -67,7 +67,6 @@ public class MainActivity extends NumeriActivity {
                 startActivity(OAuthActivity.class, true);
             }
         }
-
     }
 
     private void init() {
