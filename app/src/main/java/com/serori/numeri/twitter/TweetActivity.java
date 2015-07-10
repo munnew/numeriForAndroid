@@ -80,7 +80,7 @@ public class TweetActivity extends SubsidiaryActivity implements TextWatcher {
     public static void quoteRetweet(Context activityContext, NumeriUser numeriUser, SimpleTweetStatus quotedTweetStatus) {
         if (!(activityContext instanceof NumeriActivity)) return;
         currentNumeriUser = numeriUser;
-        tweetText = "QT " + quotedTweetStatus.getScreenName() + " >" + quotedTweetStatus.getText() + " : ";
+        tweetText = "QT @" + quotedTweetStatus.getScreenName() + " >" + quotedTweetStatus.getText() + " : ";
         ((NumeriActivity) activityContext).startActivity(TweetActivity.class, false);
     }
 
