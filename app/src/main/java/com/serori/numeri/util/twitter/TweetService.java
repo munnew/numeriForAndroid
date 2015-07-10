@@ -7,7 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.main.Global;
 
 /**

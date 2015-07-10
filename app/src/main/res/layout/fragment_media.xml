@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <com.serori.numeri.temp.imageview.NumeriImageView
+    <com.serori.numeri.imageview.NumeriImageView
         android:id="@+id/mediaImageView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

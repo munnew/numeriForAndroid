@@ -26,7 +26,7 @@
                 android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
-                <com.serori.numeri.temp.imageview.NumeriImageView
+                <com.serori.numeri.imageview.NumeriImageView
                     android:id="@+id/userInfoIcon"
                     android:layout_width="55dp"
                     android:layout_height="55dp"

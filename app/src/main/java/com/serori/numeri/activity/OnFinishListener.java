@@ -1,4 +1,4 @@
-package com.serori.numeri.temp.activity;
+package com.serori.numeri.activity;
 
 /**
  */

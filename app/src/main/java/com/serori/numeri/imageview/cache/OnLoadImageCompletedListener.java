@@ -1,4 +1,4 @@
-package com.serori.numeri.temp.imageview.cache;
+package com.serori.numeri.imageview.cache;
 
 /**
  * OnLoadImageCompletedListener

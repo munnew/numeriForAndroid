@@ -13,7 +13,7 @@
         android:background="@color/transparency"
         android:orientation="horizontal">
 
-        <com.serori.numeri.temp.imageview.NumeriImageView
+        <com.serori.numeri.imageview.NumeriImageView
             android:id="@+id/userIcon"
             android:layout_width="40dp"
             android:layout_height="40dp"

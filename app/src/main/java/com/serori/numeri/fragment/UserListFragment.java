@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.serori.numeri.R;
-import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.listview.AttachedBottomListener;
 import com.serori.numeri.listview.item.UserListItem;
 import com.serori.numeri.user.NumeriUser;

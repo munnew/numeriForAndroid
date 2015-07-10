@@ -10,7 +10,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.main.Global;
 import com.serori.numeri.util.database.DataBaseHelper;
 

@@ -6,8 +6,8 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.temp.activity.NumeriActivity;
-import com.serori.numeri.temp.activity.SubsidiaryActivity;
+import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 
 /**
  */

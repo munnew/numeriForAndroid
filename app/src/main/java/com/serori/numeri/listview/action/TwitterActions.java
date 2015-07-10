@@ -6,7 +6,7 @@ import android.support.v7.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.media.MediaActivity;
 import com.serori.numeri.twitter.ConversationActivity;

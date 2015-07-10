@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 
 import com.serori.numeri.R;
-import com.serori.numeri.temp.activity.NumeriActivity;
-import com.serori.numeri.temp.activity.SubsidiaryActivity;
+import com.serori.numeri.activity.NumeriActivity;
+import com.serori.numeri.activity.SubsidiaryActivity;
 import com.serori.numeri.listview.TimeLineListView;
 import com.serori.numeri.listview.item.TimeLineItemAdapter;
 import com.serori.numeri.user.NumeriUser;

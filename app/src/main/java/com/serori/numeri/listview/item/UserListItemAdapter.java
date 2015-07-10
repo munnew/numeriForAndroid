@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.serori.numeri.R;
 import com.serori.numeri.config.ConfigurationStorager;
-import com.serori.numeri.temp.imageview.NumeriImageView;
+import com.serori.numeri.imageview.NumeriImageView;
 import com.serori.numeri.userprofile.UserInformationActivity;
 
 import java.util.List;

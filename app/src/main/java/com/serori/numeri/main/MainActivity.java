@@ -13,7 +13,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.serori.numeri.R;
-import com.serori.numeri.temp.activity.NumeriActivity;
+import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.color.ColorManagerActivity;
 import com.serori.numeri.config.ConfigActivity;
 import com.serori.numeri.config.ConfigurationStorager;
