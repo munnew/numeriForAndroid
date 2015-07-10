@@ -1,16 +1,16 @@
 <resources>
 
     <style name="AppTheme_Light" parent="Theme.AppCompat.Light">
-        <item name="android:textCursorDrawable">@drawable/dark_cursor</item>
         <item name="actionBarStyle">@style/ActionBarStyle_Light</item>
         <item name="actionBarSize">45dip</item>
+        <item name="editTextStyle">@style/EditTextStyle_Light</item>
     </style>
 
 
     <style name="AppTheme_Dark" parent="ThemeOverlay.AppCompat.Dark">
-        <item name="android:textCursorDrawable">@drawable/light_cursor</item>
         <item name="actionBarStyle">@style/ActionBarStyle_Dark</item>
         <item name="actionBarSize">45dip</item>
+        <item name="editTextStyle">@style/EditTextStyle_Dark</item>
     </style>
 
 
@@ -26,5 +26,13 @@
 
     <style name="ActionBarTitleStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="EditTextStyle_Dark" parent="Widget.AppCompat.EditText">
+        <item name="android:textCursorDrawable">@drawable/light_cursor</item>
+    </style>
+
+    <style name="EditTextStyle_Light" parent="Widget.AppCompat.EditText">
+        <item name="android:textCursorDrawable">@drawable/dark_cursor</item>
     </style>
 </resources>
