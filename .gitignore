@@ -1,13 +1,7 @@
 .gradle
-.gradle\2.2\taskArtifacts
-.gradle\2.2.1\taskArtifacts
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 .DS_Store
 /build
 .idea
 serori.keystore
-/app/app.iml
-numeri.iml
 numeriForAndroid.iml
