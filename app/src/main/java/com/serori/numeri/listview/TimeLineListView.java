@@ -2,7 +2,6 @@ package com.serori.numeri.listview;
 
 import android.app.Activity;
 import android.content.Context;
-import android.database.CursorIndexOutOfBoundsException;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -22,14 +21,13 @@ import com.serori.numeri.user.NumeriUser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 /**
  * タイムラインを表示するためのリストビュー
  */
 public class TimeLineListView extends AttachedBottomCallBackListView {
     private float touchedCoordinatesX;
-    private boolean insertItemEnable = true;
+    private boolean insertItemEnabled = true;
 
     private int _firstVisibleItemPosition = 0;
     private int _visibleItemCount = 0;
@@ -48,10 +46,8 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
     public TimeLineListView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setOnItemScrollListener((view, firstVisibleItemPosition, visibleItemCount, totalItemCount) -> {
-            _firstVisibleItemPosition = firstVisibleItemPosition;
-            _visibleItemCount = visibleItemCount;
-            if (firstVisibleItemPosition == 1 && !storedItems.isEmpty() && insertItemEnable) {
-                insertItemEnable = false;
+            if (firstVisibleItemPosition == 0 && !storedItems.isEmpty() && insertItemEnabled) {
+                insertItemEnabled = false;
                 int y = getChildAt(0).getTop();
                 int size = storedItems.size();
                 while (!storedItems.isEmpty()) {
@@ -59,8 +55,10 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
                     storedItems.remove(0);
                     setSelectionFromTop(size - storedItems.size(), y);
                 }
-                insertItemEnable = true;
+                insertItemEnabled = true;
             }
+            _firstVisibleItemPosition = firstVisibleItemPosition;
+            _visibleItemCount = visibleItemCount;
         });
     }
 
@@ -201,7 +199,7 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
         onTouchItemEnabled(numeriUser, getContext());
         startObserveFavorite(numeriUser);
     }
-
+    //ToDo いずれちゃんと実装するのでコメントアウトしときます
     /*
         public void startObserveDestroyTweet(NumeriUser numeriUser) {
             numeriUser.getStreamEvent().addOnStatusDeletionNoticeListener(statusDeletionNotice -> {
@@ -216,6 +214,11 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
             });
         }
     */
+
+    /**
+     *  TimeLineItemAdapterを渡してください
+     * @param adapter TimeLineItemAdapter
+     */
     @Override
     public void setAdapter(ListAdapter adapter) {
         if (!(adapter instanceof TimeLineItemAdapter))
@@ -228,8 +231,12 @@ public class TimeLineListView extends AttachedBottomCallBackListView {
         return (TimeLineItemAdapter) super.getAdapter();
     }
 
+    /**
+     * 一番上にアイテムを追加する際に使用
+     * @param item SimpleTweetStatus
+     */
     public void insert(SimpleTweetStatus item) {
-        if (getFirstVisiblePosition() == 0 && getChildAt(0).getTop() == 0 && insertItemEnable) {
+        if (getFirstVisiblePosition() == 0 && insertItemEnabled) {
             Global.getInstance().runOnUiThread(() -> getAdapter().insert(item, 0));
         } else {
             storedItems.add(item);
