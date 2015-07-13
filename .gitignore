@@ -6,7 +6,8 @@
 /.idea/libraries
 .DS_Store
 /build
-serori.keystore
 .idea
+serori.keystore
 /app/app.iml
 numeri.iml
+numeriForAndroid.iml
