@@ -3,10 +3,7 @@ package com.serori.numeri.fragment;
 import android.os.Handler;
 
 import com.serori.numeri.main.manager.FragmentStorager;
-import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.twitter.SimpleTweetStatus;
-import com.serori.numeri.user.NumeriUser;
-import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import twitter4j.Paging;
 import twitter4j.ResponseList;
@@ -17,7 +14,7 @@ import twitter4j.UserMentionEntity;
 /**
  * ユーザーへのリプライを表示するFragment
  */
-public class MentionsFragment extends NumeriFragment implements OnStatusListener {
+public class MentionsFragment extends TwitterStreamFragment {
 
     @Override
     public void setFragmentName(String name) {
@@ -30,7 +27,7 @@ public class MentionsFragment extends NumeriFragment implements OnStatusListener
         new Thread(() -> {
             Paging paging = new Paging();
             paging.setCount(30);
-            ResponseList<Status> statuses = getMentionsTweetsList(paging, false);
+            ResponseList<Status> statuses = getTweets(paging, false);
             if (statuses == null) return;
             handler.post(() -> {
                 for (Status status : statuses) {
@@ -43,13 +40,19 @@ public class MentionsFragment extends NumeriFragment implements OnStatusListener
     }
 
     @Override
-    public void onStatus(Status status) {
+    protected void onTweetStats(Status status) {
         for (UserMentionEntity userMentionEntity : status.getUserMentionEntities()) {
             if (userMentionEntity.getId() == getNumeriUser().getAccessToken().getUserId() && !status.isRetweet()) {
                 getTimelineListView().insert(SimpleTweetStatus.build(status, getNumeriUser()));
             }
         }
     }
+
+    @Override
+    ResponseList<Status> getResponseList(Paging paging) throws TwitterException {
+        return getNumeriUser().getTwitter().getMentionsTimeline(paging);
+    }
+
 
     @Override
     protected void onAttachedBottom() {
@@ -59,7 +62,7 @@ public class MentionsFragment extends NumeriFragment implements OnStatusListener
             Paging paging = new Paging();
             paging.setCount(31);
             paging.setMaxId(getTimelineListView().getAdapter().getItem(getTimelineListView().getAdapter().getCount() - 1).getStatusId());
-            ResponseList<Status> statuses = getMentionsTweetsList(paging, true);
+            ResponseList<Status> statuses = getTweets(paging, true);
             handler.post(() -> {
                 for (Status status : statuses) {
                     getTimelineListView().getAdapter().addAll(SimpleTweetStatus.build(status, getNumeriUser()));
@@ -69,25 +72,5 @@ public class MentionsFragment extends NumeriFragment implements OnStatusListener
         }).start();
     }
 
-    private ResponseList<Status> getMentionsTweetsList(Paging paging, boolean isBelowUnder) {
-        ResponseList<Status> statuses = null;
-        try {
-            statuses = getNumeriUser().getTwitter().getMentionsTimeline(paging);
-            if (!statuses.isEmpty() && isBelowUnder) {
-                statuses.remove(0);
-            }
-        } catch (TwitterException e) {
-            e.printStackTrace();
-            TwitterExceptionDisplay.show(e);
-        }
-        return statuses;
-    }
 
-    @Override
-    public void onDestroy() {
-        NumeriUser numeriUser = getNumeriUser();
-        if (numeriUser != null)
-            getNumeriUser().getStreamEvent().removeOnStatusListener(this);
-        super.onDestroy();
-    }
 }

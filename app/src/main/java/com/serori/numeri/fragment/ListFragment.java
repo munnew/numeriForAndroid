@@ -3,9 +3,7 @@ package com.serori.numeri.fragment;
 
 import android.os.Handler;
 
-import com.serori.numeri.stream.event.OnStatusListener;
 import com.serori.numeri.twitter.SimpleTweetStatus;
-import com.serori.numeri.user.NumeriUser;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
@@ -21,7 +19,7 @@ import twitter4j.User;
 /**
  * ユーザーリストを表示するFragment
  */
-public class ListFragment extends NumeriFragment implements OnStatusListener {
+public class ListFragment extends TwitterStreamFragment {
 
     private long listId;
     private List<Long> listUserIds = new ArrayList<>();
@@ -50,7 +48,7 @@ public class ListFragment extends NumeriFragment implements OnStatusListener {
                 }
                 Paging paging = new Paging();
                 paging.setCount(30);
-                ResponseList<Status> statuses = getTweetsList(paging, false);
+                ResponseList<Status> statuses = getTweets(paging, false);
                 if (statuses == null) return;
                 handler.post(() -> {
                     for (Status status : statuses) {
@@ -73,7 +71,7 @@ public class ListFragment extends NumeriFragment implements OnStatusListener {
             Paging paging = new Paging();
             paging.setMaxId(getTimelineListView().getAdapter().getItem(getTimelineListView().getAdapter().getCount() - 1).getStatusId());
             paging.count(31);
-            ResponseList<Status> statuses = getTweetsList(paging, true);
+            ResponseList<Status> statuses = getTweets(paging, true);
             if (statuses == null) return;
             handler.post(() -> {
                 for (Status status : statuses) {
@@ -84,22 +82,8 @@ public class ListFragment extends NumeriFragment implements OnStatusListener {
         }).start();
     }
 
-    private ResponseList<Status> getTweetsList(Paging paging, boolean isBelowUnder) {
-        ResponseList<Status> statuses = null;
-        try {
-            statuses = getNumeriUser().getTwitter().getUserListStatuses(listId, paging);
-            if (!statuses.isEmpty() && isBelowUnder) {
-                statuses.remove(0);
-            }
-        } catch (TwitterException e) {
-            e.printStackTrace();
-            TwitterExceptionDisplay.show(e);
-        }
-        return statuses;
-    }
-
     @Override
-    public void onStatus(Status status) {
+    protected void onTweetStats(Status status) {
         for (Long listUserId : listUserIds) {
             if (status.getUser().getId() == listUserId && status.getUserMentionEntities().length == 0) {
                 getTimelineListView().insert(SimpleTweetStatus.build(status, getNumeriUser()));
@@ -109,10 +93,7 @@ public class ListFragment extends NumeriFragment implements OnStatusListener {
     }
 
     @Override
-    public void onDestroy() {
-        NumeriUser numeriUser = getNumeriUser();
-        if (numeriUser != null)
-            getNumeriUser().getStreamEvent().removeOnStatusListener(this);
-        super.onDestroy();
+    ResponseList<Status> getResponseList(Paging paging) throws TwitterException {
+        return getNumeriUser().getTwitter().getUserListStatuses(listId, paging);
     }
 }
