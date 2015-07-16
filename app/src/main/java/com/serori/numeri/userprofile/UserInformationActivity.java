@@ -46,7 +46,6 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
     private User user = null;
     private boolean isBlocking = false;
     private boolean isMuted = false;
-    private Handler handler = new Handler();
 
     private Button followButton;
     private TextView relationIndicator;
@@ -134,6 +133,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
         for (Button button : buttonList) {
             button.setTextColor(Color.parseColor(textColor));
         }
+        Handler handler = new Handler();
         new Thread(() -> {
             try {
                 if (userId != -1) {
@@ -173,7 +173,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
         viewPager = (ViewPager) findViewById(R.id.userInfoViewPager);
         userInfoPagerAdapter = new UserInfoPagerAdapter(getSupportFragmentManager());
         viewPager.setOffscreenPageLimit(4);
-        viewPager.setOnPageChangeListener(this);
+        viewPager.addOnPageChangeListener(this);
         UserPublicTimeLineFragment timeLineFragment = new UserPublicTimeLineFragment();
         timeLineFragment.setNumeriUser(numeriUser);
         timeLineFragment.setUserId(userId);
@@ -258,6 +258,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
     }
 
     private void setRelationShip(User user) {
+        Handler handler = new Handler();
         new Thread(() -> {
             try {
                 Relationship relationship = numeriUser.getTwitter().showFriendship(numeriUser.getAccessToken().getUserId(), user.getId());
