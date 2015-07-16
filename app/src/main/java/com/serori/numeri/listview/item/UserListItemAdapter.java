@@ -1,7 +1,6 @@
 package com.serori.numeri.listview.item;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -74,12 +73,11 @@ public class UserListItemAdapter extends ArrayAdapter<UserListItem> {
         }
         convertView.setOnTouchListener((v1, event) -> onTouchEvent(v1, event, userListItem));
         if (userListItem.isShowedRelation()) {
-            Log.v(toString(), "setRelation");
             if (userListItem.isFollow()) {
                 followButton.setText("フォロー解除");
                 followButton.setBackgroundColor(getContext().getResources().getColor(R.color.un_follow_color));
             } else {
-                followButton.setText(userListItem.isProtected() ? "フォローリクエスト" : "フォローする");
+                followButton.setText(userListItem.isProtected() ? "フォロリク" : "フォローする");
                 followButton.setBackgroundColor(getContext().getResources().getColor(R.color.follow_color));
             }
             relationIndicator.setText(userListItem.getRelationship());

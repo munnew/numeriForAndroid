@@ -55,7 +55,7 @@ public final class UserListView extends AttachedBottomCallBackListView implement
                         followButton.setText("フォロー解除");
                     } else {
                         followButton.setBackgroundColor(getResources().getColor(R.color.follow_color));
-                        followButton.setText(item.isProtected() ? "フォローリクエスト" : "フォローする");
+                        followButton.setText(item.isProtected() ? "フォロリク" : "フォローする");
                     }
                     relationshipIndicator.setText(relationship);
                     followButton.setOnClickListener(v -> updateFriendship(item));
