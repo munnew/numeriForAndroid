@@ -212,7 +212,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
                 followButton.setText("フォロー解除");
                 followButton.setBackgroundColor(getResources().getColor(R.color.un_follow_color));
             } else {
-                followButton.setText(user.isProtected() ? "フォローリクエスト" : "フォローする");
+                followButton.setText(user.isProtected() ? "フォロリク" : "フォローする");
                 followButton.setBackgroundColor(getResources().getColor(R.color.follow_color));
             }
             if (relationship.isTargetFollowedBySource() && relationship.isTargetFollowingSource()) {
