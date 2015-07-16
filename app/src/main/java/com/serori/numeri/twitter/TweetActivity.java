@@ -16,7 +16,6 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -139,7 +138,7 @@ public class TweetActivity extends SubsidiaryActivity implements TextWatcher {
             tweetButton.setOnClickListener(v -> sendTweet(currentNumeriUser));
             changeUserButton.setOnClickListener(v -> createChangeUserDialog());
             addImageButton.setOnClickListener(v -> {
-                appendedImage();
+                startAppendedImageSelection();
                 inputMethodManager.hideSoftInputFromWindow(tweetEditText.getWindowToken(), 0);
             });
         }
@@ -214,10 +213,10 @@ public class TweetActivity extends SubsidiaryActivity implements TextWatcher {
     }
 
     private static final int GALLERY = 1;
-    private static final int KITKAT_GALLERY = 3;
-    private static final int CAMERA = 2;
+    private static final int KITKAT__MORE__GALLERY = 3;
+    private static final int CAMERA = 2;//ToDO 未実装
 
-    private void appendedImage() {
+    private void startAppendedImageSelection() {
         if (appendedImages.size() < 4) {
             if (Build.VERSION.SDK_INT < 19) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
@@ -228,7 +227,7 @@ public class TweetActivity extends SubsidiaryActivity implements TextWatcher {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.setType("image/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(intent, KITKAT_GALLERY);
+                startActivityForResult(intent, KITKAT__MORE__GALLERY);
             }
         } else {
             ToastSender.sendToast("4つ以上は添付できません");
@@ -239,62 +238,75 @@ public class TweetActivity extends SubsidiaryActivity implements TextWatcher {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK || data == null) return;
-        Uri uri = null;
+        imageAppend(requestCode, data);
+    }
+
+    private void imageAppend(int requestCode, Intent data) {
         Bitmap bitmap = null;
         if (requestCode == GALLERY) {
-            uri = data.getData();
+            bitmap = getKitkatLessImage(data);
+        } else if (requestCode == KITKAT__MORE__GALLERY) {
+            bitmap = getKitKatMoreImage(data);
+        }
 
-            Cursor cursor = null;
-            try {
-                cursor = getContentResolver().query(uri, column, null, null, null);
-                int index = cursor.getColumnIndexOrThrow(column[0]);
-                String path = cursor.getColumnName(index);
-                File file = new File(path);
-                if (cursor.moveToFirst() || file.exists()) {
-                    bitmap = BitmapFactory.decodeFile(cursor.getColumnName(index));
-                    appendedImages.add(file);
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
-            }
-        } else if (requestCode == KITKAT_GALLERY) {
-            bitmap = getKitKatImage(data);
-        }
-        if (bitmap != null) {
-            try {
-                ImageView appendedImage = new ImageView(this);
-                Matrix matrix = new Matrix();
-                float y = Global.getInstance().getWindowSize().y / 9;
-                float magnification;
-                if (bitmap.getHeight() > bitmap.getWidth()) {
-                    magnification = y / bitmap.getHeight();
-                } else {
-                    magnification = y / bitmap.getWidth();
-                }
-                float width = bitmap.getWidth() * magnification;
-                float height = bitmap.getHeight() * magnification;
-                bitmap = Bitmap.createScaledBitmap(bitmap, (int) width, (int) height, false);
-                Log.v(toString(), "magnification:" + magnification);
-                matrix.postTranslate(0, 0);
-                appendedImage.setImageMatrix(matrix);
-                appendedImage.setScaleType(ImageView.ScaleType.MATRIX);
-                appendedImage.setImageBitmap(bitmap);
-                appendedImageViews.addView(appendedImage);
-                appendedImage.setOnClickListener(this::removeAppendedImage);
-            } catch (NullPointerException ne) {
-                ToastSender.sendToast("内部エラー");
-                ne.printStackTrace();
-            }
-        } else {
+        if (!(bitmap != null && attachedImagePreview(bitmap)))
             ToastSender.sendToast("画像を取得できませんでした。");
-            Log.v("TweetActivity", "Check path:" + uri);
+    }
+
+    private boolean attachedImagePreview(Bitmap bitmap) {
+        boolean success = false;
+        try {
+            ImageView appendedImage = new ImageView(this);
+            Matrix matrix = new Matrix();
+            float y = Global.getInstance().getWindowSize().y / 9;
+            float magnification;
+            if (bitmap.getHeight() > bitmap.getWidth()) {
+                magnification = y / bitmap.getHeight();
+            } else {
+                magnification = y / bitmap.getWidth();
+            }
+            float width = bitmap.getWidth() * magnification;
+            float height = bitmap.getHeight() * magnification;
+            bitmap = Bitmap.createScaledBitmap(bitmap, (int) width, (int) height, false);
+            matrix.postTranslate(0, 0);
+            appendedImage.setImageMatrix(matrix);
+            appendedImage.setScaleType(ImageView.ScaleType.MATRIX);
+            appendedImage.setImageBitmap(bitmap);
+            appendedImageViews.addView(appendedImage);
+            appendedImage.setOnClickListener(this::removeAppendedImage);
+            success = true;
+        } catch (NullPointerException ne) {
+            ToastSender.sendToast("内部エラー");
+            ne.printStackTrace();
         }
+        return success;
+    }
+
+
+    private Bitmap getKitkatLessImage(Intent data) {
+        Uri uri = data.getData();
+        Bitmap bitmap = null;
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(uri, column, null, null, null);
+            cursor.moveToFirst();
+            int index = cursor.getColumnIndexOrThrow(column[0]);
+            String path = cursor.getString(index);
+            File file = new File(path);
+            if (file.exists()) {
+                bitmap = BitmapFactory.decodeFile(path);
+                appendedImages.add(file);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return bitmap;
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private Bitmap getKitKatImage(Intent data) {
+    private Bitmap getKitKatMoreImage(Intent data) {
         Uri uri = data.getData();
         Bitmap bitmap = null;
         Cursor cursor = null;
@@ -308,7 +320,6 @@ public class TweetActivity extends SubsidiaryActivity implements TextWatcher {
                             column, "_id=?", new String[]{imageId}, null);
             if (cursor.moveToFirst()) {
                 appendedImages.add(new File(cursor.getString(0)));
-                ToastSender.sendToast(cursor.getString(0));
             } else {
                 throw new NullPointerException();
             }
