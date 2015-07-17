@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -64,7 +63,6 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
 
     public static void show(Context context, long id, NumeriUser numeriUser) {
         if ((context instanceof NumeriActivity)) {
-            Log.v("UserInformationActivity", "show");
             userId = id;
             screenName = "";
             UserInformationActivity.numeriUser = numeriUser;
@@ -74,7 +72,6 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
 
     public static void show(Context context, String screenName, NumeriUser numeriUser) {
         if ((context instanceof NumeriActivity)) {
-            Log.v("UserInformationActivity", "show");
             userId = -1;
             UserInformationActivity.screenName = screenName;
             UserInformationActivity.numeriUser = numeriUser;
@@ -153,8 +150,8 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
                     favoriteNum.setText("" + user.getFavouritesCount());
                     followNum.setText("" + user.getFriendsCount());
                     followerNum.setText("" + user.getFollowersCount());
-                    if (!(user.getId() == numeriUser.getAccessToken().getUserId())) {
-                        setRelationShip(user);
+                    if (user.getId() != numeriUser.getAccessToken().getUserId()) {
+                        new Thread(() -> setRelationShip(user, handler)).start();
                     } else {
                         relationIndicator.setText("自分");
                     }
@@ -240,6 +237,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
     }
 
     private void updateFriendship(User user, Relationship relationship) {
+        Handler handler = new Handler();
         new Thread(() -> {
             try {
                 if (!relationship.isSourceBlockingTarget()) {
@@ -253,25 +251,28 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
             } catch (TwitterException e) {
                 TwitterExceptionDisplay.show(e);
             }
-            setRelationShip(user);
+            setRelationShip(user, handler);
         }).start();
     }
 
-    private void setRelationShip(User user) {
-        Handler handler = new Handler();
-        new Thread(() -> {
-            try {
-                Relationship relationship = numeriUser.getTwitter().showFriendship(numeriUser.getAccessToken().getUserId(), user.getId());
-                handler.post(() -> {
-                    updateRelationshipIndicator(user, relationship);
-                    isBlocking = relationship.isSourceBlockingTarget();
-                    isMuted = relationship.isSourceMutingTarget();
-                });
-            } catch (TwitterException e) {
-                e.printStackTrace();
-                TwitterExceptionDisplay.show(e);
-            }
-        }).start();
+    /**
+     * 非同期に実行する必要があります。
+     *
+     * @param user    user
+     * @param handler 結果をポストするハンドラー
+     */
+    private void setRelationShip(User user, Handler handler) {
+        try {
+            Relationship relationship = numeriUser.getTwitter().showFriendship(numeriUser.getAccessToken().getUserId(), user.getId());
+            handler.post(() -> {
+                updateRelationshipIndicator(user, relationship);
+                isBlocking = relationship.isSourceBlockingTarget();
+                isMuted = relationship.isSourceMutingTarget();
+            });
+        } catch (TwitterException e) {
+            e.printStackTrace();
+            TwitterExceptionDisplay.show(e);
+        }
     }
 
 
@@ -345,6 +346,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
             String message = !isBlocking ? "このユーザーをブッロクしますか？" : "このユーザーをブロック解除しますか？";
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setMessage(message).setPositiveButton("はい", (dialog, which) -> {
+                        Handler handler = new Handler();
                         new Thread(() -> {
                             try {
                                 if (!isBlocking) {
@@ -352,7 +354,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
                                 } else {
                                     numeriUser.getTwitter().destroyBlock(user.getId());
                                 }
-                                setRelationShip(user);
+                                setRelationShip(user, handler);
                             } catch (TwitterException e) {
                                 TwitterExceptionDisplay.show(e);
                             }
@@ -368,6 +370,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
             String message = !isMuted ? "このユーザーをミュートしますか？" : "このユーザーをミュート解除しますか？";
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setMessage(message).setPositiveButton("はい", (dialog, which) -> {
+                        Handler handler = new Handler();
                         new Thread(() -> {
                             try {
                                 if (!isMuted) {
@@ -375,7 +378,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
                                 } else {
                                     numeriUser.getTwitter().destroyMute(user.getId());
                                 }
-                                setRelationShip(user);
+                                setRelationShip(user, handler);
                             } catch (TwitterException e) {
                                 TwitterExceptionDisplay.show(e);
                             }
@@ -390,10 +393,11 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
             String message = "このユーザーをスパム報告しますか？";
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setMessage(message).setPositiveButton("はい", (dialog, which) -> {
+                        Handler handler = new Handler();
                         new Thread(() -> {
                             try {
                                 numeriUser.getTwitter().reportSpam(user.getId());
-                                setRelationShip(user);
+                                setRelationShip(user, handler);
                             } catch (TwitterException e) {
                                 TwitterExceptionDisplay.show(e);
                             }
@@ -412,7 +416,6 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
     public void onPageSelected(int position) {
         for (int i = 0; i < buttonList.size(); i++) {
             if (position == i) {
-                Log.v(toString(), "onPageSelected" + position);
                 buttonList.get(i).setBackgroundColor(getResources().getColor(R.color.selected_color));
                 buttonList2.get(i).setBackgroundColor(getResources().getColor(R.color.selected_color));
             } else {
