@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -64,7 +63,6 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
 
     public static void show(Context context, long id, NumeriUser numeriUser) {
         if ((context instanceof NumeriActivity)) {
-            Log.v("UserInformationActivity", "show");
             userId = id;
             screenName = "";
             UserInformationActivity.numeriUser = numeriUser;
@@ -74,7 +72,6 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
 
     public static void show(Context context, String screenName, NumeriUser numeriUser) {
         if ((context instanceof NumeriActivity)) {
-            Log.v("UserInformationActivity", "show");
             userId = -1;
             UserInformationActivity.screenName = screenName;
             UserInformationActivity.numeriUser = numeriUser;
@@ -265,14 +262,12 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
      * @param handler 結果をポストするハンドラー
      */
     private void setRelationShip(User user, Handler handler) {
-        Log.v(toString(), "setRelation1");
         try {
             Relationship relationship = numeriUser.getTwitter().showFriendship(numeriUser.getAccessToken().getUserId(), user.getId());
             handler.post(() -> {
                 updateRelationshipIndicator(user, relationship);
                 isBlocking = relationship.isSourceBlockingTarget();
                 isMuted = relationship.isSourceMutingTarget();
-                Log.v(toString(), "setRelation2");
             });
         } catch (TwitterException e) {
             e.printStackTrace();
@@ -421,7 +416,6 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
     public void onPageSelected(int position) {
         for (int i = 0; i < buttonList.size(); i++) {
             if (position == i) {
-                Log.v(toString(), "onPageSelected" + position);
                 buttonList.get(i).setBackgroundColor(getResources().getColor(R.color.selected_color));
                 buttonList2.get(i).setBackgroundColor(getResources().getColor(R.color.selected_color));
             } else {
