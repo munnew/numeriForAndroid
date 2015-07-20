@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
+import lombok.Setter;
 import twitter4j.HashtagEntity;
 import twitter4j.MediaEntity;
 import twitter4j.Status;
@@ -22,25 +24,55 @@ import twitter4j.UserMentionEntity;
  * Statusから生成される軽量化されたStatus
  */
 public final class SimpleTweetStatus {
+    @Getter
     private String biggerProfileImageURL;
+    @Getter
     private String profileImageURL;
-    private String name, text, via;
-    private final long statusId, userId, retweetedStatusId;
-    private static final String DATE_FORMAT = "MM/dd HH:mm:ss";
+    @Getter
+    private String name;
+    @Getter
     private String screenName;
-    private boolean isReTweeted = false, isMention = false, isFavorite = false;
-    private boolean isMyTweet = false;
-    private boolean isProtectedUser = false;
+    @Getter
+    private String text;
+    @Getter
+    private String via;
+    @Getter
+    private final long statusId;
+    @Getter
+    private final long userId;
+    @Getter
+    private final long retweetedStatusId;
+    @Getter
     private final String createdTime;
+    @Getter
+    private final long inReplyToStatusId;
+    @Getter
+    private final NumeriUser ownerUser;
+    @Getter
+    private boolean isMention = false;
+    @Getter
+    private boolean isMyTweet = false;
+    @Getter
+    private boolean isProtectedUser = false;
+
+    private static final String DATE_FORMAT = "MM/dd HH:mm:ss";
+
+    @Setter
+    @Getter
+    private boolean isReTweeted = false;
+    @Setter
+    @Getter
+    private boolean isFavorite = false;
+
     private final List<String> destinationUserNames = new ArrayList<>();
     private final List<String> uris = new ArrayList<>();
     private final List<String> mediaUris = new ArrayList<>();
     private final List<String> thumbnailUris = new ArrayList<>();
     private final List<String> hashtags = new ArrayList<>();
     private final List<String> involvedUserNames = new ArrayList<>();
-    private final long inReplyToStatusId;
+
     private volatile static Map<String, SimpleTweetStatus> simpleTweetStatusMap = new LinkedHashMap<>();
-    private final NumeriUser ownerUser;
+
     private static final String TWITPIC_URL = "^https?:\\/\\/twitpic\\.com/[a-z0-9]+$";
     private static final String TWIPPLE_URL = "^https?:\\/\\/p\\.twipple\\.jp/[a-zA-Z0-9]+$";
     private static final String PHOTOZOU_URL = "^https?:\\/\\/photozou\\.jp/photo/show/" +
@@ -71,7 +103,7 @@ public final class SimpleTweetStatus {
      * 指定されたIdのStatusを参照しSimpleTweetStatusを返します<br>
      * 取得されたStatusはSimpleTweetStatusとしてキャッシュされます<br>
      * 存在しなければnullを返します<br>
-     * このメソッドは非同期タスクで実行されるべきです。
+     * このメソッドは非同期で実行されるべきです。
      *
      * @param statusId   参照するStatusのId
      * @param numeriUser 参照させたいユーザー
@@ -236,19 +268,8 @@ public final class SimpleTweetStatus {
         }
     }
 
-    //setter
-    public void setFavorite(boolean isFavorite) {
-        this.isFavorite = isFavorite;
-    }
-
-    public void setReTweeted(boolean isRT) {
-        this.isReTweeted = isRT;
-    }
 
     //getter
-    public String getName() {
-        return name;
-    }
 
     public List<String> getDestinationUserNames() {
         List<String> destinationUserNames = new ArrayList<>();
@@ -256,58 +277,9 @@ public final class SimpleTweetStatus {
         return destinationUserNames;
     }
 
-    public String getText() {
-        return text;
-    }
-
-
-    public String getVia() {
-        return via;
-    }
-
-
-    public long getStatusId() {
-        return statusId;
-    }
-
-    public String getScreenName() {
-        return screenName;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public boolean isReTweeted() {
-        return isReTweeted;
-    }
-
-    public boolean isMention() {
-        return isMention;
-    }
-
-    public boolean isFavorite() {
-        return isFavorite;
-    }
-
-    public String getCreatedTime() {
-        return createdTime;
-    }
-
-    public String getBiggerProfileImageURL() {
-        return biggerProfileImageURL;
-    }
-
-    public String getProfileImageURL() {
-        return profileImageURL;
-    }
 
     public boolean isRT() {
         return retweetedStatusId != -1;
-    }
-
-    public Long getInReplyToStatusId() {
-        return inReplyToStatusId;
     }
 
     public List<String> getUris() {
@@ -328,21 +300,6 @@ public final class SimpleTweetStatus {
         return thumbnailUris;
     }
 
-    public boolean isMyTweet() {
-        return isMyTweet;
-    }
-
-    public boolean isProtectedUser() {
-        return isProtectedUser;
-    }
-
-    public long getRetweetedStatusId() {
-        return retweetedStatusId;
-    }
-
-    public NumeriUser getOwnerUser() {
-        return ownerUser;
-    }
 
     public List<String> getHashtags() {
         List<String> hashtags = new ArrayList<>();
@@ -351,7 +308,9 @@ public final class SimpleTweetStatus {
     }
 
     public List<String> getInvolvedUserNames() {
-        return involvedUserNames;
+        List<String> involvedUserNames1 = new ArrayList<>();
+        involvedUserNames1.addAll(involvedUserNames);
+        return involvedUserNames1;
     }
 
     @Override
@@ -366,7 +325,6 @@ public final class SimpleTweetStatus {
             isSameTweet = this.statusId == ((SimpleTweetStatus) o).getStatusId()
                     || this.statusId == ((SimpleTweetStatus) o).getRetweetedStatusId();
         }
-
         return isSameTweet && ((SimpleTweetStatus) o).getOwnerUser().getAccessToken().getUserId() == this.ownerUser.getAccessToken().getUserId();
     }
 }

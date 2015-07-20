@@ -46,5 +46,4 @@ public class NumeriUsers {
     private static class NumeriUsersHolder {
         private static final NumeriUsers instance = new NumeriUsers();
     }
-
 }

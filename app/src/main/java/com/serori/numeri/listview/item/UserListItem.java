@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import lombok.Getter;
+import lombok.Setter;
 import twitter4j.Friendship;
 import twitter4j.Relationship;
 import twitter4j.TwitterException;
@@ -16,17 +18,27 @@ import twitter4j.User;
 /**
  */
 public class UserListItem {
+    @Getter
     private String biggerIconImageUrl = "";
+    @Getter
     private String iconImageUrl = "";
+    @Getter
     private String userScreenName = "";
+    @Getter
     private String userName = "";
+    @Getter
     private String bio = "";
+    @Getter
     private long userId = -1;
+    @Getter
     private final NumeriUser numeriUser;
     private final static ArrayList<OnUpdateRelationshipListener> onUpdateRelationshipListeners = new ArrayList<>();
+    @Getter
     private boolean isShowedRelation = false;
+    @Getter
     private boolean isMe = false;
     private static volatile Map<String, Relation> relationMap = new LinkedHashMap<>();
+    @Getter
     private boolean isProtected;
 
     public static void startObserveRelation(NumeriUser numeriUser) {
@@ -41,7 +53,7 @@ public class UserListItem {
                 Relation relation = relationMap.get(createRelationId(numeriUser, target.getId()));
                 if (relation != null) {
                     Relationship relationship = numeriUser.getTwitter().showFriendship(source.getId(), target.getId());
-                    relation.setIsFollow(relationship.isTargetFollowedBySource());
+                    relation.setFollow(relationship.isTargetFollowedBySource());
                     relation.setRelationship(convertRelationString(relationship));
                     for (OnUpdateRelationshipListener onUpdateRelationshipListener : onUpdateRelationshipListeners) {
                         onUpdateRelationshipListener.onUpdateRelationship(target.getId(), relation.isFollow(), relation.getRelationship());
@@ -51,7 +63,7 @@ public class UserListItem {
                 Relation relation = relationMap.get(createRelationId(numeriUser, source.getId()));
                 if (relation != null) {
                     Relationship relationship = numeriUser.getTwitter().showFriendship(target.getId(), source.getId());
-                    relation.setIsFollow(relationship.isTargetFollowedBySource());
+                    relation.setFollow(relationship.isTargetFollowedBySource());
                     relation.setRelationship(convertRelationString(relationship));
                     for (OnUpdateRelationshipListener onUpdateRelationshipListener : onUpdateRelationshipListeners) {
                         onUpdateRelationshipListener.onUpdateRelationship(source.getId(), relation.isFollow(), relation.getRelationship());
@@ -130,25 +142,6 @@ public class UserListItem {
         return relation;
     }
 
-    public String getBiggerIconImageUrl() {
-        return biggerIconImageUrl;
-    }
-
-    public String getUserScreenName() {
-        return userScreenName;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public String getBio() {
-        return bio;
-    }
 
     public boolean isFollow() {
         return relationMap.get(createRelationId(numeriUser, userId)).isFollow();
@@ -158,17 +151,6 @@ public class UserListItem {
         return relationMap.get(createRelationId(numeriUser, userId)).getRelationship();
     }
 
-    public boolean isShowedRelation() {
-        return isShowedRelation;
-    }
-
-    public NumeriUser getNumeriUser() {
-        return numeriUser;
-    }
-
-    public boolean isMe() {
-        return isMe;
-    }
 
     public static void removeOnUpdateRelationshipListener(OnUpdateRelationshipListener listener) {
         onUpdateRelationshipListeners.remove(listener);
@@ -178,16 +160,13 @@ public class UserListItem {
         onUpdateRelationshipListeners.add(listener);
     }
 
-    public String getIconImageUrl() {
-        return iconImageUrl;
-    }
-
-    public boolean isProtected() {
-        return isProtected;
-    }
 
     public static class Relation {
+        @Getter
+        @Setter
         private String relationship = "";
+        @Getter
+        @Setter
         private boolean isFollow = false;
 
         public Relation(String relationship, boolean isFollow) {
@@ -195,21 +174,6 @@ public class UserListItem {
             this.isFollow = isFollow;
         }
 
-        public String getRelationship() {
-            return relationship;
-        }
-
-        public void setRelationship(String relationship) {
-            this.relationship = relationship;
-        }
-
-        public boolean isFollow() {
-            return isFollow;
-        }
-
-        public void setIsFollow(boolean isFollow) {
-            this.isFollow = isFollow;
-        }
     }
 }
 

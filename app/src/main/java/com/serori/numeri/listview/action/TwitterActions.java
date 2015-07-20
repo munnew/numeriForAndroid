@@ -20,6 +20,7 @@ import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
 import twitter4j.TwitterException;
 
 /**
@@ -283,7 +284,9 @@ public class TwitterActions {
     }
 
     private static class MenuItem {
+        @Getter
         private Actions action;
+        @Getter
         private String value = "";
 
         MenuItem(Actions action) {
@@ -293,14 +296,6 @@ public class TwitterActions {
         MenuItem(Actions action, String value) {
             this.action = action;
             this.value = value;
-        }
-
-        public Actions getAction() {
-            return action;
-        }
-
-        public String getValue() {
-            return value;
         }
 
     }
@@ -326,22 +321,14 @@ public class TwitterActions {
         ALL_TAG_TWEET("すべてのハッシュタグをツイート", "ALL_TAG_TWEET"),
         ACTION_NONE("何もしない", "ACTION_NONE");
 
-
+        @Getter
         private String id;
+        @Getter
         private String name = "";
 
         Actions(String name, String id) {
             this.name = name;
             this.id = id;
         }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getId() {
-            return id;
-        }
-
     }
 }

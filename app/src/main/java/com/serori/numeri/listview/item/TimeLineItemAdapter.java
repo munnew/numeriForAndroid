@@ -41,7 +41,6 @@ public class TimeLineItemAdapter extends ArrayAdapter<SimpleTweetStatus> {
         }
         float textSize = ConfigurationStorager.NumericalConfigurations.CHARACTER_SIZE.getNumericValue() + 8;
         NumeriImageView iconImageView = (NumeriImageView) convertView.findViewById(R.id.userIcon);
-
         TextView screenNameTextView = (TextView) convertView.findViewById(R.id.timeLine_screenName);
         screenNameTextView.setTextColor(Color.parseColor(ColorStorager.Colors.CHARACTER.getColor()));
         screenNameTextView.setTextSize(textSize * (float) 0.86);
