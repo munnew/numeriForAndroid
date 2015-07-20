@@ -69,6 +69,7 @@ dependencies {
     compile 'com.j256.ormlite:ormlite-core:4.48'
     compile 'com.j256.ormlite:ormlite-android:4.48'
     compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'org.projectlombok:lombok:1.16.4'
     compile 'com.google.android.gms:play-services-identity:7.5.0'
 }
 

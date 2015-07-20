@@ -10,6 +10,9 @@ import com.serori.numeri.util.database.DataBaseHelper;
 
 import java.sql.SQLException;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * ツイートに対するアクションについての設定を保存したり読み込むためのクラス
  */
@@ -73,7 +76,7 @@ public class ActionStorager {
             for (RespectTapPositionActions respectTapPositionAction : RespectTapPositionActions.values()) {
                 ActionTable table = dao.queryForId(respectTapPositionAction.getId());
                 if (table != null) {
-                    boolean success = respectTapPositionAction.setTwitterAction(table.getTwitterActionId());
+                    boolean success = respectTapPositionAction.setTwitterActionForId(table.getTwitterActionId());
                     if (!success) {
                         respectTapPositionAction.setTwitterAction(defaultActions[j]);
                     }
@@ -106,6 +109,12 @@ public class ActionStorager {
      */
     @DatabaseTable(tableName = "actionTable")
     public static class ActionTable {
+        @DatabaseField(canBeNull = false, id = true)
+        private String actionId;
+        @DatabaseField(canBeNull = false)
+        @Getter
+        private String twitterActionId;
+
         public ActionTable() {
 
         }
@@ -113,16 +122,6 @@ public class ActionStorager {
         public ActionTable(String actionId, String twitterActionId) {
             this.actionId = actionId;
             this.twitterActionId = twitterActionId;
-        }
-
-        @DatabaseField(canBeNull = false, id = true)
-        private String actionId;
-        @DatabaseField(canBeNull = false)
-        private String twitterActionId;
-
-
-        public String getTwitterActionId() {
-            return twitterActionId;
         }
     }
 
@@ -138,24 +137,14 @@ public class ActionStorager {
         LONG_CENTER("LONG_CENTER"),
         LONG_LEFT("LONG_LEFT");
 
-
+        @Getter
         private String id;
-        private TwitterActions.Actions action;
+        @Getter
+        @Setter
+        private TwitterActions.Actions twitterAction;
 
         RespectTapPositionActions(String id) {
             this.id = id;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public TwitterActions.Actions getTwitterAction() {
-            return action;
-        }
-
-        public void setTwitterAction(TwitterActions.Actions action) {
-            this.action = action;
         }
 
         /**
@@ -164,11 +153,11 @@ public class ActionStorager {
          * @param twitterActionId TwitterActionID
          * @return true:成功 false 失敗
          */
-        public boolean setTwitterAction(String twitterActionId) {
+        public boolean setTwitterActionForId(String twitterActionId) {
             boolean success = false;
             for (TwitterActions.Actions action : TwitterActions.Actions.values()) {
                 if (twitterActionId.equals(action.getId())) {
-                    this.action = action;
+                    this.twitterAction = action;
                     success = true;
                     break;
                 }
