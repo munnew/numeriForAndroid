@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/userInfoPanel"
         android:layout_width="fill_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:background="#50505050"
         android:orientation="vertical">
 
@@ -28,8 +31,8 @@
 
                 <com.serori.numeri.imageview.NumeriImageView
                     android:id="@+id/userInfoIcon"
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:contentDescription="@string/description_imageIcon" />
 
 
@@ -50,7 +53,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="left"
                             android:singleLine="true"
-                            android:textSize="13sp" />
+                            android:textSize="15sp" />
 
                         <ImageView
                             android:id="@+id/userInfoProtectedKey"
@@ -68,7 +71,7 @@
                         android:id="@+id/userInfoName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp" />
+                        android:textSize="20sp" />
 
                 </LinearLayout>
 
@@ -99,6 +102,7 @@
 
 
             </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/followRequest"
                 android:layout_width="fill_parent"
@@ -113,21 +117,21 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
                     android:text="@string/follow_request"
-                    android:textSize="15sp"
-                    android:layout_marginLeft="10dp" />
+                    android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/followRequestNum"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="right"
-                    android:layout_marginRight="10dp" />
+                    android:layout_marginRight="10dp"
+                    android:gravity="right" />
             </LinearLayout>
 
             <ScrollView
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="70dp">
 
                 <LinearLayout
                     android:layout_width="fill_parent"
@@ -284,7 +288,8 @@
         android:id="@+id/userInfoViewPager"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/userInfoPanel"
         tools:context="com.serori.numeri.userprofile.UserInformationActivity">
 
     </android.support.v4.view.ViewPager>
-</LinearLayout>
+</RelativeLayout>

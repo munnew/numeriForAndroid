@@ -11,6 +11,7 @@ import com.serori.numeri.R;
 import com.serori.numeri.listview.item.OnUpdateRelationshipListener;
 import com.serori.numeri.listview.item.UserListItem;
 import com.serori.numeri.listview.item.UserListItemAdapter;
+import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import twitter4j.Twitter;
@@ -71,7 +72,8 @@ public final class UserListView extends AttachedBottomCallBackListView implement
                 if (userListItem.isFollow()) {
                     twitter.destroyFriendship(userListItem.getUserId());
                 } else {
-                    twitter.createFriendship(userListItem.getUserId());
+                    if (twitter.createFriendship(userListItem.getUserId()).isProtected())
+                        ToastSender.sendToast("フォローリクエストを送信しました。");
                 }
             } catch (TwitterException e) {
                 TwitterExceptionDisplay.show(e);
