@@ -29,6 +29,8 @@ public final class SimpleTweetStatus {
     @Getter
     private String profileImageURL;
     @Getter
+    private String originalProfileImageURL;
+    @Getter
     private String name;
     @Getter
     private String screenName;
@@ -78,7 +80,6 @@ public final class SimpleTweetStatus {
     private static final String PHOTOZOU_URL = "^https?:\\/\\/photozou\\.jp/photo/show/" +
             "[0-9][0-9][0-9][0-9][0-9][0-9][0-9]/" +
             "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]";
-
 
     /**
      * StatusをSimpleTweetStatusとしてキャッシュします。
@@ -175,6 +176,7 @@ public final class SimpleTweetStatus {
             isProtectedUser = status.getRetweetedStatus().getUser().isProtected();
             biggerProfileImageURL = status.getRetweetedStatus().getUser().getBiggerProfileImageURL();
             profileImageURL = status.getRetweetedStatus().getUser().getProfileImageURL();
+            originalProfileImageURL = status.getRetweetedStatus().getUser().getOriginalProfileImageURL();
             text = status.getRetweetedStatus().getText();
             name = status.getRetweetedStatus().getUser().getName();
             via = "via " + Html.fromHtml(status.getRetweetedStatus().getSource()).toString() + " RT by " + status.getUser().getScreenName() + "\n RT count : " + status.getRetweetedStatus().getRetweetCount();
@@ -187,6 +189,7 @@ public final class SimpleTweetStatus {
         } else {//!RT
             isProtectedUser = status.getUser().isProtected();
             biggerProfileImageURL = status.getUser().getBiggerProfileImageURL();
+            originalProfileImageURL = status.getUser().getOriginalProfileImageURL();
             profileImageURL = status.getUser().getProfileImageURL();
             text = status.getText();
             name = status.getUser().getName();

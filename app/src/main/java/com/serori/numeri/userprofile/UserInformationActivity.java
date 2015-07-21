@@ -25,6 +25,7 @@ import com.serori.numeri.fragment.UserInfoPagerAdapter;
 import com.serori.numeri.fragment.UserPublicTimeLineFragment;
 import com.serori.numeri.imageview.NumeriImageView;
 import com.serori.numeri.user.NumeriUser;
+import com.serori.numeri.util.toast.ToastSender;
 import com.serori.numeri.util.twitter.TwitterExceptionDisplay;
 
 import java.util.ArrayList;
@@ -94,12 +95,6 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
     }
 
 
-    private void setCurrentItem(int item) {
-        if (userInfoPagerAdapter.getCount() > item) {
-            viewPager.setCurrentItem(item);
-        }
-    }
-
     private void init() {
         boolean isDarkTheme = ConfigurationStorager.EitherConfigurations.DARK_THEME.isEnabled();
         String textColor = isDarkTheme ? "#FFFFFF" : "#000000";
@@ -140,7 +135,7 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
                     userId = user.getId();
                 }
                 handler.post(() -> {
-                    iconImage.setImage(true, NumeriImageView.ProgressType.LOAD_ICON, user.getBiggerProfileImageURL());
+                    iconImage.setImage(true, NumeriImageView.ProgressType.LOAD_ICON, user.getOriginalProfileImageURL());
                     screenName.setText(user.getScreenName());
                     userName.setText(user.getName());
                     if (user.isProtected()) isProtectedImage.setVisibility(View.VISIBLE);
@@ -202,6 +197,11 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
         followerNum.setOnClickListener(v -> setCurrentItem(3));
     }
 
+    private void setCurrentItem(int index) {
+        if (userInfoPagerAdapter != null && userInfoPagerAdapter.getCount() > index) {
+            viewPager.setCurrentItem(index);
+        }
+    }
 
     private void updateRelationshipIndicator(User user, Relationship relationship) {
         if (relationship != null) {
@@ -244,7 +244,8 @@ public class UserInformationActivity extends SubsidiaryActivity implements ViewP
                     if (relationship.isTargetFollowedBySource()) {
                         numeriUser.getTwitter().destroyFriendship(user.getId());
                     } else {
-                        numeriUser.getTwitter().createFriendship(user.getId());
+                        if (numeriUser.getTwitter().createFriendship(user.getId()).isProtected())
+                            ToastSender.sendToast("フォローリクエストを送信しました。");
                     }
                     followButton.setOnClickListener(null);
                 }
