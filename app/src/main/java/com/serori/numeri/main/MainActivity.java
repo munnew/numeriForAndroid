@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.serori.numeri.directmessage.DirectMessageActivity;
 import com.serori.numeri.R;
 import com.serori.numeri.activity.NumeriActivity;
 import com.serori.numeri.color.ColorManagerActivity;
@@ -40,6 +41,9 @@ public class MainActivity extends NumeriActivity {
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ViewPager viewPager;
     private TextView infoTextView;
+
+    //TODO debug
+    private boolean testMode = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +149,10 @@ public class MainActivity extends NumeriActivity {
                 startActivity(TweetSearchActivity.class, false);
                 break;
             case R.id.action_dm:
+                if(!NumeriUsers.getInstance().getNumeriUsers().isEmpty())
+                    //TODO remove test-check context here
+                    if(testMode)
+                        startActivity(DirectMessageActivity.class, false);
                 break;
             case R.id.action_settings:
                 startActivity(ConfigActivity.class, false);

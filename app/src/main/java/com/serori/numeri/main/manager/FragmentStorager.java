@@ -248,7 +248,8 @@ public class FragmentStorager {
     public enum FragmentType {
         TL("TimeLine"),
         MENTIONS("Mentions"),
-        LIST("リスト");
+        LIST("リスト"),
+        FillInMessage("カキコ");
 
 
         private String id;

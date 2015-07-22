@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_make_dm_thread"
+        android:icon="@drawable/ic_dm_dark"
+        android:orderInCategory="100"
+        android:title="@string/make_dm_thread"/>
+    <item
+        android:id="@+id/action_settings_in_dm_activity"
+        android:orderInCategory="100"
+        android:title="@string/action_settings" />
+    <item
+        android:id="@+id/action_dm_account_select"
+        android:orderInCategory="100"
+        android:title="@string/account" />
+</menu>

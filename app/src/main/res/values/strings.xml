@@ -47,6 +47,7 @@
     <string name="enable_image_thumb">画像のサムネイルを表示する</string>
     <string name="search">検索</string>
     <string name="DM">DM</string>
+    <string name="make_dm_thread">DMスレッド作成</string>
     <string name="setting_color">色設定</string>
     <string name="account">アカウント</string>
     <string name="fragment_manage">フラグメント管理</string>

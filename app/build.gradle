@@ -18,6 +18,12 @@ android {
             storeFile file('../serori.keystore')
             storePassword 'bbB3yYa9'
         }
+        lynx{
+            keyAlias 'lynx'
+            keyPassword 'Iam12558'
+            storeFile file('../lynx.keystore')
+            storePassword 'Iam12558'
+        }
     }
     compileSdkVersion 22
     buildToolsVersion '22.0.1'
@@ -42,10 +48,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles 'proguard-rules.pro'
-            signingConfig signingConfigs.serori
+            signingConfig signingConfigs.lynx
         }
         debug {
-            signingConfig signingConfigs.serori
+            signingConfig signingConfigs.lynx
         }
     }
     aaptOptions {
