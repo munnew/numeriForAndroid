@@ -14,7 +14,7 @@ public class NumeriUsers {
     private NumeriUsers() {
     }
 
-    static NumeriUsers getInstance() {
+    static public NumeriUsers getInstance() {
         return NumeriUsersHolder.instance;
     }
 

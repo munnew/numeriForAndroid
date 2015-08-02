@@ -249,7 +249,7 @@ public class FragmentStorager {
         TL("TimeLine"),
         MENTIONS("Mentions"),
         LIST("リスト"),
-        FillInMessage("カキコ");
+        FillInMessage("DMカキコ");
 
 
         private String id;
